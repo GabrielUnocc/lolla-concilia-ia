@@ -1,0 +1,59 @@
+<!--
+  Conciliação bancária > Conciliação Manual (aba 3) > Extrato Bancário (lado direito)
+  Container: SECTION#grids_aba_3 > DIV.flexigrid (2º)
+  Tabela de cabeçalho: DIV.hDiv > TABLE.grid-table-container
+  Tabela de dados:     DIV.bDiv > TABLE#grid_lancamentos_OFX_3
+  Linhas carregadas no momento da captura: 0 (a tabela não tem nem <tbody>; extrato vazio)
+  Observação: atributos style e handlers on* foram removidos na captura.
+-->
+<div class="ixc-grids grid-global-container flexigrid novstripe" variant="inner" size="md">
+  <div class="grid-blocker-container gBlock hidden"><div><i class="fa-spin fa-duotone fa-spinner-third"></i></div></div>
+  <div class="grid-title-container mDiv bg1">
+    <div class="ftitle">Extrato Bancário</div>
+    <div class="btn_row">
+      <a title="Ajuda" class="fa fa-circle-question modal-icon"></a>
+      <a title="Auditar registro selecionado" class="fa-solid fa-clock-rotate-left modal-icon"></a>
+    </div>
+  </div>
+  <div class="grid-toolbar-container tDiv bg2">
+    <div class="tDiv2">
+      <button class="ixc-buttons fbutton" variant="primary" size="md" type="button" name="btn_deletar_extrato">Deletar</button>
+    </div>
+    <div></div>
+  </div>
+  <div class="grid-actions-container"></div>
+  <div class="grid-header-container hDiv">
+    <div class="hDivBox">
+      <table class="grid-table-container" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr class="tableRow">
+            <th class="tableHeader" axis="col0" align="center"><div class="sdesc">-</div></th>
+            <th class="tableHeader" abbr="fn_extrato.id" axis="col1" align="center"><div>ID</div></th>
+            <th class="tableHeader" abbr="fn_extrato.conciliado" axis="col2" align="center"><div class="">Conc.</div></th>
+            <th class="tableHeader" abbr="fn_extrato.data" axis="col3" align="center"><div>Data</div></th>
+            <th class="tableHeader" abbr="fn_extrato.documento" axis="col4" align="left"><div class="">Documento</div></th>
+            <th class="tableHeader" abbr="fn_extrato.tx_id" axis="col5" align="left"><div class="">ID da transação</div></th>
+            <th class="tableHeader" abbr="fn_extrato.credito" axis="col6" align="right"><div class="">Entrada</div></th>
+            <th class="tableHeader" abbr="fn_extrato.debito" axis="col7" align="right"><div>Saída</div></th>
+            <th class="tableHeader" abbr="fn_extrato.historico" axis="col8" align="left"><div>Histórico</div></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  <div class="grid-dragger-container cDrag">
+    <div class="drag-line" axis="0" abbr="undefined"></div>
+    <div class="drag-line" axis="1" abbr="fn_extrato.id"></div>
+    <div class="drag-line" axis="2" abbr="fn_extrato.conciliado"></div>
+    <div class="drag-line" axis="3" abbr="fn_extrato.data"></div>
+    <div class="drag-line" axis="4" abbr="fn_extrato.documento"></div>
+    <div class="drag-line" axis="5" abbr="fn_extrato.tx_id"></div>
+    <div class="drag-line" axis="6" abbr="fn_extrato.credito"></div>
+    <div class="drag-line" axis="7" abbr="fn_extrato.debito"></div>
+    <div class="drag-line" axis="8" abbr="fn_extrato.historico"></div>
+  </div>
+  <div class="grid-body-container bDiv">
+    <table id="grid_lancamentos_OFX_3" class="grid_lancamentos_OFX_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0" unselectable="on"></table>
+  </div>
+  <div class="grid-editable-container iDiv"></div>
+</div>

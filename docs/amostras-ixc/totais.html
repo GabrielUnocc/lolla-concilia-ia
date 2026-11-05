@@ -1,0 +1,54 @@
+<!--
+  Conciliação Manual (aba 3) > rodapé de totais
+  Container: SECTION#rodape_aba_3
+  Valores lidos no momento da captura (input.value, não aparecem como atributo no HTML):
+    #total_selecionado_aba3_mov  = ""      (Total selecionado, Movimentação)
+    #total_a_conciliar_aba3_mov  = "60,00" (Total a conciliar, Movimentação)
+    #diferenca_aba3              = "60,00" (Diferença)
+    #total_selecionado_aba3_ext  = ""      (Total selecionado, Extrato)
+    #total_a_conciliar_aba3_ext  = "0"     (Total a conciliar, Extrato)
+  Campos ocultos relacionados (fora do rodapé, mesma aba):
+    #ids_selecionados_mov_aba_3  = ""
+    #ids_selecionados_ext_aba_3  = ""
+  Observação: atributos style e handlers on* foram removidos na captura.
+-->
+<section id="rodape_aba_3">
+  <div>
+    <p>Total selecionado:</p>
+    <input type="text" class="ixc-fields" variant="text" readonly id="total_selecionado_aba3_mov">
+    <p>Total a conciliar:</p>
+    <input type="text" class="ixc-fields" variant="text" readonly id="total_a_conciliar_aba3_mov">
+    <p id="content-popover-exibir-ajuda-manual">
+      <div class="popover">
+        <h4>Para realizar a conciliação de forma manual:</h4>
+        <div class="col">
+          <p><strong>1 - Seleção de Títulos</strong></p>
+          <p>Selecione dois ou mais títulos até que a cor do mesmo seja VERDE.</p>
+          <p>Enquanto a cor for LARANJA significa que os valores não estão de acordo.</p>
+        </div>
+        <div class="col">
+          <p><strong>2 - Realizando a Conciliação</strong></p>
+          <p>Uma vez que estiver tudo certo o botão Conciliar aparecerá acima dos registros.</p>
+          <p>Clique no botão para fazer a conciliação.</p>
+        </div>
+        <div class="col">
+          <p><strong>3 - Finalizando / Observações</strong></p>
+          <p>Caso alguma conciliação seja feita de forma equivocada, a mesma poderá ser corrigida na próxima etapa.</p>
+          <p>Os títulos restantes serão desvinculados automaticamente ao finalizar.</p>
+        </div>
+      </div>
+      <input id="checkbox-exibir-ajuda-manual" type="checkbox" class="ixc-fields" variant="checkbox">
+      <span>Exibir Ajuda</span>
+    </p>
+  </div>
+  <div>
+    <p>Diferença:</p>
+    <input type="text" class="ixc-fields" variant="text" readonly id="diferenca_aba3">
+  </div>
+  <div>
+    <p>Total selecionado:</p>
+    <input type="text" class="ixc-fields" variant="text" id="total_selecionado_aba3_ext" readonly>
+    <p>Total a conciliar:</p>
+    <input type="text" class="ixc-fields" variant="text" readonly id="total_a_conciliar_aba3_ext">
+  </div>
+</section>

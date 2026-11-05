@@ -1,0 +1,73 @@
+<!--
+  Conciliação bancária > Conciliação Manual (aba 3) > Movimentação Financeira (lado esquerdo)
+  Container: SECTION#grids_aba_3 > DIV.flexigrid (1º)
+  Tabela de cabeçalho: DIV.hDiv > TABLE.grid-table-container (flexigrid separa o thead do tbody)
+  Tabela de dados:     DIV.bDiv > TABLE#grid_lancamentos_aba_3
+  Linhas carregadas no momento da captura: 1 (o grid só tinha 1 registro)
+  Observação: atributos style e handlers on* foram removidos na captura. Nome no histórico mascarado.
+-->
+<div class="ixc-grids grid-global-container flexigrid novstripe" variant="inner" size="md" unselectable="on">
+  <div class="grid-blocker-container gBlock hidden"><div><i class="fa-spin fa-duotone fa-spinner-third"></i></div></div>
+  <div class="grid-title-container mDiv bg1">
+    <div class="ftitle">Movimentação Financeira</div>
+    <div class="btn_row">
+      <a title="Ajuda" class="fa fa-circle-question modal-icon"></a>
+      <a title="Auditar registro selecionado" class="fa-solid fa-clock-rotate-left modal-icon"></a>
+    </div>
+  </div>
+  <div class="grid-toolbar-container tDiv bg2">
+    <div class="tDiv2">
+      <button class="ixc-buttons fbutton" variant="primary" size="md" type="button" name="btn_deletar_extrato_oculto">Deletar</button>
+    </div>
+    <div></div>
+  </div>
+  <div class="grid-actions-container"></div>
+  <div class="grid-header-container hDiv">
+    <div class="hDivBox">
+      <table class="grid-table-container" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr class="tableRow">
+            <th class="tableHeader" axis="col0" align="center"><div>-</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.id" axis="col1" align="center"><div>ID</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.conciliado" axis="col2" align="center"><div>Conc.</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.data" axis="col3" align="center"><div class="">Data</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.documento" axis="col4" align="left"><div class="">Documento</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.tx_id" axis="col5" align="left"><div class="">ID da transação</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.credito" axis="col6" align="right"><div class="">Entrada</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.debito" axis="col7" align="right"><div>Saída</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.historico" axis="col8" align="left"><div>Histórico</div></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  <div class="grid-dragger-container cDrag">
+    <div class="drag-line" axis="0" abbr="undefined"></div>
+    <div class="drag-line" axis="1" abbr="fn_movim_finan.id"></div>
+    <div class="drag-line" axis="2" abbr="fn_movim_finan.conciliado"></div>
+    <div class="drag-line" axis="3" abbr="fn_movim_finan.data"></div>
+    <div class="drag-line" axis="4" abbr="fn_movim_finan.documento"></div>
+    <div class="drag-line" axis="5" abbr="fn_movim_finan.tx_id"></div>
+    <div class="drag-line" axis="6" abbr="fn_movim_finan.credito"></div>
+    <div class="drag-line" axis="7" abbr="fn_movim_finan.debito"></div>
+    <div class="drag-line" axis="8" abbr="fn_movim_finan.historico"></div>
+  </div>
+  <div class="grid-body-container bDiv">
+    <table id="grid_lancamentos_aba_3" class="grid_lancamentos_aba_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0" unselectable="on">
+      <tbody>
+        <tr class="trSelected tableRow" id="row131377">
+          <td class="tableCell" axis="0" align="center"><div><input type="checkbox" name="select_item" class="ixc-fields" variant="checkbox"></div></td>
+          <td class="tableCell" axis="1" align="center" abbr="fn_movim_finan.id"><div title="131377">131377</div></td>
+          <td class="tableCell" axis="2" align="center" abbr="fn_movim_finan.conciliado"><div><i aria-hidden="true" class="fa fa-times"></i></div></td>
+          <td class="tableCell" axis="3" align="center" abbr="fn_movim_finan.data"><div>02/11/2026</div></td>
+          <td class="tableCell" axis="4" align="left" abbr="fn_movim_finan.documento"><div>7178351</div></td>
+          <td class="tableCell" axis="5" align="left" abbr="fn_movim_finan.tx_id"><div></div></td>
+          <td class="tableCell" axis="6" align="right" abbr="fn_movim_finan.credito"><div>60,00</div></td>
+          <td class="tableCell" axis="7" align="right" abbr="fn_movim_finan.debito"><div>0,00</div></td>
+          <td class="tableCell" axis="8" align="left" abbr="fn_movim_finan.historico"><div title="Rec. Tetse geração de financiero XXX doc.: 7178351">Rec. Tetse geração de financiero XXX doc.: 7178351</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid-editable-container iDiv"></div>
+</div>

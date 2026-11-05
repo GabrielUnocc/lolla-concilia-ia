@@ -1,0 +1,36 @@
+<!--
+  Conciliação Manual (aba 3) > filtros do topo
+  Container: DIV#box_search_tab_3 (dentro de SECTION#grids_aba_3)
+  1º grupo filtra TABLE#grid_lancamentos_aba_3 (Movimentação); 2º grupo filtra TABLE#grid_lancamentos_OFX_3 (Extrato).
+  Os selects e inputs não têm id; o vínculo com a grade é pelo atributo data-grid do input.
+  Valor atual dos dois selects: "*" (Todos). Inputs de busca vazios.
+  Observação: o conteúdo do onkeypress (JS inline) foi removido na captura, assim como atributos style.
+-->
+<div id="box_search_tab_3">
+  <div class="search_input_group">
+    <select class="ixc-fields" variant="select">
+      <option value="*">Todos</option>
+      <option value="id">ID</option>
+      <option value="data">Data</option>
+      <option value="documento">Documento</option>
+      <option value="credito">Entrada</option>
+      <option value="debito">Saída</option>
+      <option value="historico">Histórico</option>
+    </select>
+    <input type="text" class="ixc-fields" variant="text" data-grid="grid_lancamentos_aba_3" onkeypress="[JS removido]">
+    <a class="ixc-buttons filter" variant="inline"><i class="fa fa-search"></i></a>
+  </div>
+  <div class="search_input_group">
+    <select class="ixc-fields" variant="select">
+      <option value="*">Todos</option>
+      <option value="id">ID</option>
+      <option value="data">Data</option>
+      <option value="documento">Documento</option>
+      <option value="credito">Entrada</option>
+      <option value="debito">Saída</option>
+      <option value="historico">Histórico</option>
+    </select>
+    <input type="text" class="ixc-fields" variant="text" data-grid="grid_lancamentos_OFX_3" onkeypress="[JS removido]">
+    <a class="ixc-buttons filter" variant="inline"><i class="fa fa-search"></i></a>
+  </div>
+</div>
