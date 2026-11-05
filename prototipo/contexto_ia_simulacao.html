@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contexto da IA (simulação)</title>
+<style>
+:root{--bg:#050607;--p1:#0a130d;--p2:#153019;--lime:#A6FF1A;--grn:#5FD34A;--pale:#F0FFE3;--line:rgba(240,255,227,.14);--mut:rgba(240,255,227,.62);--amb:#FFB547}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--pale);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{max-width:1200px;margin:0 auto;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--mut)}
+.top b{background:rgba(255,181,71,.16);color:var(--amb);font-weight:500;padding:2px 10px;border-radius:6px}
+.win{background:var(--p1);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.titlebar{background:var(--p2);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.titlebar strong{font-size:15px}
+.user{font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{border:1px solid var(--line);border-radius:20px;padding:2px 10px;background:var(--bg)}
+.pill.g{border-color:var(--lime);color:var(--lime)}
+.tabs{display:flex;padding:0 12px;background:var(--p1);margin-top:10px}
+.tab{flex:1;text-align:center;padding:10px 12px;margin-left:-8px;cursor:pointer;background:var(--p2);color:var(--mut);border:0;font-weight:500;
+ clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%)}
+.tab:first-child{margin-left:0;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%)}
+.tab.on{background:var(--pale);color:var(--bg);font-weight:600}
+.body{padding:14px}
+.note{color:var(--mut);font-size:13px;margin:0 0 12px}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+@media(max-width:860px){.row{grid-template-columns:1fr}.tab{font-size:12px;padding:10px 4px}}
+.box{border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.bt{background:var(--p2);padding:8px 12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bc{padding:10px 12px}
+textarea{width:100%;min-height:330px;background:var(--bg);border:0;padding:12px;resize:vertical;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+textarea:focus{outline:2px solid var(--lime);outline-offset:-2px}
+.btn{background:var(--p2);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn:hover{filter:brightness(1.25)}
+.btn.primary{background:var(--lime);color:var(--bg);border-color:var(--lime);font-weight:600}
+.btn.primary:hover{filter:brightness(.92)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.draft{font-size:11px;background:rgba(255,181,71,.18);color:var(--amb);border-radius:5px;padding:1px 8px;font-weight:500}
+.saved{font-size:11px;background:rgba(95,211,74,.2);color:var(--grn);border-radius:5px;padding:1px 8px;font-weight:500}
+.ver{list-style:none;margin:0;padding:0}
+.ver li{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ver li:last-child{border:0}
+.ver small{display:block;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:var(--p2);text-align:left;padding:7px 8px;font-weight:600}
+td{padding:7px 8px;border-bottom:1px solid var(--line)}
+.r{text-align:right}
+.scroll{overflow:auto}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.m{background:var(--p2);border-radius:8px;padding:9px 12px}
+.m span{display:block;font-size:12px;color:var(--mut)}
+.m b{font-size:17px;font-weight:600}
+pre{margin:0;padding:12px;white-space:pre-wrap;word-break:break-word;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-height:460px;overflow:auto}
+.s1{color:var(--lime);font-weight:700}.s2{color:var(--grn);font-weight:700}.s3{color:#9fe6ff;font-weight:700}.s4{color:var(--amb);font-weight:700}
+.hist{border:1px solid var(--line);border-radius:8px;margin-bottom:10px;background:var(--bg)}
+.hh{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;flex-wrap:wrap}
+.hh:hover{background:rgba(240,255,227,.05)}
+.hh small{color:var(--mut)}
+.hd{padding:0 12px 12px;display:none;border-top:1px solid var(--line)}
+.hist.open .hd{display:block}
+.hd h5{margin:10px 0 4px;font-size:12px;color:var(--lime);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.hd p{margin:0;color:var(--mut);font-size:13px}
+.lock{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--mut);margin-top:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--lime);color:var(--bg);padding:9px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><span>Conciliação bancária com IA · Administração</span><b>Simulação com dados fictícios</b></div>
+  <div class="win">
+    <div class="titlebar">
+      <strong>Contexto da IA</strong>
+      <div class="user"><span class="pill">gabriel@exemplo.com</span><span class="pill g">Acesso liberado: 2 pessoas</span><button class="btn sm" id="logout">Sair</button></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="body" id="view"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SISTEMA='Você é um assistente de suporte do IXC Provedor que analisa divergências de conciliação bancária. Todas as somas já foram calculadas pelo sistema: use os totais informados e não refaça contas. Nunca concilie sozinho: sugira e justifique.';
+const REGRAS0=`## Campos do IXC
+- fn_movim_finan.documento: número do boleto/título que originou o recebimento.
+- fn_movim_finan.tx_id: ID da transação bancária (pode vir vazio em baixas manuais).
+- fn_extrato.tx_id: ID da transação no OFX (FITID).
+
+## Padrões conhecidos
+- Liquidação de cobrança em lote: um crédito no extrato corresponde à soma de vários recebimentos no IXC.
+- Tarifas bancárias aparecem só como saída no extrato e podem não ter título no IXC.
+- O crédito do banco pode cair em D+1 em relação à data da baixa no IXC.
+
+## Como responder
+- Sempre citar os IDs das linhas envolvidas.
+- Se não tiver certeza, dizer o que falta para decidir.`;
+const IXC=[[131370,'02/11','7178100','100,00'],[131371,'02/11','7178101','120,00'],[131372,'02/11','7178102','80,00'],[131377,'02/11','7178351','60,00'],[131402,'03/11','7179002','120,00'],[131409,'03/11','7179002','120,00']];
+const BANK=[[905,'02/11','(sem doc)','300,00','LIQUIDACAO COBRANCA LOTE'],[907,'03/11','7179002','120,00','PIX RECEBIDO COBRANCA 7179002'],[908,'03/11','7179140','85,00','PIX RECEBIDO BOLETO 7179140']];
+const PERGUNTA='Por que a conciliação não fecha? Quais linhas explicam a diferença?';
+const HIST=[
+ {t:'04/11 22:10',u:'Gabriel',q:'Por que a conciliação não fecha?',v:'v3',tok:1480,r:'Encontrou 1 lote (3 recebimentos = 300,00), 1 duplicado e 2 itens só de um lado. Diferença de 95,00 explicada.'},
+ {t:'04/11 18:42',u:'Colega',q:'O crédito de 300,00 pertence a qual cliente?',v:'v3',tok:1210,r:'O crédito é uma liquidação em lote, sem cliente único. Sugeriu conferir os três documentos de 02/11.'},
+ {t:'03/11 16:05',u:'Gabriel',q:'A tarifa de 2,90 precisa de baixa?',v:'v2',tok:980,r:'Tarifa bancária aparece só como saída no extrato. Sugeriu lançar como despesa, sem título.'}
+];
+let VERS=[{n:'v1',u:'Gabriel',d:'01/11 09:12',m:'Primeira versão'},{n:'v2',u:'Gabriel',d:'03/11 15:40',m:'Adicionou regra de tarifas'},{n:'v3',u:'Colega',d:'04/11 18:20',m:'Adicionou padrão de lote'}];
+let saved=REGRAS0,draft=REGRAS0,tab='regras',verTxt='v3';
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+$('logout').addEventListener('click',()=>toast('Simulação: encerraria a sessão'));
+
+function dadosTxt(){
+  return 'Conta: Sicoob 0001 | Período: 01/11/2026 a 03/11/2026\nTotal a conciliar IXC: 12.480,00 | Extrato: 12.385,00 | Diferença: 95,00\n\nPENDENTES NO IXC (id | data | documento | entrada)\n'+
+  IXC.map(r=>r.join(' | ')).join('\n')+'\n\nPENDENTES NO EXTRATO (id | data | documento | entrada | histórico)\n'+BANK.map(r=>r.join(' | ')).join('\n');
+}
+function promptTxt(){
+  return [['s1','[1] INSTRUÇÕES FIXAS',SISTEMA],['s2','[2] REGRAS E GLOSSÁRIO'+(draft!==saved?' (rascunho não salvo)':' ('+verTxt+')'),draft],['s3','[3] DADOS DO CASO (lidos da tela)',dadosTxt()],['s4','[4] PERGUNTA',PERGUNTA]];
+}
+function tokens(){const all=promptTxt().map(p=>p[2]).join('\n');return Math.ceil(all.length/3.5)}
+function renderTabs(){
+  const T=[['regras','Regras e glossário'],['dados','Dados do caso'],['prompt','Prompt final'],['hist','Histórico']];
+  $('tabs').innerHTML=T.map(t=>'<button class="tab'+(tab===t[0]?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>').join('');
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.t;render()}));
+}
+function viewRegras(){
+  return '<p class="note">Texto que você e a outra pessoa editam. Ele entra em toda análise. Salve uma versão para registrar quem mudou o quê.</p>'+
+  '<div class="row"><div class="box"><div class="bt"><span>Regras e glossário</span><span id="st" class="'+(draft!==saved?'draft':'saved')+'">'+(draft!==saved?'rascunho não salvo':'salvo ('+verTxt+')')+'</span></div>'+
+  '<textarea id="ta" spellcheck="false">'+esc(draft)+'</textarea>'+
+  '<div class="bc" style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--line)"><button class="btn" id="rev">Descartar alterações</button><button class="btn primary" id="sv">Salvar nova versão</button></div></div>'+
+  '<div class="box"><div class="bt">Versões</div><div class="bc"><ul class="ver" id="vl">'+verHTML()+'</ul></div></div></div>';
+}
+function verHTML(){return VERS.slice().reverse().map(v=>'<li><b>'+v.n+'</b> · '+v.u+'<small>'+v.d+' · '+v.m+'</small></li>').join('')}
+function viewDados(){
+  const n=IXC.length+BANK.length;
+  return '<p class="note">O que a extensão leu da tela do IXC, já resumido para a IA. Somente leitura.</p>'+
+  '<div class="metrics"><div class="m"><span>Total a conciliar (IXC)</span><b>12.480,00</b></div><div class="m"><span>Total a conciliar (extrato)</span><b>12.385,00</b></div><div class="m"><span>Diferença</span><b style="color:var(--amb)">95,00</b></div><div class="m"><span>Linhas enviadas</span><b>'+n+'</b></div></div>'+
+  '<div class="row" style="grid-template-columns:1fr 1fr"><div class="box"><div class="bt">Pendentes no IXC</div><div class="scroll"><table><thead><tr><th>ID</th><th>Data</th><th>Documento</th><th class="r">Entrada</th></tr></thead><tbody>'+
+  IXC.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td class="r">'+r[3]+'</td></tr>').join('')+'</tbody></table></div></div>'+
+  '<div class="box"><div class="bt">Pendentes no extrato</div><div class="scroll"><table><thead><tr><th>ID</th><th>Data</th><th>Documento</th><th class="r">Entrada</th><th>Histórico</th></tr></thead><tbody>'+
+  BANK.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td class="r">'+r[3]+'</td><td>'+r[4]+'</td></tr>').join('')+'</tbody></table></div></div></div>'+
+  '<div class="lock">Nomes de clientes, CPF e CNPJ não são enviados. Só valor, data, documento, IDs e o histórico já mascarado.</div>';
+}
+function viewPrompt(){
+  const ps=promptTxt();
+  return '<p class="note">Este é o texto completo que a IA recebe, na ordem. Se mudar as regras, ele muda aqui na hora.</p>'+
+  '<div class="metrics"><div class="m"><span>Tamanho estimado</span><b>'+tokens().toLocaleString('pt-BR')+' tokens</b></div><div class="m"><span>Regras</span><b>'+(draft!==saved?'rascunho':verTxt)+'</b></div></div>'+
+  '<div class="box"><div class="bt"><span>Prompt montado</span><button class="btn sm" id="cp">Copiar</button></div><pre>'+
+  ps.map(p=>'<span class="'+p[0]+'">'+p[1]+'</span>\n'+esc(p[2])).join('\n\n')+'</pre></div>';
+}
+function viewHist(){
+  return '<p class="note">Cada análise guarda o que foi enviado e o que a IA respondeu. Útil para auditar uma sugestão estranha.</p>'+
+  HIST.map((h,i)=>'<div class="hist" data-i="'+i+'"><div class="hh"><div><b>'+h.q+'</b><br><small>'+h.t+' · '+h.u+' · regras '+h.v+'</small></div><span class="pill">'+h.tok.toLocaleString('pt-BR')+' tokens</span></div>'+
+  '<div class="hd"><h5>Resposta da IA</h5><p>'+h.r+'</p><h5>Enviado</h5><p>Instruções fixas + regras '+h.v+' + dados do caso (9 linhas) + a pergunta acima.</p></div></div>').join('');
+}
+function render(){
+  renderTabs();
+  const v=$('view');
+  v.innerHTML=tab==='regras'?viewRegras():tab==='dados'?viewDados():tab==='prompt'?viewPrompt():viewHist();
+  if(tab==='regras'){
+    const ta=$('ta');
+    ta.addEventListener('input',()=>{draft=ta.value;const s=$('st');s.className=draft!==saved?'draft':'saved';s.textContent=draft!==saved?'rascunho não salvo':'salvo ('+verTxt+')'});
+    $('rev').addEventListener('click',()=>{draft=saved;render();toast('Alterações descartadas')});
+    $('sv').addEventListener('click',()=>{
+      if(draft===saved){toast('Nada mudou desde a última versão');return}
+      const n='v'+(VERS.length+1);
+      VERS.push({n:n,u:'Você',d:'agora',m:'Edição das regras'});
+      saved=draft;verTxt=n;render();toast('Versão '+n+' salva');
+    });
+  }
+  if(tab==='prompt'){
+    $('cp').addEventListener('click',()=>{
+      const t=promptTxt().map(p=>p[1]+'\n'+p[2]).join('\n\n');
+      if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast('Prompt copiado'),()=>toast('Não foi possível copiar'));else toast('Não foi possível copiar');
+    });
+  }
+  if(tab==='hist'){
+    document.querySelectorAll('.hist .hh').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('open')));
+  }
+}
+render();
+</script>
+</body>
+</html>
