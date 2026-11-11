@@ -1,0 +1,249 @@
+{
+  "versao": 1,
+  "origem": "ixc-provedor/conciliacao-manual",
+  "capturado_em": "2026-11-04T10:15:00-03:00",
+  "filtros": {
+    "conta": "Sicoob 0001 (fictícia)",
+    "data_inicial": "01/11/2026",
+    "data_final": "03/11/2026"
+  },
+  "totais": {
+    "total_a_conciliar_aba3_mov": "600,00",
+    "total_a_conciliar_aba3_ext": "505,00",
+    "diferenca_aba3": "95,00"
+  },
+  "movimentacao": [
+    {
+      "id": "131350",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177800",
+      "tx_id": "",
+      "credito": "150,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7177800"
+    },
+    {
+      "id": "131355",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177812",
+      "tx_id": "",
+      "credito": "89,90",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7177812"
+    },
+    {
+      "id": "131360",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177830",
+      "tx_id": "",
+      "credito": "200,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7177830"
+    },
+    {
+      "id": "131364",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177845",
+      "tx_id": "",
+      "credito": "75,50",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7177845"
+    },
+    {
+      "id": "131370",
+      "conciliado": false,
+      "data": "02/11/2026",
+      "documento": "7178100",
+      "tx_id": "",
+      "credito": "100,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7178100"
+    },
+    {
+      "id": "131371",
+      "conciliado": false,
+      "data": "02/11/2026",
+      "documento": "7178101",
+      "tx_id": "",
+      "credito": "120,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7178101"
+    },
+    {
+      "id": "131372",
+      "conciliado": false,
+      "data": "02/11/2026",
+      "documento": "7178102",
+      "tx_id": "",
+      "credito": "80,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7178102"
+    },
+    {
+      "id": "131377",
+      "conciliado": false,
+      "data": "02/11/2026",
+      "documento": "7178351",
+      "tx_id": "",
+      "credito": "60,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7178351"
+    },
+    {
+      "id": "131380",
+      "conciliado": true,
+      "data": "02/11/2026",
+      "documento": "7178400",
+      "tx_id": "",
+      "credito": "99,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7178400"
+    },
+    {
+      "id": "131402",
+      "conciliado": false,
+      "data": "03/11/2026",
+      "documento": "7179002",
+      "tx_id": "",
+      "credito": "120,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7179002"
+    },
+    {
+      "id": "131409",
+      "conciliado": false,
+      "data": "03/11/2026",
+      "documento": "7179002",
+      "tx_id": "",
+      "credito": "120,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7179002"
+    },
+    {
+      "id": "131415",
+      "conciliado": true,
+      "data": "03/11/2026",
+      "documento": "7179050",
+      "tx_id": "",
+      "credito": "45,00",
+      "debito": "0,00",
+      "historico": "Rec. cliente XXX doc.: 7179050"
+    },
+    {
+      "id": "131420",
+      "conciliado": true,
+      "data": "03/11/2026",
+      "documento": "TAR-1103",
+      "tx_id": "",
+      "credito": "0,00",
+      "debito": "2,90",
+      "historico": "Tarifa bancária de cobrança"
+    }
+  ],
+  "extrato": [
+    {
+      "id": "901",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177800",
+      "tx_id": "E001",
+      "credito": "150,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7177800"
+    },
+    {
+      "id": "902",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177812",
+      "tx_id": "E002",
+      "credito": "89,90",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7177812"
+    },
+    {
+      "id": "903",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177830",
+      "tx_id": "E003",
+      "credito": "200,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7177830"
+    },
+    {
+      "id": "904",
+      "conciliado": true,
+      "data": "01/11/2026",
+      "documento": "7177845",
+      "tx_id": "E004",
+      "credito": "75,50",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7177845"
+    },
+    {
+      "id": "905",
+      "conciliado": false,
+      "data": "02/11/2026",
+      "documento": "",
+      "tx_id": "L0001",
+      "credito": "300,00",
+      "debito": "0,00",
+      "historico": "LIQUIDACAO COBRANCA LOTE 02/11"
+    },
+    {
+      "id": "906",
+      "conciliado": true,
+      "data": "02/11/2026",
+      "documento": "7178400",
+      "tx_id": "E007",
+      "credito": "99,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7178400"
+    },
+    {
+      "id": "907",
+      "conciliado": false,
+      "data": "03/11/2026",
+      "documento": "7179002",
+      "tx_id": "E009",
+      "credito": "120,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7179002"
+    },
+    {
+      "id": "908",
+      "conciliado": false,
+      "data": "03/11/2026",
+      "documento": "7179140",
+      "tx_id": "E0012345",
+      "credito": "85,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO BOLETO 7179140"
+    },
+    {
+      "id": "909",
+      "conciliado": true,
+      "data": "03/11/2026",
+      "documento": "7179050",
+      "tx_id": "E011",
+      "credito": "45,00",
+      "debito": "0,00",
+      "historico": "PIX RECEBIDO COBRANCA 7179050"
+    },
+    {
+      "id": "910",
+      "conciliado": true,
+      "data": "03/11/2026",
+      "documento": "TAR-1103",
+      "tx_id": "T001",
+      "credito": "0,00",
+      "debito": "2,90",
+      "historico": "TARIFA COBRANCA"
+    }
+  ]
+}

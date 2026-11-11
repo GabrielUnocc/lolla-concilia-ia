@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova conciliação · Concilia IA</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/ixc.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/"><span class="logo">CI</span>Concilia IA</a>
+  <nav class="trilha" id="trilha"></nav>
+  <div class="usuario"><span class="nome" id="usuario-nome"></span><button class="btn pq" id="btn-sair" type="button">Sair</button></div>
+</header>
+<main class="pagina">
+  <form class="janela" id="form" novalidate>
+    <div class="janela-titulo">Nova conciliação</div>
+    <div class="barra-acoes">
+      <button class="btn primario" type="submit" id="salvar">Salvar e abrir</button>
+      <a class="btn" href="/">Cancelar</a>
+      <span class="espaco"></span>
+      <a class="btn pq" href="/exemplos/conciliacao-exemplo.json" download>Baixar JSON de exemplo</a>
+    </div>
+    <div class="janela-corpo">
+      <div class="alerta erro" id="erro" hidden></div>
+
+      <div class="form-grade">
+        <h2 class="secao col-12">1. Arquivo extraído do IXC Provedor</h2>
+        <div class="col-12">
+          <label class="soltar" id="zona-json" for="arq-json">
+            <input type="file" id="arq-json" accept=".json,application/json">
+            <strong id="json-titulo">Clique ou arraste o arquivo JSON aqui <span class="obrig">*</span></strong>
+            <span id="json-desc">Gerado pela extensão a partir da tela Conciliação Manual (as duas grades e os totais).</span>
+          </label>
+        </div>
+        <div class="col-12" id="previa" hidden>
+          <div class="metricas" id="metricas"></div>
+          <div class="alerta" id="avisos-json" hidden></div>
+        </div>
+
+        <h2 class="secao col-12">2. Período e conta filtrados no IXC</h2>
+        <div class="campo col-6">
+          <label for="conta">Conta bancária <span class="obrig">*</span></label>
+          <input class="entrada" id="conta" maxlength="120" placeholder="Ex.: Sicoob 0001 – Cobrança" required>
+        </div>
+        <div class="campo col-3">
+          <label for="data-ini">Data inicial <span class="obrig">*</span></label>
+          <input class="entrada" id="data-ini" type="date" required>
+        </div>
+        <div class="campo col-3">
+          <label for="data-fim">Data final <span class="obrig">*</span></label>
+          <input class="entrada" id="data-fim" type="date" required>
+        </div>
+        <div class="campo col-12">
+          <label for="obs">Observação</label>
+          <textarea class="entrada" id="obs" maxlength="2000" placeholder="Contexto do chamado, o que o cliente relatou, o que já foi conferido…"></textarea>
+          <span class="ajuda">Não escreva nomes, CPF/CNPJ ou outros dados pessoais de clientes.</span>
+        </div>
+
+        <h2 class="secao col-12">3. Francesinha (opcional)</h2>
+        <div class="col-12">
+          <label class="soltar" id="zona-fr" for="arq-fr">
+            <input type="file" id="arq-fr" accept=".pdf,.csv,.txt,.ret,.xls,.xlsx,.ofx">
+            <strong id="fr-titulo">Clique ou arraste a francesinha do banco</strong>
+            <span id="fr-desc">Relatório de títulos liquidados do banco: PDF, CSV, TXT, RET, XLS ou XLSX, até 10 MB.</span>
+          </label>
+          <div class="barra-acoes" id="fr-acoes" hidden><button class="btn pq perigo" type="button" id="fr-remover">Remover francesinha</button></div>
+        </div>
+      </div>
+    </div>
+  </form>
+</main>
+<script type="module" src="/js/nova.js"></script>
+</body>
+</html>

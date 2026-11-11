@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conciliação · Concilia IA</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/ixc.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/"><span class="logo">CI</span>Concilia IA</a>
+  <nav class="trilha" id="trilha"></nav>
+  <div class="usuario"><span class="nome" id="usuario-nome"></span><button class="btn pq" id="btn-sair" type="button">Sair</button></div>
+</header>
+<main class="pagina">
+  <div class="alerta erro" id="erro-geral" hidden></div>
+  <section class="janela" id="janela" hidden>
+    <div class="janela-titulo"><span>Conciliação bancária <small id="subtitulo"></small></span><small id="situacao"></small></div>
+    <div class="barra-acoes">
+      <button class="btn" type="button" id="btn-ant">&larr; Anterior</button>
+      <button class="btn" type="button" id="btn-prox">Próximo &rarr;</button>
+      <span class="espaco"></span>
+      <a class="btn pq" id="btn-francesinha" hidden>Baixar francesinha</a>
+      <a class="btn pq" href="/">Voltar à lista</a>
+    </div>
+    <nav class="etapas" id="etapas"></nav>
+
+    <div class="janela-corpo">
+      <!-- Filtros -->
+      <div id="aba-filtros" hidden>
+        <div class="alerta" id="avisos" hidden></div>
+        <dl class="dl" id="dados-filtros"></dl>
+        <h2 class="secao">Resumo</h2>
+        <div class="metricas" id="metricas"></div>
+      </div>
+
+      <!-- Conciliação automática: o que já veio conciliado do IXC -->
+      <div id="aba-auto" hidden>
+        <p class="dica">Linhas que já estavam conciliadas no IXC no momento da extração.</p>
+        <div class="grades">
+          <div class="grade"><div class="grade-titulo">Movimentação Financeira <span class="qtd" id="qa-ixc"></span></div>
+            <div class="grade-rolagem"><table class="tab"><thead id="ha-ixc"></thead><tbody id="ba-ixc"></tbody></table></div></div>
+          <div class="grade"><div class="grade-titulo">Extrato Bancário <span class="qtd" id="qa-ext"></span></div>
+            <div class="grade-rolagem"><table class="tab"><thead id="ha-ext"></thead><tbody id="ba-ext"></tbody></table></div></div>
+        </div>
+      </div>
+
+      <!-- Conciliação manual -->
+      <div id="aba-manual" hidden>
+        <div class="legenda"><span><i class="l-ok"></i>Valores de acordo</span><span><i class="l-erro"></i>Valores em desacordo</span></div>
+        <div class="dica" id="dica"></div>
+        <div class="centro"><button class="btn sucesso" type="button" id="btn-conciliar" hidden>Conciliar</button></div>
+        <div class="barra-pares">
+          <button class="btn" type="button" id="btn-iguais">Selecionar valores iguais</button>
+          <label class="sr" for="sel-valor">Valor específico</label>
+          <select class="entrada" id="sel-valor"></select>
+          <button class="btn" type="button" id="btn-limpar" disabled>Limpar seleção</button>
+          <span class="info-pares" id="info-pares"></span>
+        </div>
+        <div class="grades">
+          <div class="grade">
+            <div class="grade-titulo">Movimentação Financeira <span class="qtd" id="q-ixc"></span></div>
+            <div class="grade-busca">
+              <select class="entrada" id="f-ixc" aria-label="Campo de busca da Movimentação"></select>
+              <input class="entrada" id="b-ixc" type="search" placeholder="Buscar" aria-label="Buscar na Movimentação">
+            </div>
+            <div class="grade-rolagem"><table class="tab"><thead id="h-ixc"></thead><tbody id="g-ixc"></tbody></table></div>
+          </div>
+          <div class="grade">
+            <div class="grade-titulo">Extrato Bancário <span class="qtd" id="q-ext"></span></div>
+            <div class="grade-busca">
+              <select class="entrada" id="f-ext" aria-label="Campo de busca do Extrato"></select>
+              <input class="entrada" id="b-ext" type="search" placeholder="Buscar" aria-label="Buscar no Extrato">
+            </div>
+            <div class="grade-rolagem"><table class="tab"><thead id="h-ext"></thead><tbody id="g-ext"></tbody></table></div>
+          </div>
+        </div>
+        <div class="rodape-totais">
+          <div class="bloco">
+            <label for="t-sel-ixc">Total selecionado:</label><input class="entrada" id="t-sel-ixc" readonly>
+            <label for="t-conc-ixc">Total a conciliar:</label><input class="entrada" id="t-conc-ixc" readonly>
+          </div>
+          <div class="bloco meio">
+            <label for="t-dif">Diferença:</label><input class="entrada" id="t-dif" readonly>
+            <label for="t-dif-sel">Diferença da seleção:</label><input class="entrada" id="t-dif-sel" readonly>
+          </div>
+          <div class="bloco">
+            <label for="t-sel-ext">Total selecionado:</label><input class="entrada" id="t-sel-ext" readonly>
+            <label for="t-conc-ext">Total a conciliar:</label><input class="entrada" id="t-conc-ext" readonly>
+          </div>
+        </div>
+
+        <div class="painel-ia">
+          <div class="grade-titulo"><span><span class="ponto"></span>Análise da IA</span>
+            <button class="btn pq primario" type="button" disabled title="Integração com o Claude ainda não conectada">Analisar divergências</button></div>
+          <div class="corpo" id="ia-corpo"></div>
+        </div>
+      </div>
+
+      <!-- Todos os conciliados -->
+      <div id="aba-todos" hidden>
+        <p class="dica">Vínculos feitos nesta ferramenta. Eles servem para o diagnóstico: para conciliar de fato, repita a seleção no IXC.</p>
+        <div class="grade"><div class="grade-titulo">Vínculos manuais <span class="qtd" id="q-vinc"></span></div>
+          <div class="grade-rolagem livre"><table class="tab">
+            <thead><tr><th>#</th><th>IDs na Movimentação</th><th>Documentos</th><th>IDs no Extrato</th><th>ID da transação</th><th class="d">Valor</th><th>Feito por</th><th>Quando</th><th></th></tr></thead>
+            <tbody id="g-vinc"></tbody></table></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module" src="/js/conciliacao.js"></script>
+</body>
+</html>

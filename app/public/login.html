@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar · Concilia IA</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/ixc.css">
+</head>
+<body>
+<main class="login-fundo">
+  <div class="login-caixa">
+    <div class="login-marca">
+      <span class="logo">CI</span>
+      <h1>Concilia IA</h1>
+      <p>Diagnóstico de conciliação bancária do IXC Provedor</p>
+    </div>
+    <form class="janela" id="form-login" novalidate>
+      <div class="janela-titulo">Acesso restrito</div>
+      <div class="janela-corpo">
+        <div class="alerta erro" id="erro" hidden></div>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input class="entrada" id="email" name="email" type="email" autocomplete="username" required autofocus>
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input class="entrada" id="senha" name="senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn primario grande" type="submit" id="entrar">Entrar</button>
+      </div>
+    </form>
+    <p class="login-rodape">O acesso é liberado pelo administrador. A análise com IA consome créditos da conta da equipe.</p>
+  </div>
+</main>
+<script type="module" src="/js/login.js"></script>
+</body>
+</html>

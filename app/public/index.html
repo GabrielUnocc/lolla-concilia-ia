@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conciliações · Concilia IA</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/ixc.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/"><span class="logo">CI</span>Concilia IA</a>
+  <nav class="trilha" id="trilha"></nav>
+  <div class="usuario"><span class="nome" id="usuario-nome"></span><button class="btn pq" id="btn-sair" type="button">Sair</button></div>
+</header>
+<main class="pagina">
+  <section class="janela">
+    <div class="janela-titulo">Conciliações bancárias <small id="contagem"></small></div>
+    <div class="barra-acoes">
+      <a class="btn primario" href="/nova.html">+ Nova conciliação</a>
+      <span class="espaco"></span>
+      <div class="filtros-lista">
+        <select class="entrada" id="f-situacao" aria-label="Situação">
+          <option value="">Todas as situações</option>
+          <option value="aberta">Com diferença</option>
+          <option value="fechada">Sem diferença</option>
+        </select>
+        <input class="entrada" id="f-busca" type="search" placeholder="Buscar por conta, período ou autor" aria-label="Buscar">
+      </div>
+    </div>
+    <div class="grade-rolagem livre">
+      <table class="tab">
+        <thead>
+          <tr>
+            <th>#</th><th>Conta</th><th>Período</th><th class="c">Situação</th>
+            <th class="d">Pend. IXC</th><th class="d">Pend. extrato</th><th class="d">Diferença</th>
+            <th class="c">Francesinha</th><th>Criada por</th><th>Atualizada</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="linhas"><tr><td colspan="11" class="vazio">Carregando…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script type="module" src="/js/lista.js"></script>
+</body>
+</html>

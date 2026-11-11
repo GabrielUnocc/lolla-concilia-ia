@@ -1,0 +1,16 @@
+{
+  "name": "lolla-concilia-ia",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Apoio ao suporte na conciliação bancária do IXC Provedor, com IA.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node app/server.js",
+    "dev": "node --watch app/server.js",
+    "criar-usuario": "node app/scripts/criar-usuario.js",
+    "test": "node --test app/test/*.test.js"
+  }
+}
