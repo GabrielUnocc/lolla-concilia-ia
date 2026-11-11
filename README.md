@@ -2,7 +2,17 @@
 
 Ferramenta de apoio ao suporte para diagnosticar divergências na conciliação bancária do IXC Provedor: o que está no sistema (movimentação financeira) contra o que veio no extrato do banco (OFX).
 
-Status: ideia validada com protótipo visual. Ainda sem extrator real nem IA conectada.
+Status: ideia validada com protótipo visual e primeiro teste do extrator/pareamento (amostra mascarada e cenário fictício). Ainda sem teste em conciliação real nem IA conectada.
+
+## Mapa do repositório
+
+| Pasta | O que tem |
+|---|---|
+| [`docs/requisitos/`](docs/requisitos/) | **Análise de requisitos**: objetivo, números, funcionamento, arquitetura, testes, custo, retorno e pendências |
+| [`docs/amostras-ixc/`](docs/amostras-ixc/) | HTML mascarado da tela de Conciliação Manual do IXC |
+| [`extensao/`](extensao/) | Código do extrator e do pareamento (base da extensão) |
+| [`testes/`](testes/) | Testes automáticos e resultado do primeiro teste de viabilidade |
+| [`prototipo/`](prototipo/) | Protótipo visual com dados fictícios |
 
 ## Problema
 
