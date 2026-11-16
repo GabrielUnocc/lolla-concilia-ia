@@ -80,6 +80,7 @@ Lolla.core.store = Lolla.core.criarStore({
   chat: [],
   conversando: false,
   historico: [],         // análises salvas (carregadas ao abrir Indicadores/Histórico)
+  cenario: 'padrao',     // cenário de teste carregado na base simulada
   testeClaude: '',
   aviso: null            // { tipo: 'ok'|'erro', texto }
 });
