@@ -28,6 +28,8 @@
           <p class="suave">Volte à Conciliação Manual no IXC e clique em <b>Abrir em guia</b> de novo, ou aguarde: esta guia tenta reconectar sozinha.</p></div></div></div>`;
       return;
     }
+    host.setAttribute('data-tema', estado.tema || 'claro');
+    document.documentElement.setAttribute('data-tema', estado.tema || 'claro');
     alvo.innerHTML = Lolla.painel.painel(Object.assign({}, estado, { aviso: aviso || estado.aviso }), { modo: 'guia' });
     const nova = raiz.getElementById('lolla-chat');
     if (nova) { nova.value = rascunho; if (focado) nova.focus(); }

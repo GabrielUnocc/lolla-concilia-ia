@@ -29,8 +29,10 @@ A tela de **Configurações** abre sozinha na primeira vez.
    - **Selecionar no IXC:** marca as caixinhas no IXC. A Lolla nunca concilia; quem concilia é você, pelo botão do IXC.
 5. No topo do painel:
    - **⤢ Expandir:** o painel fica largo, com os blocos lado a lado (**⤡ Recolher** volta ao normal).
-   - **↗ Abrir em guia:** abre a Lolla numa aba própria do Chrome, conectada ao IXC. Ela se atualiza sozinha; **Mostrar** e **Selecionar** levam de volta à aba do IXC. Se o IXC for recarregado, a guia reconecta sozinha.
-6. Para **desligar**, clique no ícone da Lolla na barra e desmarque **Lolla ativa**. Para desligar de vez, use `chrome://extensions`.
+   - **↗ Guia:** abre a Lolla numa aba própria do Chrome, conectada ao IXC. Ela se atualiza sozinha; **Mostrar** e **Selecionar** levam de volta à aba do IXC. Se o IXC for recarregado, a guia reconecta sozinha.
+   - **–** minimiza: o painel encolhe até o botão **Lolla**, com um estouro bem leve de gotinhas azuis.
+6. **Aparência:** painel e Conciliação em vidro fosco. A Lolla acompanha sozinha o **modo escuro** do IXC (pela classe de tema da página ou pelas cores da tela). O visual da Conciliação pode ser desligado em **Visual modernizado**, no botão da barra.
+7. Para **desligar**, clique no ícone da Lolla na barra e desmarque **Lolla ativa**. Para desligar de vez, use `chrome://extensions`.
 
 ## O que conferir no teste com o IXC
 
@@ -44,6 +46,7 @@ A tela de **Configurações** abre sozinha na primeira vez.
 1. Em `chrome://extensions` → **Detalhes** da AR Lolla, ligue **Permitir acesso a URLs de arquivo**.
 2. Em Configurações, adicione o endereço `file://`.
 3. Abra o arquivo no Chrome (arraste para uma aba).
+4. O botão **Simular modo escuro do IXC**, no topo da página, testa o tema escuro.
 
 ## Arquivos
 
@@ -57,4 +60,4 @@ A tela de **Configurações** abre sozinha na primeira vez.
 | `lib/` | Pareamento, mascaramento, indicadores, prompts e IA simulada (os mesmos do MVP) |
 | `popup.html` / `opcoes.html` | Botão da barra (liga/desliga) e Configurações |
 | `guia.html` / `guia.js` | A Lolla em guia própria, ligada à aba do IXC |
-| `conteudo/visual.js` | Visual modernizado da Conciliação (só aparência) |
+| `conteudo/visual.js` | Visual modernizado da Conciliação (só aparência) e detecção do tema claro/escuro do IXC |

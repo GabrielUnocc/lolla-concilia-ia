@@ -82,18 +82,29 @@ async function chamarClaude({ system, messages, maxTokens }) {
     }[resp.status];
     throw new Error((amigavel || 'Erro da API do Claude') + ` (${resp.status}: ${msg})`);
   }
-  return { texto: (corpo.content || []).filter((b) => b.type === 'text').map((b) => b.text).join(''), usage: corpo.usage || null, modelo: corpo.model };
+  return { texto: (corpo.content || []).filter((b) => b.type === 'text').map((b) => b.text).join(''), usage: corpo.usage || null, modelo: corpo.model, parada: corpo.stop_reason };
 }
 
+// Lê o JSON da resposta. Devolve null se não der (para tentar de novo).
 function extrairJson(texto) {
-  const limpo = texto.replace(/```(?:json)?/g, '').trim();
+  const limpo = (texto || '').replace(/```(?:json)?/g, '').trim();
   const ini = limpo.indexOf('{'), fim = limpo.lastIndexOf('}');
-  if (ini < 0 || fim < ini) throw new Error('A IA não devolveu o formato esperado.');
-  const obj = JSON.parse(limpo.slice(ini, fim + 1));
+  if (ini < 0 || fim < ini) return null;
+  let obj;
+  try { obj = JSON.parse(limpo.slice(ini, fim + 1)); } catch (e) { return null; }
   obj.itens = Array.isArray(obj.itens) ? obj.itens : [];
   obj.perguntas_ao_cliente = Array.isArray(obj.perguntas_ao_cliente) ? obj.perguntas_ao_cliente : [];
   return obj;
 }
+
+function erroFormato(r) {
+  if (r.parada === 'max_tokens') return new Error('A resposta da IA ficou longa demais e foi cortada. Filtre um período menor e tente de novo.');
+  if (r.parada === 'refusal') return new Error('A IA recusou a análise. Tente de novo ou use outro modelo.');
+  const trecho = (r.texto || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+  return new Error('A IA não devolveu o formato esperado' + (trecho ? ': "' + trecho + (r.texto.length > 160 ? '…"' : '"') : ' (resposta vazia)') + '. Tente de novo ou troque o modelo nas Configurações.');
+}
+
+const somarUso = (a, b) => (!a ? b : !b ? a : { input_tokens: (a.input_tokens || 0) + (b.input_tokens || 0), output_tokens: (a.output_tokens || 0) + (b.output_tokens || 0) });
 
 const P = () => self.Lolla.services.prompts;
 
@@ -103,8 +114,23 @@ const tratadores = {
     return { temChave: !!c.apiKey, iaSimulada: c.iaSimulada || !c.apiKey, modelo: c.modelo, ativo: c.ativo };
   },
   async analisar({ payload }) {
-    const r = await chamarClaude({ system: P().SISTEMA_ANALISE, messages: [{ role: 'user', content: P().analise(payload) }] });
-    return { resultado: extrairJson(r.texto), usage: r.usage, modelo: r.modelo };
+    const system = P().SISTEMA_ANALISE;
+    const messages = [{ role: 'user', content: P().analise(payload) }];
+    let r = await chamarClaude({ system, messages, maxTokens: 8000 });
+    let obj = extrairJson(r.texto);
+    let uso = r.usage;
+    // Se veio fora do formato (e não foi cortada), pede de novo uma vez, só o JSON
+    if (!obj && r.parada !== 'max_tokens' && r.parada !== 'refusal') {
+      const r2 = await chamarClaude({ system, maxTokens: 8000, messages: messages.concat(
+        { role: 'assistant', content: r.texto || '(vazio)' },
+        { role: 'user', content: 'Sua resposta não veio no formato pedido. Responda de novo APENAS com o JSON do formato combinado, começando em { e terminando em }, sem nenhum texto fora dele.' }) });
+      uso = somarUso(uso, r2.usage);
+      obj = extrairJson(r2.texto);
+      if (!obj) throw erroFormato(r2);
+      r = r2;
+    }
+    if (!obj) throw erroFormato(r);
+    return { resultado: obj, usage: uso, modelo: r.modelo };
   },
   async conversar({ historico, payload, resultado }) {
     const msgs = [{ role: 'user', content: P().contextoChat(payload, resultado) }, { role: 'assistant', content: 'Entendido. Pode perguntar.' }]

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AR Lolla — Conciliação com IA",
   "short_name": "AR Lolla",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "description": "Lê a Conciliação Manual do IXC Provedor, pareia em código e usa IA para explicar as divergências. Só roda nos endereços do IXC que você cadastrar.",
   "icons": {
     "16": "icones/lolla-16.png",
