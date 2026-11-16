@@ -26,6 +26,10 @@ Em **Configurações → Cenário de teste** dá para trocar a base simulada:
 - **Cenário 1 — Sicoob e Bradesco (03 a 13/11):** lote, rendimento não lançado, baixa duplicada, tarifa, recebimento manual, PIX sem baixa, data de crédito e estorno.
 - **Cenário 2 — Sicredi e Itaú (16 a 24/11):** lote de 4 boletos, pares ambíguos, linha repetida no OFX, PIX baixado 2x, float D+2, estorno, bloqueio judicial, convênio e tarifa. A conta Itaú fecha sem divergência.
 
+## Importar um OFX
+
+Na Conciliação, **Importar OFX** lê o arquivo no navegador (OFX 1.x e 2.x), mostra banco, período, totais e alertas (lançamento repetido, FITID repetido, linha sem data/valor, fora do período) e cria uma conta nova com o extrato real. O lado do IXC é escolhido na hora: espelho com divergências (mostra o gabarito), espelho exato ou vazio. Há um arquivo de teste em `exemplos/extrato-exemplo-sicoob.ofx`.
+
 Para criar outro cenário, copie `js/services/ixc/cenarioTeste2.js`, mude o nome e adicione o `<script>` no `index.html`.
 
 ## Estrutura
