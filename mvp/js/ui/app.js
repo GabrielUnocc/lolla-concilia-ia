@@ -12,6 +12,25 @@
 
   const ABAS = [['conciliacao', 'Conciliação'], ['indicadores', 'Indicadores'], ['historico', 'Histórico'], ['configuracoes', 'Configurações']];
 
+  /* ---------- Diálogo de confirmação na própria página (confirm/prompt nativos não funcionam em todo lugar) ---------- */
+  function dialogo({ texto, confirmar = 'Confirmar', perigo = false, conteudo = '' }) {
+    return new Promise((resolver) => {
+      const fundo = document.createElement('div');
+      fundo.className = 'dialogo-fundo';
+      fundo.innerHTML = `<div class="dialogo" role="dialog" aria-modal="true"><p>${esc(texto)}</p>${conteudo}
+        <div class="dialogo-botoes">${confirmar ? '<button data-r="nao">Cancelar</button>' : ''}
+        <button data-r="sim" class="${perigo ? 'perigo' : 'primario'}">${esc(confirmar || 'Fechar')}</button></div></div>`;
+      const fechar = (v) => { fundo.remove(); resolver(v); };
+      fundo.addEventListener('click', (e) => {
+        if (e.target === fundo) return fechar(false);
+        const b = e.target.closest('[data-r]'); if (b) fechar(b.dataset.r === 'sim' && !!confirmar);
+      });
+      document.body.appendChild(fundo);
+      const ta = fundo.querySelector('textarea'); if (ta) ta.select(); else fundo.querySelector('[data-r="sim"]').focus();
+    });
+  }
+  const confirmar = (texto, opcoes) => dialogo(Object.assign({ texto }, opcoes));
+
   /* ---------- Desbloqueio ---------- */
   function telaCofre(erro) {
     const novo = !cofre.existe();
@@ -99,10 +118,10 @@
       case 'limpar-selecao': return acoes.limparSelecao();
       case 'lancar': return acoes.lancarNoIxc(s.selecao.ext[0]);
       case 'estornar':
-        if (confirm('Estornar esta baixa no IXC (simulado)?')) return acoes.estornarBaixa(s.selecao.mov[0]);
+        if (await confirmar('Estornar esta baixa no IXC (simulado)?', { confirmar: 'Estornar', perigo: true })) return acoes.estornarBaixa(s.selecao.mov[0]);
         return;
       case 'conciliar-pares':
-        if (confirm('Conciliar todos os pares automáticos (exceto os ambíguos)?')) return acoes.conciliarParesAutomaticos();
+        if (await confirmar('Conciliar todos os pares automáticos (exceto os ambíguos)?', { confirmar: 'Conciliar' })) return acoes.conciliarParesAutomaticos();
         return;
       case 'analisar': return acoes.analisar();
       case 'ver-refs': {
@@ -112,13 +131,13 @@
       }
       case 'lancar-ref': return acoes.lancarNoIxc(alvo.dataset.id);
       case 'estornar-ref':
-        if (confirm('Estornar esta baixa no IXC (simulado)?')) return acoes.estornarBaixa(alvo.dataset.id);
+        if (await confirmar('Estornar esta baixa no IXC (simulado)?', { confirmar: 'Estornar', perigo: true })) return acoes.estornarBaixa(alvo.dataset.id);
         return;
       case 'decidir': return acoes.decidir(Number(alvo.dataset.k), alvo.dataset.d || undefined);
       case 'copiar-resumo': {
         const txt = acoes.resumoParaAtendimento();
         try { await navigator.clipboard.writeText(txt); acoes.avisar('ok', 'Resumo copiado.'); }
-        catch (e) { prompt('Copie o resumo:', txt); }
+        catch (e) { dialogo({ texto: 'Copie o resumo:', confirmar: '', conteudo: `<textarea rows="10" readonly>${esc(txt)}</textarea>` }); }
         return;
       }
       case 'testar-claude':
@@ -127,14 +146,14 @@
         catch (e) { store.set({ testeClaude: e.message }); }
         return;
       case 'restaurar-base':
-        if (!confirm('Restaurar a base simulada? Conciliações e lançamentos de teste serão desfeitos.')) return;
+        if (!(await confirmar('Restaurar a base simulada? Conciliações e lançamentos de teste serão desfeitos.', { confirmar: 'Restaurar' }))) return;
         await Lolla.services.ixc.restaurarBase();
         acoes.avisar('ok', 'Base simulada restaurada.');
         return acoes.buscar();
       case 'bloquear':
         cofre.bloquear(); location.reload(); return;
       case 'apagar-tudo':
-        if (!confirm('Apagar base simulada, histórico e senha local deste navegador? Não dá para desfazer.')) return;
+        if (!(await confirmar('Apagar base simulada, histórico e senha local deste navegador? Não dá para desfazer.', { confirmar: 'Apagar tudo', perigo: true }))) return;
         cofre.apagarTudo(); location.reload(); return;
     }
   });
