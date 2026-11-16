@@ -11,7 +11,7 @@
   const fmt = Lolla.core.fmt;
   const tela = Lolla.ixcTela;
   const s = {
-    ativo: false, aberto: false, leitura: null, pareamento: null, ind: null, conferencia: null, assinatura: '',
+    ativo: false, visualModerno: true, aberto: false, leitura: null, pareamento: null, ind: null, conferencia: null, assinatura: '',
     analise: null, analisando: false, erroIA: null, chat: [], conversando: false, status: null, atualizadoEm: null, aviso: null
   };
   let host = null, raiz = null, observador = null, relogio = null, espera = null;
@@ -65,22 +65,32 @@
   function verificar() {
     if (!s.ativo) return;
     const tem = tela.encontrar().ok;
+    if (tem && s.visualModerno) Lolla.visual.aplicar(); else Lolla.visual.remover();
     if (tem && !host) { montar(); reler(true); }
     else if (!tem && host) { desmontar(); s.aberto = false; s.assinatura = ''; }
     else if (tem) reler(false);
+    if (tem && s.visualModerno) Lolla.visual.atualizarSelecao(tela.ler().rodape);
   }
 
   function ligar() {
     s.ativo = true;
     observador = new MutationObserver(() => { clearTimeout(espera); espera = setTimeout(verificar, 300); });
     observador.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
-    relogio = setInterval(() => { if (host) reler(false); }, 2000); // pega mudanças nos totais (input.value)
+    relogio = setInterval(() => { if (host) { reler(false); if (s.visualModerno) Lolla.visual.atualizarSelecao(tela.ler().rodape); } }, 2000);
+    document.addEventListener('change', aoMarcar, true);
     verificar();
+  }
+  // Ao marcar/desmarcar uma linha no IXC, recolore a seleção (verde/laranja) logo depois do IXC somar
+  function aoMarcar(ev) {
+    if (!s.visualModerno || !ev.target.matches || !ev.target.matches('input[type="checkbox"]')) return;
+    setTimeout(() => Lolla.visual.atualizarSelecao(tela.ler().rodape), 150);
   }
   function desligar() {
     s.ativo = false;
     if (observador) observador.disconnect();
     clearInterval(relogio); clearTimeout(espera);
+    document.removeEventListener('change', aoMarcar, true);
+    Lolla.visual.remover();
     desmontar(); s.aberto = false;
   }
 
@@ -171,9 +181,11 @@
   }
 
   /* ---------- Liga/desliga e mensagens do botão da extensão ---------- */
-  chrome.storage.local.get({ ativo: true }, (c) => { if (c.ativo) ligar(); });
+  chrome.storage.local.get({ ativo: true, visualModerno: true }, (c) => { s.visualModerno = c.visualModerno; if (c.ativo) ligar(); });
   chrome.storage.onChanged.addListener((m, area) => {
-    if (area !== 'local' || !m.ativo) return;
+    if (area !== 'local') return;
+    if (m.visualModerno) { s.visualModerno = m.visualModerno.newValue; if (s.ativo) verificar(); }
+    if (!m.ativo) return;
     if (m.ativo.newValue && !s.ativo) ligar();
     if (!m.ativo.newValue && s.ativo) desligar();
   });

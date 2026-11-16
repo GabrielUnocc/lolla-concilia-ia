@@ -3,6 +3,8 @@
  */
 Lolla.painel = (function () {
   const { esc, reais, brDeIso } = Lolla.core.fmt;
+  const AVATAR = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) ? chrome.runtime.getURL('icones/lolla-avatar.png') : '';
+  const avatar = (cls) => AVATAR ? `<img class="${cls}" src="${AVATAR}" alt="Lolla (visual em breve)">` : '';
 
   const CSS = `
   :host { all: initial; }
@@ -14,15 +16,19 @@ Lolla.painel = (function () {
   button:focus-visible, input:focus-visible { outline: 2px solid #1f5fa8; outline-offset: 2px; }
   .primario { background: #1f5fa8; border-color: #1f5fa8; color: #fff; }
   .lancador { position: fixed; right: 18px; bottom: 18px; z-index: 2147483646; display: flex; gap: 8px; align-items: center;
-    background: #12355f; color: #fff; border: 0; border-radius: 22px; padding: 9px 16px 9px 12px; box-shadow: 0 6px 20px rgba(0,0,0,.25); font-weight: 600; }
+    background: rgba(18,53,95,.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: #fff;
+    border: 1px solid rgba(255,255,255,.25); border-radius: 26px; padding: 5px 16px 5px 5px; box-shadow: 0 8px 24px rgba(18,53,95,.35); font-weight: 600; }
+  .lancador .av { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.8); }
   .lancador i { width: 9px; height: 9px; border-radius: 50%; background: #e07b24; display: inline-block; }
+  .cab .av { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,.5); }
+  .breve { font-size: 10px; background: rgba(224,123,36,.9); color: #fff; border-radius: 8px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; font-weight: 600; }
   .painel { position: fixed; top: 12px; right: 12px; bottom: 12px; width: 410px; max-width: calc(100vw - 24px); z-index: 2147483646;
-    background: #f3f5f8; border: 1px solid #c9d2dd; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; overflow: hidden; }
-  .cab { background: #12355f; color: #fff; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+    background: rgba(243,245,248,.80); -webkit-backdrop-filter: blur(18px) saturate(140%); backdrop-filter: blur(18px) saturate(140%); border: 1px solid rgba(255,255,255,.7); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; overflow: hidden; }
+  .cab { background: linear-gradient(135deg, rgba(18,53,95,.95), rgba(31,95,168,.9)); color: #fff; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
   .cab b { font-size: 15px; } .cab small { opacity: .8; display: block; font-size: 11px; }
   .cab .sep { flex: 1; } .cab button { background: transparent; color: #fff; border-color: rgba(255,255,255,.35); padding: 3px 9px; }
   .corpo { overflow: auto; padding: 10px 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-  .bloco { background: #fff; border: 1px solid #d9dfe7; border-radius: 8px; padding: 10px; }
+  .bloco { background: rgba(255,255,255,.78); border: 1px solid rgba(217,223,231,.9); border-radius: 8px; padding: 10px; }
   .bloco h4 { margin: 0 0 6px; font-size: 13px; }
   .vivo { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #2e8b57; }
   .vivo i { width: 8px; height: 8px; border-radius: 50%; background: #2e8b57; animation: pulso 1.6s infinite; }
@@ -67,7 +73,7 @@ Lolla.painel = (function () {
 
   function lancador(s) {
     const n = s.ind ? s.ind.sobrasIxc + s.ind.sobrasBanco : null;
-    return `<button class="lancador base" data-a="abrir" title="Abrir a Lolla"><i></i>Lolla${n != null ? ` · ${n} sobra(s)` : ''}</button>`;
+    return `<button class="lancador base" data-a="abrir" title="Abrir a Lolla">${avatar('av')}<i></i>Lolla${n != null ? ` · ${n} sobra(s)` : ''}</button>`;
   }
 
   function listaSobras(linhas, prefixo) {
@@ -144,7 +150,7 @@ Lolla.painel = (function () {
         ${blocoIA(s)}`;
     }
     return `<div class="painel base" role="dialog" aria-label="AR Lolla">
-      <div class="cab"><div><b>AR Lolla</b><small>Conciliação com IA</small></div><span class="sep"></span>
+      <div class="cab">${avatar('av')}<div><b>AR Lolla</b><span class="breve" title="A aparência da Lolla ainda vai ser definida">visual em breve</span><small>Conciliação com IA</small></div><span class="sep"></span>
         <button data-a="minimizar" title="Minimizar">–</button></div>
       <div class="corpo">${corpo}</div>
       ${s.aviso ? `<div class="toast ${s.aviso.tipo}">${esc(s.aviso.texto)}</div>` : ''}</div>`;
