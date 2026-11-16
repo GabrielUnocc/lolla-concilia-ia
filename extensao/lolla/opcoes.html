@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AR Lolla — Configurações</title>
+<style>
+  :root { --borda: #d9dfe7; --suave: #5b6878; --primaria: #1f5fa8; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1d2733; background: #f3f5f8; }
+  header { background: #12355f; color: #fff; padding: 14px 20px; display: flex; gap: 12px; align-items: center; }
+  header img { width: 32px; height: 32px; } header b { font-size: 18px; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px 20px 40px; display: flex; flex-direction: column; gap: 14px; }
+  section { background: #fff; border: 1px solid var(--borda); border-radius: 10px; padding: 4px 16px 14px; }
+  h2 { font-size: 16px; margin: 12px 0 6px; }
+  p { margin: 6px 0; } .suave { color: var(--suave); font-size: 13px; }
+  label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: 13px; }
+  input[type=text], input[type=password], select { font: inherit; width: 100%; padding: 7px 9px; border: 1px solid var(--borda); border-radius: 6px; }
+  .linha { display: flex; gap: 8px; } .linha input { flex: 1; }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--borda); background: #fff; padding: 7px 12px; border-radius: 6px; white-space: nowrap; }
+  button.primario { background: var(--primaria); border-color: var(--primaria); color: #fff; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
+  ul { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+  li { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #f7f9fb; border-radius: 6px; padding: 6px 10px; }
+  code { font: 13px ui-monospace, Menlo, Consolas, monospace; }
+  .check { display: flex; gap: 8px; align-items: center; font-weight: normal; }
+  .msg { min-height: 1.4em; font-size: 13px; } .ok { color: #2e8b57; } .erro { color: #c0392b; }
+  .aviso { background: #fff6e5; color: #7a4d00; border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+  <header><img src="icones/lolla-32.png" alt=""><b>AR Lolla — Configurações</b></header>
+  <main>
+    <section>
+      <h2>1. Endereços do IXC</h2>
+      <p class="suave">A Lolla só roda nestes endereços. Em qualquer outro site ela não lê nada. Copie o endereço da barra do navegador com o IXC aberto (ex.: <code>https://teste.seuprovedor.com.br</code>).</p>
+      <div class="linha"><input type="text" id="novo-endereco" placeholder="https://endereco-do-ixc"><button class="primario" id="adicionar">Adicionar</button></div>
+      <p class="msg" id="msg-endereco"></p>
+      <ul id="enderecos"></ul>
+    </section>
+
+    <section>
+      <h2>2. API do Claude</h2>
+      <p class="aviso">A chave fica guardada só neste navegador. Use apenas com a base de teste, sem dados reais de clientes, até a liberação da empresa.</p>
+      <label for="chave">Chave da API</label>
+      <input type="password" id="chave" placeholder="sk-ant-..." autocomplete="off">
+      <label for="workspace">Workspace ID <span class="suave">(só se a chave não foi criada dentro de um workspace)</span></label>
+      <input type="text" id="workspace" placeholder="wrkspc_...">
+      <label for="modelo">Modelo</label>
+      <select id="modelo">
+        <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (recomendado)</option>
+        <option value="claude-haiku-5-5">Claude Haiku 5.5 (mais barato)</option>
+        <option value="claude-opus-5-5">Claude Opus 5.5 (mais caro)</option>
+      </select>
+      <label class="check"><input type="checkbox" id="simulada"> Usar IA simulada (regras locais, não gasta tokens)</label>
+      <p><button class="primario" id="salvar">Salvar</button> <button id="testar">Testar conexão</button></p>
+      <p class="msg" id="msg-api"></p>
+    </section>
+  </main>
+  <script src="opcoes.js"></script>
+</body>
+</html>

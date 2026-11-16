@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "AR Lolla — Conciliação com IA",
+  "short_name": "AR Lolla",
+  "version": "0.1.0",
+  "description": "Lê a Conciliação Manual do IXC Provedor, pareia em código e usa IA para explicar as divergências. Só roda nos endereços do IXC que você cadastrar.",
+  "icons": {
+    "16": "icones/lolla-16.png",
+    "32": "icones/lolla-32.png",
+    "48": "icones/lolla-48.png",
+    "128": "icones/lolla-128.png"
+  },
+  "action": {
+    "default_title": "AR Lolla",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icones/lolla-16.png",
+      "32": "icones/lolla-32.png"
+    }
+  },
+  "options_page": "opcoes.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://api.anthropic.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "file:///*"
+  ]
+}

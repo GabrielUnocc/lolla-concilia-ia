@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AR Lolla</title>
+<style>
+  body { margin: 0; width: 300px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1d2733; background: #f3f5f8; }
+  header { background: #12355f; color: #fff; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  header img { width: 24px; height: 24px; } header b { font-size: 15px; }
+  main { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .linha { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #d9dfe7; border-radius: 8px; padding: 10px; }
+  .chave { position: relative; width: 40px; height: 22px; }
+  .chave input { opacity: 0; width: 0; height: 0; }
+  .chave span { position: absolute; inset: 0; background: #c9d2dd; border-radius: 22px; transition: .2s; cursor: pointer; }
+  .chave span::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+  .chave input:checked + span { background: #2e8b57; } .chave input:checked + span::before { transform: translateX(18px); }
+  .chave input:focus-visible + span { outline: 2px solid #1f5fa8; outline-offset: 2px; }
+  .status { background: #fff; border: 1px solid #d9dfe7; border-radius: 8px; padding: 10px; }
+  .ok { color: #2e8b57; } .nok { color: #b4400f; } .suave { color: #5b6878; font-size: 12px; }
+  button { font: inherit; cursor: pointer; border: 1px solid #1f5fa8; background: #1f5fa8; color: #fff; padding: 7px 12px; border-radius: 6px; width: 100%; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  a { color: #1f5fa8; }
+</style>
+</head>
+<body>
+  <header><img src="icones/lolla-32.png" alt=""><b>AR Lolla</b></header>
+  <main>
+    <label class="linha" for="ativo"><span><b>Lolla ativa</b><br><span class="suave" id="ativo-txt">Painel aparece na Conciliação do IXC</span></span>
+      <span class="chave"><input type="checkbox" id="ativo"><span></span></span></label>
+    <div class="status" id="status">Verificando esta aba…</div>
+    <button id="abrir" disabled>Abrir o painel nesta aba</button>
+    <p class="suave">Endereços do IXC, chave da API e modelo: <a href="#" id="opcoes">Configurações</a></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
