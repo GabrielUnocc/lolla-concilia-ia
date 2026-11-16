@@ -48,7 +48,7 @@ Lolla.services.iaSimulada = (function () {
         tratadas.add(m.ref); tratadas.add(mesmo.ref);
         return;
       }
-      const manual = /manual/i.test(m.origem_baixa || '');
+      const manual = /manual/i.test((m.origem_baixa || '') + ' ' + (m.historico || ''));
       itens.push({ refs: [m.ref], categoria: manual ? 'recebimento manual' : 'retenção pelo banco',
         causa: manual ? 'Baixa manual no IXC sem crédito correspondente no extrato.' : 'Baixa no IXC sem crédito no período; banco pode ter retido ou creditado depois.',
         proximo_passo: manual ? 'Perguntar ao cliente se o valor foi recebido em dinheiro ou em outra conta; ajustar a conta da baixa.' : 'Consultar o extrato dos dias seguintes e a francesinha do banco.',
