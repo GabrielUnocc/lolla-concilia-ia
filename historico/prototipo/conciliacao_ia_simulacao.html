@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conciliação bancária com IA (simulação)</title>
+<style>
+:root{
+  --bg:#050607; --p1:#0a130d; --p2:#153019; --lime:#A6FF1A; --grn:#5FD34A; --pale:#F0FFE3;
+  --line:rgba(240,255,227,.14); --mut:rgba(240,255,227,.62); --amb:#FFB547;
+  --ok:rgba(95,211,74,.28); --warn:rgba(255,181,71,.26);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--pale);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{max-width:1440px;margin:0 auto;padding:14px}
+.sim{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;color:var(--mut)}
+.sim b{background:rgba(255,181,71,.16);color:var(--amb);font-weight:500;padding:2px 10px;border-radius:6px}
+.win{background:var(--p1);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.titlebar{background:var(--p2);text-align:center;padding:12px;font-weight:600;letter-spacing:.2px}
+.actions{display:flex;gap:8px;padding:12px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.btn{background:var(--p2);border:1px solid var(--line);border-radius:6px;padding:7px 14px;cursor:pointer;transition:filter .15s}
+.btn:hover{filter:brightness(1.25)}
+.btn.primary{background:var(--lime);color:var(--bg);border-color:var(--lime);font-weight:600}
+.btn.primary:hover{filter:brightness(.92)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn[hidden]{display:none}
+.tabs{display:flex;padding:0 12px;background:var(--p1)}
+.tab{flex:1;text-align:center;padding:11px 18px;margin-left:-8px;cursor:pointer;background:var(--p2);color:var(--mut);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%);border:0;font-weight:500}
+.tab:first-child{margin-left:0;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%)}
+.tab.on{background:var(--pale);color:var(--bg);font-weight:600}
+.tab em{font-style:normal;background:var(--lime);color:var(--bg);border-radius:10px;padding:0 7px;font-size:11px;margin-left:6px}
+.body{padding:12px}
+.legend{display:flex;justify-content:center;gap:18px;font-size:12px;margin-bottom:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.hint{text-align:center;color:var(--mut);font-size:12px;margin:-4px 0 10px}
+.grids{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:980px){.grids{grid-template-columns:1fr}}
+.grid{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
+.gtitle{background:var(--p2);padding:8px 12px;font-weight:600}
+.gfilter{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.gfilter select,.gfilter input{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+.gfilter input{flex:1}
+.gfilter select{width:112px}
+.gfilter input:focus,.gfilter select:focus,.chat input:focus{outline:2px solid var(--lime);outline-offset:-1px}
+.scroll{max-height:300px;min-height:150px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{position:sticky;top:0;background:var(--p2);text-align:left;padding:7px 8px;font-weight:600;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid var(--line)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(240,255,227,.06)}
+tbody tr.ok{background:var(--ok)}
+tbody tr.warn{background:var(--warn)}
+.r{text-align:right}.c{text-align:center}
+.x{color:var(--amb)}
+input[type=checkbox]{accent-color:var(--lime);width:15px;height:15px;cursor:pointer}
+.chip{display:inline-block;font-size:11px;background:rgba(166,255,26,.14);color:var(--lime);border-radius:5px;padding:1px 7px;margin-left:6px}
+.empty{padding:28px;text-align:center;color:var(--mut)}
+.foot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:980px){.foot{grid-template-columns:1fr}}
+.foot label{display:block;font-size:12px;color:var(--mut);margin:0 0 3px}
+.foot input{width:100%;background:var(--p2);border:1px solid var(--line);border-radius:6px;padding:7px 10px;margin-bottom:8px;text-align:right;font-weight:500}
+.foot .mid input.diffok{color:var(--lime);border-color:var(--lime)}
+.foot .mid input.diffno{color:var(--amb);border-color:var(--amb)}
+.ai{margin-top:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.aihead{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--p2);padding:9px 12px;flex-wrap:wrap}
+.aihead b{display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px rgba(166,255,26,.2)}
+.aibody{padding:12px}
+.sum{background:var(--p2);border-left:3px solid var(--lime);padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;font-size:13px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:980px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--p1)}
+.card.done{opacity:.5}
+.card h4{margin:6px 0 4px;font-size:14px;font-weight:600}
+.card p{margin:0 0 10px;color:var(--mut);font-size:13px}
+.tag{font-size:11px;border-radius:5px;padding:2px 8px;font-weight:600}
+.tag.ok{background:rgba(95,211,74,.2);color:var(--grn)}
+.tag.warn{background:rgba(255,181,71,.18);color:var(--amb)}
+.tag.info{background:rgba(240,255,227,.12);color:var(--pale)}
+.loading{color:var(--mut);padding:6px 0}
+.chat{display:flex;gap:8px;margin-top:12px}
+.chat input{flex:1;background:var(--p1);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.msgs{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.msg{font-size:13px;padding:7px 11px;border-radius:8px;max-width:88%}
+.msg.u{align-self:flex-end;background:var(--p2)}
+.msg.a{align-self:flex-start;background:rgba(166,255,26,.1);border:1px solid rgba(166,255,26,.25)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:760px;margin:10px auto}
+.form label{display:block;font-size:12px;color:var(--mut);margin-bottom:3px}
+.form input,.form select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--lime);color:var(--bg);padding:9px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sim"><span>Conta Sicoob 0001 · 01/11/2026 a 03/11/2026</span><b>Simulação com dados fictícios</b></div>
+  <div class="win">
+    <div class="titlebar">Conciliação bancária</div>
+    <div class="actions">
+      <button class="btn" data-toast="Simulação: navegação entre etapas">← Anterior</button>
+      <button class="btn" data-toast="Simulação: navegação entre etapas">Próximo →</button>
+      <button class="btn" data-toast="Simulação: o extrato já está carregado">Lançar extrato</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="body">
+      <div id="view-manual">
+        <div class="legend"><span><i style="background:var(--grn)"></i>Valores de acordo</span><span><i style="background:var(--amb)"></i>Valores em desacordo</span></div>
+        <div class="hint" id="hint">Selecione títulos dos dois lados até a cor ficar verde. O botão Conciliar aparece quando os valores baterem.</div>
+        <div style="display:flex;justify-content:center;margin-bottom:10px"><button class="btn primary" id="btn-conc" hidden>Conciliar</button></div>
+        <div class="grids">
+          <div class="grid">
+            <div class="gtitle">Movimentação Financeira (IXC Provedor)</div>
+            <div class="gfilter"><select id="f-ixc"></select><input id="q-ixc" placeholder="Buscar nesta grade"></div>
+            <div class="scroll"><table><thead id="th-ixc"></thead><tbody id="tb-ixc"></tbody></table></div>
+          </div>
+          <div class="grid">
+            <div class="gtitle">Extrato Bancário (OFX)</div>
+            <div class="gfilter"><select id="f-bank"></select><input id="q-bank" placeholder="Buscar nesta grade"></div>
+            <div class="scroll"><table><thead id="th-bank"></thead><tbody id="tb-bank"></tbody></table></div>
+          </div>
+        </div>
+        <div class="foot">
+          <div><label>Total selecionado</label><input readonly id="t-sel-ixc"><label>Total a conciliar</label><input readonly id="t-conc-ixc"></div>
+          <div class="mid"><label>Diferença</label><input readonly id="t-diff"><label>Diferença da seleção</label><input readonly id="t-seldiff"></div>
+          <div><label>Total selecionado</label><input readonly id="t-sel-bank"><label>Total a conciliar</label><input readonly id="t-conc-bank"></div>
+        </div>
+
+        <div class="ai">
+          <div class="aihead"><b><span class="dot"></span>Análise da IA</b><button class="btn primary sm" id="btn-ai">Analisar divergências</button></div>
+          <div class="aibody" id="aibody"><div class="loading">A IA lê os dois lados, compara com as regras e o contexto que você der, e sugere onde olhar. Nada é conciliado sem você aprovar.</div></div>
+        </div>
+      </div>
+      <div id="view-other" hidden></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const IXC=[
+ {id:131350,data:'01/11/2026',doc:'7177800',tx:'',ent:150,sai:0,hist:'Rec. cliente XXX doc.: 7177800',conc:true},
+ {id:131355,data:'01/11/2026',doc:'7177812',tx:'',ent:89.9,sai:0,hist:'Rec. cliente XXX doc.: 7177812',conc:true},
+ {id:131360,data:'01/11/2026',doc:'7177830',tx:'',ent:200,sai:0,hist:'Rec. cliente XXX doc.: 7177830',conc:true},
+ {id:131364,data:'01/11/2026',doc:'7177845',tx:'',ent:75.5,sai:0,hist:'Rec. cliente XXX doc.: 7177845',conc:true},
+ {id:131370,data:'02/11/2026',doc:'7178100',tx:'',ent:100,sai:0,hist:'Rec. cliente XXX doc.: 7178100',conc:false},
+ {id:131371,data:'02/11/2026',doc:'7178101',tx:'',ent:120,sai:0,hist:'Rec. cliente XXX doc.: 7178101',conc:false},
+ {id:131372,data:'02/11/2026',doc:'7178102',tx:'',ent:80,sai:0,hist:'Rec. cliente XXX doc.: 7178102',conc:false},
+ {id:131377,data:'02/11/2026',doc:'7178351',tx:'',ent:60,sai:0,hist:'Rec. cliente XXX doc.: 7178351',conc:false},
+ {id:131380,data:'02/11/2026',doc:'7178400',tx:'',ent:99,sai:0,hist:'Rec. cliente XXX doc.: 7178400',conc:true},
+ {id:131402,data:'03/11/2026',doc:'7179002',tx:'',ent:120,sai:0,hist:'Rec. cliente XXX doc.: 7179002',conc:false},
+ {id:131409,data:'03/11/2026',doc:'7179002',tx:'',ent:120,sai:0,hist:'Rec. cliente XXX doc.: 7179002',conc:false},
+ {id:131415,data:'03/11/2026',doc:'7179050',tx:'',ent:45,sai:0,hist:'Rec. cliente XXX doc.: 7179050',conc:true},
+ {id:131420,data:'03/11/2026',doc:'TAR-1103',tx:'',ent:0,sai:2.9,hist:'Tarifa bancária de cobrança',conc:true}
+];
+const BANK=[
+ {id:901,data:'01/11/2026',doc:'7177800',tx:'E001',ent:150,sai:0,hist:'PIX RECEBIDO COBRANCA 7177800',conc:true},
+ {id:902,data:'01/11/2026',doc:'7177812',tx:'E002',ent:89.9,sai:0,hist:'PIX RECEBIDO COBRANCA 7177812',conc:true},
+ {id:903,data:'01/11/2026',doc:'7177830',tx:'E003',ent:200,sai:0,hist:'PIX RECEBIDO COBRANCA 7177830',conc:true},
+ {id:904,data:'01/11/2026',doc:'7177845',tx:'E004',ent:75.5,sai:0,hist:'PIX RECEBIDO COBRANCA 7177845',conc:true},
+ {id:905,data:'02/11/2026',doc:'',tx:'L0001',ent:300,sai:0,hist:'LIQUIDACAO COBRANCA LOTE 02/11',conc:false},
+ {id:906,data:'02/11/2026',doc:'7178400',tx:'E007',ent:99,sai:0,hist:'PIX RECEBIDO COBRANCA 7178400',conc:true},
+ {id:907,data:'03/11/2026',doc:'7179002',tx:'E009',ent:120,sai:0,hist:'PIX RECEBIDO COBRANCA 7179002',conc:false},
+ {id:908,data:'03/11/2026',doc:'7179140',tx:'E0012345',ent:85,sai:0,hist:'PIX RECEBIDO BOLETO 7179140',conc:false},
+ {id:909,data:'03/11/2026',doc:'7179050',tx:'E011',ent:45,sai:0,hist:'PIX RECEBIDO COBRANCA 7179050',conc:true},
+ {id:910,data:'03/11/2026',doc:'TAR-1103',tx:'T001',ent:0,sai:2.9,hist:'TARIFA COBRANCA',conc:true}
+];
+const AUTO=[[131350,901],[131355,902],[131360,903],[131364,904],[131380,906],[131415,909],[131420,910]];
+const DATA={ixc:IXC,bank:BANK};
+const CARDS=[
+ {k:'lote',tag:'Lote',tone:'ok',title:'Crédito em lote bate com 3 recebimentos',
+  txt:'O crédito de 300,00 (liquidação de cobrança em lote, 02/11) é a soma dos recebimentos 7178100, 7178101 e 7178102 (100,00 + 120,00 + 80,00).',
+  ixc:[131370,131371,131372],bank:[905],flags:{}},
+ {k:'dup',tag:'Duplicado',tone:'warn',title:'Boleto 7179002 recebido duas vezes no IXC',
+  txt:'Há dois recebimentos de 120,00 (IDs 131402 e 131409) e só um crédito de 120,00 no banco. Concilie o 131402 e revise a baixa do 131409.',
+  ixc:[131402],bank:[907],flags:{ixc:{131409:'IA: possível duplicado'}}},
+ {k:'banco',tag:'Só no banco',tone:'info',title:'Crédito de 85,00 sem título no IXC',
+  txt:'O histórico cita o boleto 7179140, que deve estar em aberto no IXC com o mesmo valor. Sugestão: dar baixa manual nesse boleto.',
+  ixc:[],bank:[908],flags:{bank:{908:'IA: só no banco'}}},
+ {k:'ixc',tag:'Só no IXC',tone:'info',title:'Recebimento de 60,00 sem crédito no extrato',
+  txt:'Confira se o OFX de 02/11 foi importado completo, ou se a baixa foi manual sem entrada no banco.',
+  ixc:[131377],bank:[],flags:{ixc:{131377:'IA: só no IXC'}}}
+];
+const S={tab:'manual',sel:{ixc:new Set(),bank:new Set()},flags:{ixc:{},bank:{}},manual:[],
+  filt:{ixc:{f:'*',q:''},bank:{f:'*',q:''}},analyzed:false,loading:false,msgs:[]};
+
+const net=r=>r.ent-r.sai;
+const cents=n=>Math.round(n*100);
+const money=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const $=id=>document.getElementById(id);
+const FIELDS=[['*','Todos'],['id','ID'],['data','Data'],['documento','Documento'],['credito','Entrada'],['debito','Saída'],['historico','Histórico']];
+
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+document.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)));
+
+function rowMatch(r,f,q){
+  q=q.trim().toLowerCase(); if(!q) return true;
+  const v={id:String(r.id),data:r.data,documento:r.doc,credito:money(r.ent),debito:money(r.sai),historico:r.hist};
+  if(f==='*') return Object.values(v).some(x=>x.toLowerCase().includes(q));
+  return v[f].toLowerCase().includes(q);
+}
+function pending(side){return DATA[side].filter(r=>!r.conc)}
+function selSum(side){return DATA[side].filter(r=>S.sel[side].has(r.id)).reduce((a,r)=>a+net(r),0)}
+function selState(){
+  const a=S.sel.ixc.size,b=S.sel.bank.size;
+  const l=selSum('ixc'),r=selSum('bank');
+  return {a,b,l,r,ok:a>0&&b>0&&cents(l)===cents(r)};
+}
+
+function headHTML(){
+  return '<tr><th></th><th>ID</th><th class="c">Conc.</th><th>Data</th><th>Documento</th><th>ID da transação</th><th class="r">Entrada</th><th class="r">Saída</th><th>Histórico</th></tr>';
+}
+function bodyHTML(side){
+  const f=S.filt[side];
+  const rows=pending(side).filter(r=>rowMatch(r,f.f,f.q));
+  if(!rows.length) return '<tr><td colspan="9" class="empty">Nenhum registro para conciliar neste lado.</td></tr>';
+  const st=selState();
+  return rows.map(r=>{
+    const on=S.sel[side].has(r.id);
+    const cls=on?(st.ok?'ok':'warn'):'';
+    const flag=S.flags[side][r.id]?'<span class="chip">'+S.flags[side][r.id]+'</span>':'';
+    return '<tr class="'+cls+'" data-side="'+side+'" data-id="'+r.id+'">'+
+      '<td><input type="checkbox" '+(on?'checked':'')+' aria-label="Selecionar '+r.id+'"></td>'+
+      '<td>'+r.id+'</td><td class="c x">✗</td><td>'+r.data+'</td><td>'+r.doc+'</td><td>'+r.tx+'</td>'+
+      '<td class="r">'+money(r.ent)+'</td><td class="r">'+money(r.sai)+'</td><td>'+r.hist+flag+'</td></tr>';
+  }).join('');
+}
+
+function renderManual(){
+  $('tb-ixc').innerHTML=bodyHTML('ixc');
+  $('tb-bank').innerHTML=bodyHTML('bank');
+  const st=selState();
+  const aL=pending('ixc').reduce((a,r)=>a+net(r),0);
+  const aR=pending('bank').reduce((a,r)=>a+net(r),0);
+  $('t-sel-ixc').value=st.a?money(st.l):'';
+  $('t-sel-bank').value=st.b?money(st.r):'';
+  $('t-conc-ixc').value=money(aL);
+  $('t-conc-bank').value=money(aR);
+  const d=aL-aR,dEl=$('t-diff');
+  dEl.value=money(d);
+  dEl.className=cents(d)===0?'diffok':'diffno';
+  const sd=$('t-seldiff');
+  if(st.a||st.b){sd.value=money(st.l-st.r);sd.className=st.ok?'diffok':'diffno'}else{sd.value='';sd.className=''}
+  $('btn-conc').hidden=!st.ok;
+  $('hint').textContent=st.ok?'Valores de acordo. Clique em Conciliar para vincular as linhas selecionadas.':
+    (st.a||st.b)?'Valores em desacordo. Ajuste a seleção até os dois lados terem o mesmo total.':
+    'Selecione títulos dos dois lados até a cor ficar verde. O botão Conciliar aparece quando os valores baterem.';
+  renderTabs();
+  renderAI();
+}
+
+function renderTabs(){
+  const n=pending('ixc').length+pending('bank').length;
+  const T=[['filtros','Filtros'],['auto','Conciliação Automática'],['manual','Conciliação Manual'],['todos','Todos os conciliados']];
+  $('tabs').innerHTML=T.map(t=>'<button class="tab'+(S.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+(t[0]==='manual'&&n?'<em>'+n+'</em>':'')+'</button>').join('');
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{S.tab=b.dataset.tab;showTab()}));
+}
+function byId(side,id){return DATA[side].find(r=>r.id===id)}
+function pairRows(){
+  const out=AUTO.map(p=>{const a=byId('ixc',p[0]),b=byId('bank',p[1]);return {o:'Automática',ids:String(a.id),doc:a.doc,data:a.data,val:net(a),ext:String(b.id),tx:b.tx}});
+  S.manual.forEach(m=>out.push({o:'Manual',ids:m.ixc.join(', '),doc:m.ixc.map(i=>byId('ixc',i).doc).join(', '),data:byId('ixc',m.ixc[0]).data,val:m.val,ext:m.bank.join(', '),tx:m.bank.map(i=>byId('bank',i).tx).join(', ')}));
+  return out;
+}
+function otherHTML(){
+  if(S.tab==='filtros') return '<div class="form">'+
+    '<div><label>Conta bancária</label><select><option>Sicoob 0001 (fictícia)</option></select></div>'+
+    '<div><label>Data inicial</label><input value="01/11/2026"></div>'+
+    '<div><label>Data final</label><input value="03/11/2026"></div>'+
+    '<div><label>Tipo</label><select><option>Entradas e saídas</option></select></div>'+
+    '<div style="align-self:end"><button class="btn primary" data-toast="Simulação: os dados são fixos">Filtrar</button></div></div>';
+  const rows=pairRows().filter(r=>S.tab==='todos'||r.o==='Automática');
+  const th=S.tab==='todos'?'<th>Origem</th>':'';
+  return '<div class="grid"><div class="gtitle">'+(S.tab==='todos'?'Todos os conciliados':'Conciliados automaticamente')+' ('+rows.length+')</div><div class="scroll"><table><thead><tr>'+th+
+    '<th>ID IXC</th><th>Documento</th><th>Data</th><th class="r">Valor</th><th>ID extrato</th><th>ID transação</th></tr></thead><tbody>'+
+    rows.map(r=>'<tr style="cursor:default">'+(S.tab==='todos'?'<td>'+r.o+'</td>':'')+'<td>'+r.ids+'</td><td>'+r.doc+'</td><td>'+r.data+'</td><td class="r">'+money(r.val)+'</td><td>'+r.ext+'</td><td>'+r.tx+'</td></tr>').join('')+
+    '</tbody></table></div></div>';
+}
+function showTab(){
+  const man=S.tab==='manual';
+  $('view-manual').hidden=!man;
+  $('view-other').hidden=man;
+  if(!man){$('view-other').innerHTML=otherHTML();$('view-other').querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>toast(b.dataset.toast)))}
+  renderTabs();
+}
+
+function cardDone(c){
+  if(c.k!=='lote'&&c.k!=='dup') return false;
+  return c.ixc.every(i=>byId('ixc',i).conc)&&c.bank.every(i=>byId('bank',i).conc);
+}
+function renderAI(){
+  const el=$('aibody');
+  let h='';
+  if(S.loading) h='<div class="loading">Analisando 6 lançamentos do IXC e 3 do extrato…</div>';
+  else if(S.analyzed){
+    h='<div class="sum">Diferença de 95,00 explicada: +60,00 só no IXC, +120,00 duplicado, -85,00 só no banco. O lote de 300,00 fecha em zero.</div><div class="cards">'+
+      CARDS.map(c=>'<div class="card'+(cardDone(c)?' done':'')+'"><span class="tag '+c.tone+'">'+c.tag+'</span><h4>'+c.title+'</h4><p>'+c.txt+'</p>'+
+        (cardDone(c)?'<span class="tag ok">Conciliado</span>':'<button class="btn sm" data-card="'+c.k+'">Selecionar linhas</button>')+'</div>').join('')+'</div>';
+  } else h='<div class="loading">A IA lê os dois lados, compara com as regras e o contexto que você der, e sugere onde olhar. Nada é conciliado sem você aprovar.</div>';
+  if(S.analyzed&&!S.loading){
+    h+='<div class="msgs">'+S.msgs.map(m=>'<div class="msg '+m.w+'">'+m.t+'</div>').join('')+'</div>'+
+      '<div class="chat"><input id="chat-in" placeholder="Dê contexto ou pergunte. Ex.: o banco manda a tarifa junto com o crédito?"><button class="btn primary" id="chat-send">Enviar</button></div>';
+  }
+  const keep=document.activeElement&&document.activeElement.id==='chat-in'?$('chat-in').value:null;
+  el.innerHTML=h;
+  if(keep!==null){const i=$('chat-in');i.value=keep;i.focus()}
+  el.querySelectorAll('[data-card]').forEach(b=>b.addEventListener('click',()=>{
+    const c=CARDS.find(x=>x.k===b.dataset.card);
+    S.sel.ixc=new Set(c.ixc);S.sel.bank=new Set(c.bank);
+    renderManual();
+    const cnt=c.ixc.length+c.bank.length;
+    toast(cnt+' linha(s) selecionada(s) nas grades');
+    $('tb-ixc').scrollIntoView({behavior:'smooth',block:'center'});
+  }));
+  const send=$('chat-send');
+  if(send){
+    const go=()=>{
+      const i=$('chat-in'),t=i.value.trim();
+      if(!t){i.focus();return}
+      S.msgs.push({w:'u',t:t.replace(/</g,'&lt;')});
+      renderAI();
+      setTimeout(()=>{S.msgs.push({w:'a',t:'Anotado (simulação). Na versão real, eu usaria esse contexto para refazer a análise e ajustar as sugestões acima.'});renderAI()},700);
+    };
+    send.addEventListener('click',go);
+    $('chat-in').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+  }
+}
+
+$('btn-ai').addEventListener('click',()=>{
+  S.loading=true;S.analyzed=false;renderAI();
+  setTimeout(()=>{
+    S.loading=false;S.analyzed=true;
+    CARDS.forEach(c=>{['ixc','bank'].forEach(s=>{if(c.flags[s])Object.assign(S.flags[s],c.flags[s])})});
+    renderManual();
+  },1000);
+});
+$('btn-conc').addEventListener('click',()=>{
+  const st=selState();if(!st.ok)return;
+  S.manual.push({ixc:[...S.sel.ixc],bank:[...S.sel.bank],val:st.l});
+  S.sel.ixc.forEach(i=>byId('ixc',i).conc=true);
+  S.sel.bank.forEach(i=>byId('bank',i).conc=true);
+  S.sel.ixc=new Set();S.sel.bank=new Set();
+  renderManual();
+  toast('Conciliado: '+money(st.l)+' (veja em Todos os conciliados)');
+});
+['ixc','bank'].forEach(side=>{
+  $('f-'+side).innerHTML=FIELDS.map(f=>'<option value="'+f[0]+'">'+f[1]+'</option>').join('');
+  $('th-'+side).innerHTML=headHTML();
+  $('f-'+side).addEventListener('change',e=>{S.filt[side].f=e.target.value;renderManual()});
+  $('q-'+side).addEventListener('input',e=>{S.filt[side].q=e.target.value;$('tb-'+side).innerHTML=bodyHTML(side)});
+  $('tb-'+side).addEventListener('click',e=>{
+    const tr=e.target.closest('tr[data-id]');if(!tr)return;
+    const id=Number(tr.dataset.id),set=S.sel[side];
+    set.has(id)?set.delete(id):set.add(id);
+    renderManual();
+  });
+});
+renderManual();
+</script>
+</body>
+</html>
