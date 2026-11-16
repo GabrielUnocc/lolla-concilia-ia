@@ -25,7 +25,7 @@ Lolla.services.ixcSimulado = (function () {
   async function carregar() {
     if (db) return db;
     db = await seguro.ler(CHAVE);
-    if (!db) { db = Lolla.services.baseSimulada.gerar(); await salvar(); }
+    if (!db) { db = Object.assign(Lolla.services.cenarios.padrao.gerar(), { cenario: 'padrao' }); await salvar(); }
     return db;
   }
   const salvar = () => seguro.gravar(CHAVE, db);
@@ -128,9 +128,18 @@ Lolla.services.ixcSimulado = (function () {
       return { ok: true };
     },
 
-    async restaurarBase() {
-      db = Lolla.services.baseSimulada.gerar();
+    async restaurarBase(cenarioId) {
+      await carregar();
+      const id = cenarioId || db.cenario || 'padrao';
+      const cen = Lolla.services.cenarios[id];
+      if (!cen) throw new ErroIxc(404, 'Cenário não encontrado: ' + id);
+      db = Object.assign(cen.gerar(), { cenario: id });
       await salvar();
+    },
+
+    async cenarioAtual() {
+      await carregar();
+      return db.cenario || 'padrao';
     },
 
     ErroIxc
@@ -171,6 +180,7 @@ Lolla.services.ixc = (function () {
     desconciliar: (a) => cliente().desconciliar(a),
     lancarRecebimento: (a) => cliente().lancarRecebimento(a),
     estornarBaixa: (a) => cliente().estornarBaixa(a),
-    restaurarBase: () => cliente().restaurarBase()
+    restaurarBase: (id) => cliente().restaurarBase(id),
+    cenarioAtual: () => cliente().cenarioAtual ? cliente().cenarioAtual() : Promise.resolve(null)
   };
 })();

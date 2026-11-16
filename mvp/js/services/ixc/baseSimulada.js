@@ -110,5 +110,15 @@ Lolla.services.baseSimulada = (function () {
     return { versao: 1, contas: CONTAS, movimentacao: mov, extrato: ext, proximoId: { mov: idMov, ext: idExt } };
   }
 
-  return { gerar, DIAS, fmt };
+  return { gerar, DIAS, rng, NOMES, fmt };
 })();
+
+/* Registro de cenários de teste. Outros arquivos (ex.: cenarioTeste2.js) se adicionam aqui. */
+Lolla.services.cenarios = {
+  padrao: {
+    nome: 'Cenário 1 — Sicoob e Bradesco (03 a 13/11)',
+    descricao: 'Lote, rendimento não lançado, baixa duplicada, tarifa, recebimento manual, PIX sem baixa, data de crédito e estorno.',
+    periodo: { dataIni: '2026-11-03', dataFim: '2026-11-06' },
+    gerar: () => Lolla.services.baseSimulada.gerar()
+  }
+};
