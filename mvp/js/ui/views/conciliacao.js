@@ -118,9 +118,10 @@ Lolla.ui.views.conciliacao = (function () {
     const contas = s.contas.map((ct) => `<option value="${ct.id}" ${String(ct.id) === String(s.filtros.contaId) ? 'selected' : ''}>${esc(ct.descricao)}</option>`).join('');
     const filtros = `<form class="filtros" id="box_search_tab_3" data-form="filtros">
       <label>Conta<select id="f-conta" name="contaId">${contas}</select></label>
-      <label>De<input id="f-ini" type="date" name="dataIni" value="${esc(s.filtros.dataIni)}" min="2026-11-01" max="2026-11-30"></label>
-      <label>Até<input id="f-fim" type="date" name="dataFim" value="${esc(s.filtros.dataFim)}" min="2026-11-01" max="2026-11-30"></label>
+      <label>De<input id="f-ini" type="date" name="dataIni" value="${esc(s.filtros.dataIni)}"></label>
+      <label>Até<input id="f-fim" type="date" name="dataFim" value="${esc(s.filtros.dataFim)}"></label>
       <button class="primario" ${s.carregando ? 'disabled' : ''}>Buscar</button>
+      <button type="button" data-acao="importar-ofx" ${s.carregando ? 'disabled' : ''}>Importar OFX</button>
     </form>`;
     let corpo;
     if (s.erro) corpo = `<div class="alerta erro">${esc(s.erro.texto)} <button data-acao="repetir">Tentar novamente</button></div>`;
