@@ -22,6 +22,15 @@ Lolla.services.iaSimulada = (function () {
       d.refs.forEach((r) => tratadas.add(r));
     });
 
+    (payload.linhas_repetidas_no_ofx || []).forEach((d) => {
+      const sobra = (d.pendentes || []).find((r) => payload.so_no_banco.some((e) => e.ref === r));
+      if (!sobra) return;
+      itens.push({ refs: [sobra], categoria: 'ofx duplicado', causa: `O documento ${d.documento} aparece ${d.refs.length} vezes no extrato importado; o IXC tem uma baixa só.`,
+        proximo_passo: 'Conferir o extrato no internet banking; se o crédito foi um só, excluir a linha repetida do OFX importado e reimportar.',
+        acao_sugerida: 'nenhuma', certeza: 'alta' });
+      tratadas.add(sobra);
+    });
+
     payload.so_no_ixc.forEach((m) => {
       if (tratadas.has(m.ref)) return;
       const mesmo = payload.so_no_banco.find((e) => !tratadas.has(e.ref) && e.valor === m.valor && dia(e.data) - dia(m.data) > 1);
@@ -43,9 +52,10 @@ Lolla.services.iaSimulada = (function () {
     const porClasse = {
       tarifa: ['tarifa', 'Tarifa bancária no extrato sem lançamento no IXC.', 'Lançar a tarifa como despesa no IXC na conta conciliada.', 'lancar_no_ixc', 'alta'],
       estorno: ['estorno', 'Estorno/devolução no banco sem lançamento no IXC.', 'Identificar o recebimento devolvido e lançar o estorno no IXC.', 'lancar_no_ixc', 'media'],
+      'retenção': ['retenção pelo banco', 'Débito de bloqueio/retenção no banco (ex.: judicial) sem lançamento no IXC.', 'Confirmar com o cliente o bloqueio e lançar o débito no IXC na conta correta.', 'verificar_com_cliente', 'alta'],
       'entrada diversa': ['entrada diversa não lançada', 'Entrada que não é recebimento de cliente (ex.: rendimento) sem lançamento no IXC.', 'Lançar como entrada diversa (receita) no IXC.', 'lancar_no_ixc', 'alta'],
       recebimento: ['crédito sem baixa', 'Crédito de cliente no banco sem baixa no IXC (retorno ou webhook não processado).', 'Localizar o título pelo valor/data e dar baixa; verificar processamento do retorno/webhook.', 'lancar_no_ixc', 'media'],
-      saida: ['outra', 'Saída no banco sem lançamento no IXC.', 'Lançar o pagamento no contas a pagar.', 'lancar_no_ixc', 'media']
+      saida: ['saída sem lançamento', 'Saída no banco (débito, convênio, pagamento) sem lançamento no IXC.', 'Lançar o pagamento no contas a pagar.', 'lancar_no_ixc', 'media']
     };
     payload.so_no_banco.forEach((e) => {
       if (tratadas.has(e.ref)) return;
