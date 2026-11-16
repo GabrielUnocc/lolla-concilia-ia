@@ -15,6 +15,7 @@ Lolla.domain.pareamento = (function () {
     const h = String(l.historico || '').normalize('NFD').replace(/[^A-Za-z0-9 ]/g, '').toUpperCase();
     if (/TARIFA/.test(h)) return 'tarifa';
     if (/ESTORNO|DEVOLUC/.test(h)) return 'estorno';
+    if (/BLOQ|RETENC|JUDICIAL/.test(h)) return 'retenção';
     if (l.valor < 0) return 'saida';
     if (/RENDIMENTO|APLIC|TED RECEB|JUROS/.test(h)) return 'entrada diversa';
     if (/LIQUIDA|COBRAN|BOLETO|PIX|LOTE/.test(h)) return 'recebimento';
@@ -65,12 +66,19 @@ Lolla.domain.pareamento = (function () {
     });
 
     // 4) duplicados (olha a lista inteira, inclusive o que já foi pareado)
-    // (inclui já conciliados; só reporta se ainda houver baixa pendente do documento)
-    const porDoc = {};
-    movimentacao.filter((i) => i.valor > 0).forEach((i) => { if (i.documento) (porDoc[i.documento] = porDoc[i.documento] || []).push(i); });
-    const duplicados = Object.entries(porDoc)
-      .filter(([, ls]) => ls.length > 1 && ls.some((l) => !l.conciliado))
-      .map(([documento, ls]) => ({ documento, ids: ls.map((l) => l.id), pendentes: ls.filter((l) => !l.conciliado).map((l) => l.id) }));
+    // (mesmo documento ou mesmo tx_id; inclui já conciliados; só reporta se ainda houver linha pendente)
+    function repetidos(linhas) {
+      const porChave = {};
+      linhas.filter((i) => i.valor > 0).forEach((i) => {
+        const chave = i.documento || i.tx_id;
+        if (chave) (porChave[chave] = porChave[chave] || []).push(i);
+      });
+      return Object.entries(porChave)
+        .filter(([, ls]) => ls.length > 1 && ls.some((l) => !l.conciliado))
+        .map(([documento, ls]) => ({ documento, ids: ls.map((l) => l.id), pendentes: ls.filter((l) => !l.conciliado).map((l) => l.id) }));
+    }
+    const duplicados = repetidos(movimentacao);
+    const duplicadosOfx = repetidos(extrato); // mesma linha 2x no OFX importado
 
     // Mapa de status por linha, para a interface
     const status = {};
@@ -79,12 +87,14 @@ Lolla.domain.pareamento = (function () {
       p.extrato.forEach((id) => { status['E:' + id] = p.tipo; });
     });
     duplicados.forEach((d) => d.pendentes.forEach((id) => { status['M:' + id] = 'duplicado'; }));
+    duplicadosOfx.forEach((d) => d.pendentes.forEach((id) => { if (!status['E:' + id]) status['E:' + id] = 'duplicado'; }));
 
     return {
       pares,
       soNoIxc: ixc.filter((_, k) => !usadoI.has(k)),
       soNoBanco: ban.filter((_, k) => !usadoE.has(k)).map((l) => Object.assign({}, l, { classificacao: classificarExtrato(l) })),
       duplicados,
+      duplicadosOfx,
       status
     };
   }

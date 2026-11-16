@@ -57,7 +57,8 @@ Lolla.domain.mascaramento = (function () {
       pares_ambiguos: pareamento.pares.filter((p) => p.ambiguo).map((p) => ({ ixc: p.ixc.map((i) => 'M:' + i), banco: p.extrato.map((i) => 'E:' + i) })),
       so_no_ixc: pareamento.soNoIxc.map((l) => linha(l, 'M:')),
       so_no_banco: pareamento.soNoBanco.map((l) => linha(l, 'E:')),
-      possiveis_duplicados: pareamento.duplicados.map((d) => ({ documento: d.documento, refs: d.ids.map((i) => 'M:' + i), pendentes: d.pendentes.map((i) => 'M:' + i) }))
+      possiveis_duplicados: pareamento.duplicados.map((d) => ({ documento: d.documento, refs: d.ids.map((i) => 'M:' + i), pendentes: d.pendentes.map((i) => 'M:' + i) })),
+      linhas_repetidas_no_ofx: (pareamento.duplicadosOfx || []).map((d) => ({ documento: d.documento, refs: d.ids.map((i) => 'E:' + i), pendentes: d.pendentes.map((i) => 'E:' + i) }))
     };
   }
 
