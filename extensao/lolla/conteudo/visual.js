@@ -35,14 +35,13 @@ Lolla.visual = (function () {
   ${R} ${CAIXA} .hDiv, ${R} ${CAIXA} .hDiv th { background-color: rgba(247,249,251,.72); }
   ${R} ${CAIXA} .hDiv th { color: #46566a; }
   ${R} ${GRADE} tbody tr > td { border-color: rgba(18,53,95,.06); }
-  ${R} ${GRADE} tbody tr:hover > td { background-color: rgba(47,111,209,.06); }
+  /* hover só em linha NÃO selecionada: o laranja/verde nativo do IXC na seleção nunca é coberto */
+  ${R} ${GRADE} tbody tr:not(:has(input[type="checkbox"]:checked)):not(.trSelected):hover > td { background-color: rgba(47,111,209,.06); }
   ${R} ${GRADE} td[abbr$=".conciliado"] .fa-times { color: #d0473a; }
   ${R} ${GRADE} td[abbr$=".conciliado"] .fa-check, ${R} ${GRADE} td[abbr$=".conciliado"] .fa-circle-check { color: #2e8b57; }
   ${R} ${GRADE} td[abbr$=".credito"], ${R} ${GRADE} td[abbr$=".debito"] { font-variant-numeric: tabular-nums; }
 
-  /* Seleção como no protótipo: verde quando os totais selecionados batem, laranja quando não */
-  ${R}[data-lolla-sel="ok"] ${GRADE} tbody tr:has(input[type="checkbox"]:checked) > td { background-color: rgba(46,139,87,.30); }
-  ${R}[data-lolla-sel="nok"] ${GRADE} tbody tr:has(input[type="checkbox"]:checked) > td { background-color: rgba(224,123,36,.30); }
+  /* A cor da seleção (verde quando bate, laranja quando não) é a do próprio IXC: a Lolla não sobrepõe. */
 
   ${R} [id^="box_search_tab_"] select, ${R} [id^="box_search_tab_"] input[type="text"],
   ${R} [id^="rodape_aba_"] input[type="text"] {
@@ -69,16 +68,8 @@ Lolla.visual = (function () {
     document.documentElement.removeAttribute('data-lolla-sel');
   }
 
-  // Lê só os totais selecionados do rodapé para colorir a seleção (não altera nada)
-  function atualizarSelecao(rodape) {
-    const m = rodape.selecionadoMov, e = rodape.selecionadoExt;
-    const algum = (m != null && m !== 0) || (e != null && e !== 0);
-    const estado = !algum ? '' : (m || 0) === (e || 0) ? 'ok' : 'nok';
-    const raiz = document.documentElement;
-    if ((raiz.getAttribute('data-lolla-sel') || '') !== estado) {
-      if (estado) raiz.setAttribute('data-lolla-sel', estado); else raiz.removeAttribute('data-lolla-sel');
-    }
-  }
+  // Mantido por compatibilidade: a cor da seleção agora é só a nativa do IXC.
+  function atualizarSelecao() {}
 
   return { aplicar, remover, atualizarSelecao };
 })();

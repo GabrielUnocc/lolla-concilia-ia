@@ -28,6 +28,16 @@ Lolla.painel = (function () {
   .cab b { font-size: 15px; } .cab small { opacity: .8; display: block; font-size: 11px; }
   .cab .sep { flex: 1; } .cab button { background: transparent; color: #fff; border-color: rgba(255,255,255,.35); padding: 3px 9px; }
   .corpo { overflow: auto; padding: 10px 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+  /* Expandido (no IXC) e em guia: blocos lado a lado; a análise ocupa a largura toda */
+  .painel.expandido { width: min(1100px, calc(100vw - 24px)); }
+  .painel.expandido .corpo, .painel.guia .corpo { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-content: start; align-items: start; }
+  .painel.expandido .ia, .painel.guia .ia { grid-column: 1 / -1; }
+  .painel.expandido .ia .cards, .painel.guia .ia .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; }
+  .painel.guia { position: static; inset: auto; width: auto; max-width: none; height: 100vh; border-radius: 0; border: 0; box-shadow: none; }
+  .painel.guia .corpo { padding: 16px 20px 24px; gap: 12px; }
+  .painel.guia + .toast, .painel.guia .toast { right: 20px; }
+  .cab .acoes-cab { display: flex; gap: 6px; }
+  .desconectado { padding: 24px; }
   .bloco { background: rgba(255,255,255,.78); border: 1px solid rgba(217,223,231,.9); border-radius: 8px; padding: 10px; }
   .bloco h4 { margin: 0 0 6px; font-size: 13px; }
   .vivo { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #2e8b57; }
@@ -94,7 +104,7 @@ Lolla.painel = (function () {
       corpo = `${a.desatualizada ? '<div class="aviso">A tela mudou depois desta análise. Analise de novo para atualizar.</div>' : ''}
         <div class="resumo">${esc(r.resumo || '')}</div>
         ${r.perguntas_ao_cliente.length ? `<div class="aviso"><b>Perguntar ao cliente:</b> ${r.perguntas_ao_cliente.map(esc).join(' · ')}</div>` : ''}
-        ${r.itens.map((it, k) => {
+        <div class="cards">${r.itens.map((it, k) => {
           const d = a.decisoes[k], refs = (it.refs || []).join(',');
           return `<div class="card ${d || ''}">
             <div class="chips"><span class="chip azul">${esc(it.categoria || 'outra')}</span><span class="chip ${tomCerteza[it.certeza] || ''}">certeza ${esc(it.certeza || '?')}</span>
@@ -105,19 +115,20 @@ Lolla.painel = (function () {
               ${d ? `<span class="suave">Sugestão ${esc(d)}</span> <button data-a="decidir" data-k="${k}" data-d="">Desfazer</button>`
                   : `<button class="ok-b" data-a="decidir" data-k="${k}" data-d="aceita">Aceitar</button><button class="nok-b" data-a="decidir" data-k="${k}" data-d="rejeitada">Rejeitar</button>`}
             </div></div>`;
-        }).join('')}
+        }).join('')}</div>
         <div><button data-a="copiar">Copiar resumo para o atendimento</button>
           ${a.usage ? `<span class="suave"> ${a.usage.input_tokens} + ${a.usage.output_tokens} tokens</span>` : ''}</div>
         <div><div class="msgs">${s.chat.map((m) => `<div class="msg ${m.papel}">${esc(m.texto)}</div>`).join('')}${s.conversando ? '<div class="msg lolla">…</div>' : ''}</div>
           <form class="chat" data-f="chat"><input id="lolla-chat" autocomplete="off" placeholder="Pergunte sobre esta análise…" ${s.conversando ? 'disabled' : ''}><button class="primario" ${s.conversando ? 'disabled' : ''}>Enviar</button></form></div>`;
     }
     const nada = s.ind && !s.ind.sobrasIxc && !s.ind.sobrasBanco && !(s.pareamento.duplicados || []).length && !s.ind.ambiguos;
-    return `<div class="bloco"><h4>Análise da Lolla</h4><p class="suave">${rotulo} · só valor, data, documento, IDs e histórico mascarado vão para a IA.</p>
+    return `<div class="bloco ia"><h4>Análise da Lolla</h4><p class="suave">${rotulo} · só valor, data, documento, IDs e histórico mascarado vão para a IA.</p>
       <p><button class="primario" data-a="analisar" ${s.analisando || nada || !s.ind ? 'disabled' : ''}>${nada ? 'Nada para analisar: tudo pareado' : s.analise ? 'Analisar de novo' : 'Analisar sobras com IA'}</button></p>
       ${corpo}</div>`;
   }
 
-  function painel(s) {
+  function painel(s, o) {
+    o = o || {};
     const hora = s.atualizadoEm ? new Date(s.atualizadoEm).toLocaleTimeString('pt-BR') : '—';
     let corpo;
     if (!s.ind) corpo = '<div class="bloco"><p><span class="giro"></span>Lendo a Conciliação Manual…</p></div>';
@@ -149,9 +160,13 @@ Lolla.painel = (function () {
         <div class="bloco"><h4>Sobras só no banco (${s.pareamento.soNoBanco.length})</h4>${listaSobras(s.pareamento.soNoBanco, 'E:')}</div>
         ${blocoIA(s)}`;
     }
-    return `<div class="painel base" role="dialog" aria-label="AR Lolla">
+    return `<div class="painel base ${o.modo === 'guia' ? 'guia' : (o.expandido ? 'expandido' : '')}" role="dialog" aria-label="AR Lolla">
       <div class="cab">${avatar('av')}<div><b>AR Lolla</b><span class="breve" title="A aparência da Lolla ainda vai ser definida">visual em breve</span><small>Conciliação com IA</small></div><span class="sep"></span>
-        <button data-a="minimizar" title="Minimizar">–</button></div>
+        <div class="acoes-cab">${o.modo === 'guia'
+          ? '<button data-a="ir-ixc" title="Voltar para a aba do IXC">↩ Ir para o IXC</button>'
+          : `<button data-a="expandir" title="${o.expandido ? 'Recolher o painel' : 'Expandir o painel'}">${o.expandido ? '⤡ Recolher' : '⤢ Expandir'}</button>
+             <button data-a="abrir-guia" title="Abrir a Lolla numa guia própria">↗ Abrir em guia</button>
+             <button data-a="minimizar" title="Minimizar">–</button>`}</div></div>
       <div class="corpo">${corpo}</div>
       ${s.aviso ? `<div class="toast ${s.aviso.tipo}">${esc(s.aviso.texto)}</div>` : ''}</div>`;
   }

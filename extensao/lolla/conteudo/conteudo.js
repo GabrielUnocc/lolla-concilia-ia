@@ -11,7 +11,7 @@
   const fmt = Lolla.core.fmt;
   const tela = Lolla.ixcTela;
   const s = {
-    ativo: false, visualModerno: true, aberto: false, leitura: null, pareamento: null, ind: null, conferencia: null, assinatura: '',
+    ativo: false, visualModerno: true, aberto: false, expandido: false, leitura: null, pareamento: null, ind: null, conferencia: null, assinatura: '',
     analise: null, analisando: false, erroIA: null, chat: [], conversando: false, status: null, atualizadoEm: null, aviso: null
   };
   let host = null, raiz = null, observador = null, relogio = null, espera = null;
@@ -35,12 +35,37 @@
     const focado = raiz.activeElement && raiz.activeElement.id === 'lolla-chat';
     const corpo = raiz.querySelector('.corpo');
     const rolagem = corpo ? corpo.scrollTop : 0;
-    raiz.getElementById('r').innerHTML = s.aberto ? Lolla.painel.painel(s) : Lolla.painel.lancador(s);
+    raiz.getElementById('r').innerHTML = s.aberto ? Lolla.painel.painel(s, { modo: 'flutuante', expandido: s.expandido }) : Lolla.painel.lancador(s);
     const nova = raiz.getElementById('lolla-chat');
     if (nova) { nova.value = rascunho; if (focado) nova.focus(); }
     const c2 = raiz.querySelector('.corpo'); if (c2) c2.scrollTop = rolagem;
     const msgs = raiz.querySelector('.msgs'); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    enviarEstado();
   }
+
+  /* ---------- Lolla em guia própria (guia.html conectada a esta aba) ---------- */
+  const portas = new Set();
+  function estadoParaGuia() {
+    return { leitura: s.leitura, pareamento: s.pareamento, ind: s.ind, conferencia: s.conferencia, analise: s.analise, analisando: s.analisando,
+      erroIA: s.erroIA, chat: s.chat, conversando: s.conversando, status: s.status, atualizadoEm: s.atualizadoEm, aviso: s.aviso };
+  }
+  function enviarEstado() {
+    portas.forEach((p) => { try { p.postMessage({ tipo: 'estado', s: estadoParaGuia() }); } catch (e) { portas.delete(p); } });
+  }
+  chrome.runtime.onConnect.addListener((porta) => {
+    if (porta.name !== 'lolla-guia') return;
+    if (!tela.encontrar().ok) { porta.disconnect(); return; } // só o quadro com a Conciliação atende
+    portas.add(porta);
+    porta.onDisconnect.addListener(() => portas.delete(porta));
+    porta.onMessage.addListener(async (m) => {
+      if (m.a === 'copiar') { porta.postMessage({ tipo: 'texto', texto: s.analise ? resumo() : '' }); return; }
+      if (m.a === 'perguntar') { perguntar(m.texto || ''); return; }
+      await executar(m.a, { refs: m.refs || [], k: m.k, d: m.d });
+    });
+    if (!s.status) enviar({ tipo: 'status' }).then((st) => { s.status = st; enviarEstado(); });
+    reler(true);
+    enviarEstado();
+  });
 
   function avisar(tipo, texto) {
     s.aviso = { tipo, texto }; render();
@@ -159,13 +184,25 @@
     const b = ev.target.closest('[data-a]');
     if (!b || b.disabled) return;
     const refs = (b.dataset.refs || '').split(',').filter(Boolean);
-    switch (b.dataset.a) {
+    return executar(b.dataset.a, { refs, k: b.dataset.k, d: b.dataset.d });
+  }
+
+  // Ações usadas pelo painel flutuante e pela guia
+  async function executar(acao, { refs = [], k, d } = {}) {
+    switch (acao) {
+      case 'expandir': s.expandido = !s.expandido; render(); return;
+      case 'abrir-guia': {
+        const r = await enviar({ tipo: 'abrir-guia' });
+        if (!r.ok) avisar('erro', r.erro || 'Não foi possível abrir a guia.');
+        else { s.aberto = false; render(); }
+        return;
+      }
       case 'abrir': s.aberto = true; s.status = await enviar({ tipo: 'status' }); reler(true); return;
       case 'minimizar': s.aberto = false; render(); return;
       case 'mostrar': { const n = tela.destacar(refs); if (!n) avisar('erro', 'Linha não está visível na grade agora.'); return; }
       case 'selecionar': { const n = tela.selecionar(refs); avisar(n ? 'ok' : 'erro', n ? `${n} linha(s) marcada(s) no IXC. Confira e concilie pelo IXC.` : 'Nada para marcar (já marcadas ou fora da grade).'); return; }
       case 'analisar': return analisar();
-      case 'decidir': s.analise.decisoes[b.dataset.k] = b.dataset.d || undefined; guardarHistorico(); render(); return;
+      case 'decidir': s.analise.decisoes[k] = d || undefined; guardarHistorico(); render(); return;
       case 'copiar': {
         const txt = resumo();
         try { await navigator.clipboard.writeText(txt); avisar('ok', 'Resumo copiado.'); }

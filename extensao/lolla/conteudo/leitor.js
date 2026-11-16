@@ -9,10 +9,16 @@ Lolla.ixcTela = (function () {
   const SEL_MOV = 'table[id^="grid_lancamentos_aba_"]';
   const SEL_EXT = 'table[id^="grid_lancamentos_OFX_"]';
 
+  // A janela de conciliação tem várias abas (Automática, Manual, Todos os conciliados...).
+  // Lê só a aba que está visível agora, e o extrato e o rodapé da MESMA aba (mesmo número no id).
+  const visivel = (el) => !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+  let abaAtual = '';
   function encontrar() {
-    const mov = document.querySelector(SEL_MOV);
-    const ext = document.querySelector(SEL_EXT);
-    return { mov, ext, ok: !!(mov && ext) };
+    const movs = Array.from(document.querySelectorAll(SEL_MOV));
+    const mov = movs.find(visivel) || null;
+    abaAtual = mov ? mov.id.replace('grid_lancamentos_aba_', '') : '';
+    const ext = mov ? (document.getElementById('grid_lancamentos_OFX_' + abaAtual) || Array.from(document.querySelectorAll(SEL_EXT)).find(visivel) || null) : null;
+    return { mov, ext, aba: abaAtual, ok: !!(mov && ext) };
   }
 
   function lerGrade(tabela, prefixo, lado) {
@@ -41,13 +47,19 @@ Lolla.ixcTela = (function () {
     return v === '' ? null : fmt.centavosBR(v);
   };
 
+  // Rodapé da aba atual (ex.: #total_a_conciliar_aba3_mov); se não achar, cai no primeiro que existir
   function lerRodape() {
+    const n = abaAtual;
+    const campo = (exato, prefixo, sufixo) => {
+      const v = n ? valorCampo('#' + exato) : null;
+      return v != null ? v : valorCampo(`[id^="${prefixo}"]${sufixo ? `[id$="${sufixo}"]` : ''}`);
+    };
     return {
-      aConciliarMov: valorCampo('[id^="total_a_conciliar_aba"][id$="_mov"]'),
-      aConciliarExt: valorCampo('[id^="total_a_conciliar_aba"][id$="_ext"]'),
-      diferenca: valorCampo('[id^="diferenca_aba"]'),
-      selecionadoMov: valorCampo('[id^="total_selecionado_aba"][id$="_mov"]'),
-      selecionadoExt: valorCampo('[id^="total_selecionado_aba"][id$="_ext"]')
+      aConciliarMov: campo(`total_a_conciliar_aba${n}_mov`, 'total_a_conciliar_aba', '_mov'),
+      aConciliarExt: campo(`total_a_conciliar_aba${n}_ext`, 'total_a_conciliar_aba', '_ext'),
+      diferenca: campo(`diferenca_aba${n}`, 'diferenca_aba', ''),
+      selecionadoMov: campo(`total_selecionado_aba${n}_mov`, 'total_selecionado_aba', '_mov'),
+      selecionadoExt: campo(`total_selecionado_aba${n}_ext`, 'total_selecionado_aba', '_ext')
     };
   }
 
@@ -58,7 +70,7 @@ Lolla.ixcTela = (function () {
     const rodape = lerRodape();
     const assinatura = JSON.stringify([movimentacao.map((l) => [l.id, l.conciliado, l.valor, l.data]), extrato.map((l) => [l.id, l.conciliado, l.valor, l.data]),
       rodape.aConciliarMov, rodape.aConciliarExt]);
-    return { ok: g.ok, movimentacao, extrato, rodape, assinatura };
+    return { ok: g.ok, aba: g.aba, movimentacao, extrato, rodape, assinatura };
   }
 
   // Confere o que a Lolla leu com o rodapé do IXC (teste 1 do projeto)
