@@ -1,5 +1,5 @@
 /*
- * Processamento: pareamento automático em código (porta do extensao/extrator.js).
+ * Processamento: pareamento automático em código (porta do historico/extrator-v0/extrator.js).
  * Toda soma e comparação fica aqui, nunca na IA. Valores em centavos.
  *
  * Ordem: 1) identificador (tx_id/documento)  2) valor + data (D0/D+1)
