@@ -42,12 +42,33 @@ Lolla.acoes = (function () {
     payloadAtual,
     lerHistorico,
 
+    // Ao abrir: usa o período do cenário de teste carregado
+    async iniciar() {
+      try {
+        const id = await ixc.cenarioAtual();
+        const cen = id && Lolla.services.cenarios[id];
+        if (cen) store.set({ cenario: id, filtros: Object.assign({}, store.get().filtros, cen.periodo, { contaId: null }) });
+      } catch (e) { /* segue com o padrão */ }
+      await this.carregarContas();
+      if (store.get().contas.length) await this.buscar();
+    },
+
+    async carregarCenario(id) {
+      store.set({ carregando: true });
+      try {
+        await ixc.restaurarBase(id);
+        await this.iniciar();
+        avisar('ok', 'Cenário carregado: ' + Lolla.services.cenarios[id].nome);
+      } catch (e) { store.set({ carregando: false }); avisar('erro', e.message); }
+    },
+
     async carregarContas() {
       store.set({ carregando: true, erro: null });
       try {
         const contas = await ixc.listarContas();
         const f = store.get().filtros;
-        store.set({ contas, carregando: false, filtros: Object.assign({}, f, { contaId: f.contaId || (contas[0] && contas[0].id) }) });
+        const valida = contas.some((c) => String(c.id) === String(f.contaId));
+        store.set({ contas, carregando: false, filtros: Object.assign({}, f, { contaId: valida ? f.contaId : (contas[0] && contas[0].id) }) });
       } catch (e) {
         store.set({ carregando: false, erro: { texto: e.message, repetir: 'carregarContas' } });
       }
