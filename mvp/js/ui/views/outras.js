@@ -85,6 +85,12 @@ Lolla.ui.views.configuracoes = (function () {
         <p><button data-acao="testar-claude" ${st.temCredencial ? '' : 'disabled'}>Testar conexão</button> <span id="teste-claude">${esc(s.testeClaude || '')}</span></p>
         <p class="nota">A chave e o modelo vêm do arquivo config.js. Ela fica visível no navegador: use só neste computador, nunca publique.</p>
       </section>
+      <section class="bloco"><h3>Cenário de teste</h3>
+        <label>Base simulada<select id="cfg-cenario">${Object.entries(Lolla.services.cenarios).map(([id, cn]) =>
+          `<option value="${esc(id)}" ${id === s.cenario ? 'selected' : ''}>${esc(cn.nome)}</option>`).join('')}</select></label>
+        <p class="nota">${esc((Lolla.services.cenarios[s.cenario] || {}).descricao || '')}</p>
+        <p><button data-acao="carregar-cenario" class="primario">Carregar cenário</button> <small>Troca a base simulada e volta para a Conciliação.</small></p>
+      </section>
       <section class="bloco"><h3>IXC simulado</h3>
         <label>Taxa de erro das consultas: <b>${Math.round(cfg.ixc.taxaErro * 100)}%</b>
           <input type="range" min="0" max="50" step="5" value="${Math.round(cfg.ixc.taxaErro * 100)}" data-acao="taxa-erro"></label>
