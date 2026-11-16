@@ -6,7 +6,7 @@ Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamen
 
 ## Como rodar
 
-1. Abra `config.js` e preencha `claude.apiKey` (sem chave, a app usa uma **IA simulada** por regras locais).
+1. Copie `config.example.js` para `config.js` (ele não vai para o Git) e preencha `claude.apiKey`. Sem chave, a app usa uma **IA simulada** por regras locais.
 2. Abra `index.html` no Chrome ou Edge (duplo clique; não precisa de servidor nem de Node).
 3. Crie uma senha local: ela cifra a base simulada e o histórico salvos no navegador.
 
