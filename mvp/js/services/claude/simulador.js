@@ -33,6 +33,13 @@ Lolla.services.iaSimulada = (function () {
 
     payload.so_no_ixc.forEach((m) => {
       if (tratadas.has(m.ref)) return;
+      const docIgual = m.documento && payload.so_no_banco.find((e) => !tratadas.has(e.ref) && e.documento === m.documento && e.valor !== m.valor);
+      if (docIgual) {
+        itens.push({ refs: [m.ref, docIgual.ref], categoria: 'valor divergente', causa: `Mesmo documento ${m.documento}: IXC baixou ${brl(m.valor)}, banco creditou ${brl(docIgual.valor)}.`,
+          proximo_passo: 'Conferir o valor pago (juros, multa ou desconto) e corrigir o valor da baixa no IXC.', acao_sugerida: 'verificar_com_cliente', certeza: 'alta' });
+        tratadas.add(m.ref); tratadas.add(docIgual.ref);
+        return;
+      }
       const mesmo = payload.so_no_banco.find((e) => !tratadas.has(e.ref) && e.valor === m.valor && dia(e.data) - dia(m.data) > 1);
       if (mesmo) {
         itens.push({ refs: [m.ref, mesmo.ref], categoria: 'data de crédito', causa: `Mesmo valor (${brl(m.valor)}): IXC em ${brDeIso(m.data)}, banco em ${brDeIso(mesmo.data)}.`,

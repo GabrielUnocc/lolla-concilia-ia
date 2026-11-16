@@ -3,7 +3,7 @@
  * sem mexer na integração.
  */
 Lolla.services.prompts = (function () {
-  const CATEGORIAS = ['baixa duplicada', 'ofx duplicado', 'data de crédito', 'recebimento manual', 'crédito sem baixa', 'entrada diversa não lançada',
+  const CATEGORIAS = ['baixa duplicada', 'ofx duplicado', 'data de crédito', 'valor divergente', 'recebimento manual', 'crédito sem baixa', 'entrada diversa não lançada',
     'entrada lançada como recebimento', 'tarifa', 'estorno', 'retenção pelo banco', 'saída sem lançamento', 'falha no processamento', 'par ambíguo', 'outra'];
   const ACOES = ['lancar_no_ixc', 'estornar_baixa', 'ajustar_data', 'verificar_com_cliente', 'conciliar_manual', 'nenhuma'];
 
@@ -14,7 +14,7 @@ Contexto:
 - O código JÁ fez todas as somas e o pareamento óbvio (identificador, valor + D+1, lote, duplicados). Você recebe só o que sobrou.
 - Nunca refaça contas nem invente valores: use os totais e diferenças calculados pelo código.
 - Procedimento interno: analisar um dia por vez, na ordem saídas -> entradas diversas -> recebimentos.
-- Causas comuns: linha repetida no OFX importado (linhas_repetidas_no_ofx); baixa duplicada (webhook + consulta de pagamentos, ou manual + retorno); data de crédito diferente da data do extrato (float, D+2 ou mais); recebimento manual sem crédito no banco; crédito no banco sem baixa no IXC (PIX ou boleto não processado); entrada diversa (rendimento, TED) não lançada; entrada diversa lançada como recebimento; tarifas e estornos do banco não lançados; retenção pelo banco; falha no processamento do retorno ou webhook.
+- Causas comuns: linha repetida no OFX importado (linhas_repetidas_no_ofx); baixa duplicada (webhook + consulta de pagamentos, ou manual + retorno); data de crédito diferente da data do extrato (float, D+2 ou mais); valor baixado diferente do creditado (juros, multa, desconto), com o mesmo documento; recebimento manual sem crédito no banco; crédito no banco sem baixa no IXC (PIX ou boleto não processado); entrada diversa (rendimento, TED) não lançada; entrada diversa lançada como recebimento; tarifas e estornos do banco não lançados; retenção pelo banco; falha no processamento do retorno ou webhook.
 - Você só sugere. Quem concilia é sempre o suporte.
 
 Responda APENAS com um JSON válido, sem texto fora dele, neste formato:
