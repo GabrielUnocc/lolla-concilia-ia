@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>AR Lolla</title>
+<style>
+  :root { color-scheme: light dark;
+    --acento: #2f6fed; --tinta: #0f1a2e; --tinta-3: #6f7c99; --verde: #1f9d5c; --laranja: #c26414;
+    --vidro: linear-gradient(160deg, rgba(255,255,255,.62), rgba(255,255,255,.26)); --vidro-forte: rgba(255,255,255,.85); --borda: rgba(255,255,255,.80); --borda-suave: rgba(150,170,215,.32);
+    --sombra-card: 0 8px 24px rgba(30,60,150,.14), inset 0 1px 0 rgba(255,255,255,.95); --superficie: #fff;
+    --cena: linear-gradient(180deg, #2a55c9 0, #3f73e6 70px, rgba(95,145,245,.55) 150px, rgba(150,185,250,.18) 240px, rgba(150,185,250,0) 320px), radial-gradient(150px 130px at 12% 46%, rgba(56,189,248,.55), transparent 70%), radial-gradient(170px 140px at 92% 62%, rgba(139,92,246,.40), transparent 70%), radial-gradient(160px 140px at 30% 92%, rgba(47,111,237,.38), transparent 70%), linear-gradient(180deg, #eaf0fd, #f3f1fb);
+    --chave-off: rgba(120,135,170,.35); }
+  @media (prefers-color-scheme: dark) { :root {
+    --acento: #5b93f7; --tinta: #eef1fb; --tinta-3: #8b96b4; --verde: #4fd18b; --laranja: #ffb066;
+    --vidro: linear-gradient(160deg, rgba(50,60,120,.50), rgba(16,20,46,.34)); --vidro-forte: rgba(24,31,58,.90); --borda: rgba(255,255,255,.13); --borda-suave: rgba(120,140,200,.20);
+    --sombra-card: 0 8px 24px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.10); --superficie: #16213a;
+    --cena: linear-gradient(180deg, #2a2fa8 0, #3038b8 70px, rgba(52,62,190,.50) 150px, rgba(52,62,190,.14) 240px, rgba(52,62,190,0) 320px), radial-gradient(150px 130px at 12% 46%, rgba(56,189,248,.30), transparent 70%), radial-gradient(170px 140px at 92% 62%, rgba(139,92,246,.34), transparent 70%), radial-gradient(160px 140px at 30% 92%, rgba(91,147,247,.26), transparent 70%), linear-gradient(180deg, #080b1e, #0b0920);
+    --chave-off: rgba(255,255,255,.16); } }
+  body { margin: 0; width: 320px; min-height: 100%; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--tinta); background: var(--cena); -webkit-font-smoothing: antialiased; }
+  header { color: #fff; padding: 14px 16px 6px; display: flex; align-items: center; gap: 12px; background: transparent; text-shadow: 0 1px 2px rgba(10,20,60,.25); }
+  header img { width: 46px; height: 46px; border-radius: 15px; border: 1.5px solid rgba(255,255,255,.7); box-shadow: 0 6px 16px rgba(10,20,80,.30); }
+  header b { font-size: 16px; font-weight: 700; } header small { display: block; font-size: 11px; color: rgba(255,255,255,.85); }
+  .breve { font-size: 10px; background: #f07d1e; border-radius: 999px; padding: 1px 7px; margin-left: 4px; vertical-align: 2px; font-weight: 700; text-shadow: none; }
+  main { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .linha, .status { background: var(--vidro); -webkit-backdrop-filter: blur(16px) saturate(190%); backdrop-filter: blur(16px) saturate(190%);
+    border: 1px solid var(--borda); border-radius: 18px; padding: 11px 13px; box-shadow: var(--sombra-card); }
+  .linha { display: flex; justify-content: space-between; align-items: center; gap: 10px; cursor: pointer; }
+  .chave { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+  .chave input { opacity: 0; width: 0; height: 0; }
+  .chave span { position: absolute; inset: 0; background: var(--chave-off); border-radius: 22px; transition: .2s; cursor: pointer; }
+  .chave span::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+  .chave input:checked + span { background: linear-gradient(135deg, var(--acento), #38bdf8); } .chave input:checked + span::before { transform: translateX(18px); }
+  .chave input:focus-visible + span { outline: 2px solid var(--acento); outline-offset: 2px; }
+  .chave input:disabled + span { opacity: .45; cursor: not-allowed; }
+  .ok { color: var(--verde); } .nok { color: var(--laranja); } .suave { color: var(--tinta-3); font-size: 12px; }
+  /* Botão no estilo do botão de feedback do CNABER: borda em degradê animada e brilho por trás */
+  .fab { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 6px 0 2px;
+    padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font: inherit; font-weight: 600; color: var(--tinta);
+    background: var(--superficie); box-shadow: 0 12px 28px -14px rgba(19,45,86,.45); isolation: isolate; transition: transform .2s ease;
+    --fab-c1: #2f6fed; --fab-c2: #5fd9b0; --fab-c3: #f0a94a; --fab-c4: #2f6fed; }
+  .fab::before { content: ""; position: absolute; inset: 0; border-radius: 999px; padding: 2px;
+    background: linear-gradient(135deg, var(--fab-c1), var(--fab-c2), var(--fab-c3), var(--fab-c4)); background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: fabGiro 6s linear infinite; z-index: -1; }
+  .fab::after { content: ""; position: absolute; inset: -6px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--fab-c1), var(--fab-c2), var(--fab-c3), var(--fab-c4)); background-size: 300% 300%;
+    filter: blur(14px); opacity: .5; animation: fabGiro 6s linear infinite; z-index: -2; transition: opacity .3s, filter .3s; }
+  .fab:hover:not(:disabled) { transform: translateY(-2px); --fab-c1: #8b5cf6; --fab-c2: #2dd4bf; --fab-c3: #8b5cf6; --fab-c4: #2dd4bf; }
+  .fab:hover:not(:disabled)::after { opacity: .85; filter: blur(18px); }
+  .fab:disabled { cursor: not-allowed; opacity: .55; }
+  .fab:disabled::before, .fab:disabled::after { animation: none; filter: grayscale(1); }
+  .fab:disabled::after { opacity: .15; }
+  .fab svg { width: 16px; height: 16px; }
+  @keyframes fabGiro { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  @media (prefers-reduced-motion: reduce) { .fab::before, .fab::after { animation: none; } }
+  a { color: var(--acento); }
+</style>
+</head>
+<body>
+  <header><img src="icones/lolla-avatar.png" alt="Lolla (visual em breve)"><div><b>AR Lolla</b><span class="breve">em breve</span><small>Conciliação bancária com IA</small></div></header>
+  <main>
+    <label class="linha" for="ativo"><span><b>Lolla ativa</b><br><span class="suave" id="ativo-txt">Painel aparece na Conciliação do IXC</span></span>
+      <span class="chave"><input type="checkbox" id="ativo"><span></span></span></label>
+    <label class="linha" for="visual"><span><b>Visual modernizado</b><br><span class="suave">Só a aparência da Conciliação. Dados e funções do IXC não mudam.</span></span>
+      <span class="chave"><input type="checkbox" id="visual"><span></span></span></label>
+    <div class="status" id="status">Verificando esta aba…</div>
+    <button class="fab" id="abrir" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Abrir o painel nesta aba</button>
+    <p class="suave">Endereços do IXC, chave da API e modelo: <a href="#" id="opcoes">Configurações</a></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
