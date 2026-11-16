@@ -1,0 +1,121 @@
+<html><body><!--
+  Conciliação bancária > Conciliação Manual (aba 3) > Movimentação Financeira (lado esquerdo)
+  Container: SECTION#grids_aba_3 > DIV.flexigrid (1º)
+  Tabela de cabeçalho: DIV.hDiv > TABLE.grid-table-container (flexigrid separa o thead do tbody)
+  Tabela de dados:     DIV.bDiv > TABLE#grid_lancamentos_aba_3
+  Linhas carregadas no momento da captura: 1 (o grid só tinha 1 registro)
+  Observação: atributos style e handlers on* foram removidos na captura. Nome no histórico mascarado.
+-->
+<div class="ixc-grids grid-global-container flexigrid novstripe" variant="inner" size="md" unselectable="on">
+  <div class="grid-blocker-container gBlock hidden"><div><i class="fa-spin fa-duotone fa-spinner-third"></i></div></div>
+  <div class="grid-title-container mDiv bg1">
+    <div class="ftitle">Movimentação Financeira</div>
+    <div class="btn_row">
+      <a title="Ajuda" class="fa fa-circle-question modal-icon"></a>
+      <a title="Auditar registro selecionado" class="fa-solid fa-clock-rotate-left modal-icon"></a>
+    </div>
+  </div>
+  <div class="grid-toolbar-container tDiv bg2">
+    <div class="tDiv2">
+      <button class="ixc-buttons fbutton" variant="primary" size="md" type="button" name="btn_deletar_extrato_oculto">Deletar</button>
+    </div>
+    <div></div>
+  </div>
+  <div class="grid-actions-container"></div>
+  <div class="grid-header-container hDiv">
+    <div class="hDivBox">
+      <table class="grid-table-container" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr class="tableRow">
+            <th class="tableHeader" axis="col0" align="center"><div>-</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.id" axis="col1" align="center"><div>ID</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.conciliado" axis="col2" align="center"><div>Conc.</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.data" axis="col3" align="center"><div class="">Data</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.documento" axis="col4" align="left"><div class="">Documento</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.tx_id" axis="col5" align="left"><div class="">ID da transação</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.credito" axis="col6" align="right"><div class="">Entrada</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.debito" axis="col7" align="right"><div>Saída</div></th>
+            <th class="tableHeader" abbr="fn_movim_finan.historico" axis="col8" align="left"><div>Histórico</div></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  <div class="grid-dragger-container cDrag">
+    <div class="drag-line" axis="0" abbr="undefined"></div>
+    <div class="drag-line" axis="1" abbr="fn_movim_finan.id"></div>
+    <div class="drag-line" axis="2" abbr="fn_movim_finan.conciliado"></div>
+    <div class="drag-line" axis="3" abbr="fn_movim_finan.data"></div>
+    <div class="drag-line" axis="4" abbr="fn_movim_finan.documento"></div>
+    <div class="drag-line" axis="5" abbr="fn_movim_finan.tx_id"></div>
+    <div class="drag-line" axis="6" abbr="fn_movim_finan.credito"></div>
+    <div class="drag-line" axis="7" abbr="fn_movim_finan.debito"></div>
+    <div class="drag-line" axis="8" abbr="fn_movim_finan.historico"></div>
+  </div>
+  <div class="grid-body-container bDiv">
+    <table id="grid_lancamentos_aba_3" class="grid_lancamentos_aba_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0" unselectable="on">
+      <tbody><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>1</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>02/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178351</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>60,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. doc 7178351</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>2</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>02/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178352</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>1.250,50</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. doc 7178352</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>3</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>03/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178360</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>100,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. lote a</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>4</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>03/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178361</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>80,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. lote b</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>5</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>04/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178370</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>45,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. doc 7178370</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>6</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>04/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178370</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>45,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. doc 7178370 (dup)</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_movim_finan.id"><div>7</div></td><td abbr="fn_movim_finan.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_movim_finan.data"><div>05/11/2026</div></td><td abbr="fn_movim_finan.documento"><div>7178399</div></td><td abbr="fn_movim_finan.tx_id"><div></div></td><td abbr="fn_movim_finan.credito"><div>30,00</div></td><td abbr="fn_movim_finan.debito"><div>0,00</div></td><td abbr="fn_movim_finan.historico"><div>Rec. sem crédito no banco</div></td></tr></tbody>
+    </table>
+  </div>
+  <div class="grid-editable-container iDiv"></div>
+</div>
+<!--
+  Conciliação bancária > Conciliação Manual (aba 3) > Extrato Bancário (lado direito)
+  Container: SECTION#grids_aba_3 > DIV.flexigrid (2º)
+  Tabela de cabeçalho: DIV.hDiv > TABLE.grid-table-container
+  Tabela de dados:     DIV.bDiv > TABLE#grid_lancamentos_OFX_3
+  Linhas carregadas no momento da captura: 0 (a tabela não tem nem <tbody>; extrato vazio)
+  Observação: atributos style e handlers on* foram removidos na captura.
+-->
+<div class="ixc-grids grid-global-container flexigrid novstripe" variant="inner" size="md">
+  <div class="grid-blocker-container gBlock hidden"><div><i class="fa-spin fa-duotone fa-spinner-third"></i></div></div>
+  <div class="grid-title-container mDiv bg1">
+    <div class="ftitle">Extrato Bancário</div>
+    <div class="btn_row">
+      <a title="Ajuda" class="fa fa-circle-question modal-icon"></a>
+      <a title="Auditar registro selecionado" class="fa-solid fa-clock-rotate-left modal-icon"></a>
+    </div>
+  </div>
+  <div class="grid-toolbar-container tDiv bg2">
+    <div class="tDiv2">
+      <button class="ixc-buttons fbutton" variant="primary" size="md" type="button" name="btn_deletar_extrato">Deletar</button>
+    </div>
+    <div></div>
+  </div>
+  <div class="grid-actions-container"></div>
+  <div class="grid-header-container hDiv">
+    <div class="hDivBox">
+      <table class="grid-table-container" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr class="tableRow">
+            <th class="tableHeader" axis="col0" align="center"><div class="sdesc">-</div></th>
+            <th class="tableHeader" abbr="fn_extrato.id" axis="col1" align="center"><div>ID</div></th>
+            <th class="tableHeader" abbr="fn_extrato.conciliado" axis="col2" align="center"><div class="">Conc.</div></th>
+            <th class="tableHeader" abbr="fn_extrato.data" axis="col3" align="center"><div>Data</div></th>
+            <th class="tableHeader" abbr="fn_extrato.documento" axis="col4" align="left"><div class="">Documento</div></th>
+            <th class="tableHeader" abbr="fn_extrato.tx_id" axis="col5" align="left"><div class="">ID da transação</div></th>
+            <th class="tableHeader" abbr="fn_extrato.credito" axis="col6" align="right"><div class="">Entrada</div></th>
+            <th class="tableHeader" abbr="fn_extrato.debito" axis="col7" align="right"><div>Saída</div></th>
+            <th class="tableHeader" abbr="fn_extrato.historico" axis="col8" align="left"><div>Histórico</div></th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+  <div class="grid-dragger-container cDrag">
+    <div class="drag-line" axis="0" abbr="undefined"></div>
+    <div class="drag-line" axis="1" abbr="fn_extrato.id"></div>
+    <div class="drag-line" axis="2" abbr="fn_extrato.conciliado"></div>
+    <div class="drag-line" axis="3" abbr="fn_extrato.data"></div>
+    <div class="drag-line" axis="4" abbr="fn_extrato.documento"></div>
+    <div class="drag-line" axis="5" abbr="fn_extrato.tx_id"></div>
+    <div class="drag-line" axis="6" abbr="fn_extrato.credito"></div>
+    <div class="drag-line" axis="7" abbr="fn_extrato.debito"></div>
+    <div class="drag-line" axis="8" abbr="fn_extrato.historico"></div>
+  </div>
+  <div class="grid-body-container bDiv">
+    <table id="grid_lancamentos_OFX_3" class="grid_lancamentos_OFX_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0" unselectable="on"><tbody><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>a</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>02/11/2026</div></td><td abbr="fn_extrato.documento"><div>7178351</div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>60,00</div></td><td abbr="fn_extrato.debito"><div>0,00</div></td><td abbr="fn_extrato.historico"><div>CRED COBRANCA</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>b</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>03/11/2026</div></td><td abbr="fn_extrato.documento"><div></div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>1.250,50</div></td><td abbr="fn_extrato.debito"><div>0,00</div></td><td abbr="fn_extrato.historico"><div>PIX RECEBIDO</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>c</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>04/11/2026</div></td><td abbr="fn_extrato.documento"><div></div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>180,00</div></td><td abbr="fn_extrato.debito"><div>0,00</div></td><td abbr="fn_extrato.historico"><div>CRED LOTE COBRANCA</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>d</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>05/11/2026</div></td><td abbr="fn_extrato.documento"><div>7178370</div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>45,00</div></td><td abbr="fn_extrato.debito"><div>0,00</div></td><td abbr="fn_extrato.historico"><div>CRED COBRANCA</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>e</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>05/11/2026</div></td><td abbr="fn_extrato.documento"><div></div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>0,00</div></td><td abbr="fn_extrato.debito"><div>3,50</div></td><td abbr="fn_extrato.historico"><div>TARIFA</div></td></tr><tr class="tableRow"><td><input type="checkbox"></td><td abbr="fn_extrato.id"><div>f</div></td><td abbr="fn_extrato.conciliado"><div><i class="fa fa-times"></i></div></td><td abbr="fn_extrato.data"><div>06/11/2026</div></td><td abbr="fn_extrato.documento"><div></div></td><td abbr="fn_extrato.tx_id"><div></div></td><td abbr="fn_extrato.credito"><div>99,90</div></td><td abbr="fn_extrato.debito"><div>0,00</div></td><td abbr="fn_extrato.historico"><div>PIX SEM BAIXA</div></td></tr></tbody></table>
+  </div>
+  <div class="grid-editable-container iDiv"></div>
+</div>
+</body></html>
