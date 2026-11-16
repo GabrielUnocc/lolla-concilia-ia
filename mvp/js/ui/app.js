@@ -31,6 +31,78 @@
   }
   const confirmar = (texto, opcoes) => dialogo(Object.assign({ texto }, opcoes));
 
+  /* ---------- Importação de OFX ---------- */
+  function abrirImportacaoOfx() {
+    const { reais, brDeIso } = Lolla.core.fmt;
+    const fundo = document.createElement('div');
+    fundo.className = 'dialogo-fundo';
+    fundo.innerHTML = `<form class="dialogo largo" data-form="ofx" role="dialog" aria-modal="true" aria-labelledby="ofx-titulo">
+      <h3 id="ofx-titulo">Importar extrato OFX</h3>
+      <p class="nota">O arquivo é lido aqui no navegador e não é enviado para lugar nenhum. Para a IA vão só valor, data, documento e histórico mascarado.</p>
+      <label class="arquivo">Arquivo OFX<input id="ofx-arquivo" type="file" accept=".ofx,.OFX,application/x-ofx" required></label>
+      <div id="ofx-resumo"></div>
+      <fieldset><legend>Lado do IXC (simulado)</legend>
+        <label class="opcao"><input type="radio" name="modo" value="divergencias" checked><span><b>Espelho com divergências</b><small>Copia o OFX para o IXC e planta alguns erros (sem baixa, duplicada, data, valor, despesa, recebimento manual). Ao final mostra o gabarito.</small></span></label>
+        <label class="opcao"><input type="radio" name="modo" value="exato"><span><b>Espelho exato</b><small>Cópia fiel: o código deve parear tudo sozinho.</small></span></label>
+        <label class="opcao"><input type="radio" name="modo" value="vazio"><span><b>IXC vazio</b><small>Só o extrato real, para conferir a leitura e a validação do arquivo.</small></span></label>
+      </fieldset>
+      <div class="dialogo-botoes"><button type="button" data-r="cancelar">Cancelar</button><button class="primario" id="ofx-importar" disabled>Importar</button></div>
+    </form>`;
+    document.body.appendChild(fundo);
+    let lido = null;
+    const resumo = fundo.querySelector('#ofx-resumo');
+    const botao = fundo.querySelector('#ofx-importar');
+    const fechar = () => fundo.remove();
+    fundo.addEventListener('click', (e) => { if (e.target === fundo || e.target.closest('[data-r="cancelar"]')) fechar(); });
+
+    fundo.querySelector('#ofx-arquivo').addEventListener('change', async (e) => {
+      const f = e.target.files[0];
+      lido = null; botao.disabled = true;
+      if (!f) { resumo.innerHTML = ''; return; }
+      resumo.innerHTML = Lolla.ui.c.spinner('Lendo o arquivo…');
+      try {
+        if (f.size > 5 * 1024 * 1024) throw new Error('Arquivo maior que 5 MB. Exporte um período menor.');
+        const ofx = Lolla.domain.ofx.interpretar(await Lolla.domain.ofx.lerArquivo(f), f.name);
+        const a = ofx.alertas, r = ofx.resumo;
+        const alertas = [
+          a.linhaRepetida.length && `${a.linhaRepetida.length} lançamento(s) repetido(s) no arquivo (linhas ${a.linhaRepetida.map((x) => x.join(' e ')).join('; ')})`,
+          a.fitidRepetido.length && `${a.fitidRepetido.length} identificador(es) FITID repetido(s)`,
+          a.invalidas.length && `${a.invalidas.length} linha(s) ignorada(s) por falta de data ou valor`,
+          a.fora.length && `${a.fora.length} lançamento(s) fora do período informado no arquivo`,
+          a.semFitid && `${a.semFitid} lançamento(s) sem FITID`
+        ].filter(Boolean);
+        resumo.innerHTML = `<table class="simples"><tbody>
+          <tr><td>Banco / conta</td><td>${esc(ofx.conta.banco)} · ag. ${esc(ofx.conta.agencia || '—')} · conta ${esc(ofx.conta.numero || '—')}</td></tr>
+          <tr><td>Período</td><td>${brDeIso(ofx.periodo.inicio)} a ${brDeIso(ofx.periodo.fim)}</td></tr>
+          <tr><td>Lançamentos</td><td>${r.total} (${r.qtdCreditos} créditos · ${r.qtdDebitos} débitos)</td></tr>
+          <tr><td>Créditos / débitos</td><td>${reais(r.creditos)} / ${reais(r.debitos)}</td></tr>
+          ${ofx.saldoFinal != null ? `<tr><td>Saldo final no arquivo</td><td>${reais(ofx.saldoFinal)}</td></tr>` : ''}
+        </tbody></table>
+        ${alertas.length ? `<div class="alerta aviso"><b>Atenção no arquivo:</b><ul>${alertas.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>` : '<p class="ok-txt">Nenhum problema encontrado no arquivo.</p>'}`;
+        lido = ofx; botao.disabled = false;
+      } catch (err) {
+        resumo.innerHTML = `<div class="alerta erro">${esc(err.message)}</div>`;
+      }
+    });
+
+    fundo.querySelector('form').addEventListener('submit', async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (!lido) return;
+      const modo = fundo.querySelector('input[name="modo"]:checked').value;
+      botao.disabled = true; botao.textContent = 'Importando…';
+      try {
+        const r = await acoes.importarOfx(lido, modo);
+        fechar();
+        if (r.gabarito.length) {
+          dialogo({ texto: 'OFX importado. Gabarito do que foi plantado no IXC, para conferir a análise da Lolla:', confirmar: '',
+            conteudo: `<ul class="gabarito">${r.gabarito.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` });
+        }
+      } catch (err) {
+        botao.disabled = false; botao.textContent = 'Importar';
+      }
+    });
+  }
+
   /* ---------- Desbloqueio ---------- */
   function telaCofre(erro) {
     const novo = !cofre.existe();
@@ -113,6 +185,7 @@
       case 'aba': return abrirAba(alvo.dataset.aba);
       case 'selecionar': return acoes.alternarSelecao(alvo.dataset.lado, alvo.dataset.id);
       case 'repetir': return s.erro && s.erro.repetir === 'carregarContas' ? acoes.carregarContas().then(acoes.buscar) : acoes.buscar();
+      case 'importar-ofx': return abrirImportacaoOfx();
       case 'conciliar': return acoes.conciliarSelecao();
       case 'desconciliar': return acoes.desconciliarSelecao();
       case 'limpar-selecao': return acoes.limparSelecao();
@@ -178,6 +251,7 @@
     if (!form) return;
     ev.preventDefault();
     if (form.dataset.form === 'cofre') return entrar(form);
+    if (form.dataset.form === 'ofx') return; // tratado no próprio diálogo
     if (form.dataset.form === 'filtros') return acoes.buscar();
     if (form.dataset.form === 'chat') {
       const inp = form.querySelector('#chat-entrada');
