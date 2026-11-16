@@ -12,14 +12,16 @@
   const tela = Lolla.ixcTela;
   const s = {
     ativo: false, visualModerno: true, aberto: false, expandido: false, leitura: null, pareamento: null, ind: null, conferencia: null, assinatura: '',
-    analise: null, analisando: false, erroIA: null, chat: [], conversando: false, status: null, atualizadoEm: null, aviso: null
+    analise: null, analisando: false, erroIA: null, chat: [], conversando: false, status: null, atualizadoEm: null, aviso: null, tema: 'claro'
   };
   let host = null, raiz = null, observador = null, relogio = null, espera = null;
+  let animando = false, renderPendente = false;
 
   /* ---------- Montagem do painel ---------- */
   function montar() {
     host = document.createElement('div');
     host.id = 'lolla-host';
+    host.setAttribute('data-tema', s.tema);
     raiz = host.attachShadow({ mode: 'open' });
     raiz.innerHTML = `<style>${Lolla.painel.CSS}</style><div id="r"></div>`;
     document.documentElement.appendChild(host);
@@ -30,6 +32,7 @@
 
   function render() {
     if (!raiz) return;
+    if (animando) { renderPendente = true; return; }
     const entrada = raiz.getElementById('lolla-chat');
     const rascunho = entrada ? entrada.value : '';
     const focado = raiz.activeElement && raiz.activeElement.id === 'lolla-chat';
@@ -43,11 +46,79 @@
     enviarEstado();
   }
 
+  /* ---------- Animações: painel encolhendo até o botão + gotinhas azuis ---------- */
+  const semMovimento = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  async function animarSaida() {
+    const p = raiz && raiz.querySelector('.painel');
+    if (!p || !p.animate || semMovimento()) return;
+    // Encolhe em direção a onde o botão "Lolla" vai aparecer (canto inferior direito)
+    const r = p.getBoundingClientRect();
+    const alvoX = innerWidth - 22 - 55, alvoY = innerHeight - 22 - 22;
+    p.style.transformOrigin = `${alvoX - r.left}px ${alvoY - r.top}px`;
+    animando = true;
+    try {
+      await p.animate([
+        { transform: 'scale(1)', opacity: 1, filter: 'blur(0px)' },
+        { transform: 'scale(.5)', opacity: .75, filter: 'blur(1px)', offset: .6 },
+        { transform: 'scale(.04)', opacity: 0, filter: 'blur(6px)' }
+      ], { duration: 440, easing: 'cubic-bezier(.55,0,.7,.2)', fill: 'forwards' }).finished;
+    } catch (e) { /* animação interrompida */ }
+    animando = false;
+  }
+  function animarEntrada() {
+    const p = raiz && raiz.querySelector('.painel');
+    if (!p || !p.animate || semMovimento()) return;
+    const r = p.getBoundingClientRect();
+    p.style.transformOrigin = `${innerWidth - 77 - r.left}px ${innerHeight - 44 - r.top}px`;
+    p.animate([{ transform: 'scale(.92)', opacity: 0, filter: 'blur(4px)' }, { transform: 'scale(1)', opacity: 1, filter: 'blur(0px)' }],
+      { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  }
+  // Estouro bem leve de gotinhas azuis em volta do botão
+  function estourar() {
+    const b = raiz && raiz.querySelector('.lancador');
+    if (!b || !b.animate || semMovimento()) return;
+    const r = b.getBoundingClientRect();
+    b.animate([{ transform: 'scale(.8)', opacity: .4 }, { transform: 'scale(1.04)', opacity: 1, offset: .6 }, { transform: 'scale(1)', opacity: 1 }],
+      { duration: 380, easing: 'ease-out' });
+    const g = document.createElement('div');
+    g.className = 'gotas';
+    g.style.left = (r.left + r.width / 2) + 'px'; g.style.top = (r.top + r.height / 2) + 'px';
+    const cores = ['#2f6fed', '#5b93f7', '#8cb4ff', '#38bdf8'];
+    const n = 12;
+    for (let i = 0; i < n; i++) {
+      const sp = document.createElement('span');
+      const t = 2 + Math.random() * 2.5;
+      sp.style.width = sp.style.height = t + 'px';
+      sp.style.marginLeft = sp.style.marginTop = (-t / 2) + 'px';
+      sp.style.setProperty('--c', cores[i % cores.length]);
+      g.appendChild(sp);
+      const ang = (i / n) * Math.PI * 2 + Math.random() * 0.5;
+      // nasce na borda do botão e se afasta um pouquinho
+      const rx = r.width / 2 + 2, ry = r.height / 2 + 2, d = 12 + Math.random() * 16;
+      const x0 = Math.cos(ang) * rx, y0 = Math.sin(ang) * ry;
+      const x1 = Math.cos(ang) * (rx + d), y1 = Math.sin(ang) * (ry + d);
+      sp.animate([
+        { transform: `translate(${x0}px, ${y0}px) scale(1)`, opacity: 0 },
+        { transform: `translate(${(x0 + x1) / 2}px, ${(y0 + y1) / 2}px) scale(1)`, opacity: .9, offset: .25 },
+        { transform: `translate(${x1}px, ${y1}px) scale(.2)`, opacity: 0 }
+      ], { duration: 520 + Math.random() * 220, delay: Math.random() * 60, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
+    }
+    raiz.appendChild(g);
+    setTimeout(() => g.remove(), 900);
+  }
+  async function fecharComAnimacao() {
+    await animarSaida();
+    s.aberto = false;
+    renderPendente = false;
+    render();
+    estourar();
+  }
+
   /* ---------- Lolla em guia própria (guia.html conectada a esta aba) ---------- */
   const portas = new Set();
   function estadoParaGuia() {
     return { leitura: s.leitura, pareamento: s.pareamento, ind: s.ind, conferencia: s.conferencia, analise: s.analise, analisando: s.analisando,
-      erroIA: s.erroIA, chat: s.chat, conversando: s.conversando, status: s.status, atualizadoEm: s.atualizadoEm, aviso: s.aviso };
+      erroIA: s.erroIA, chat: s.chat, conversando: s.conversando, status: s.status, atualizadoEm: s.atualizadoEm, aviso: s.aviso, tema: s.tema };
   }
   function enviarEstado() {
     portas.forEach((p) => { try { p.postMessage({ tipo: 'estado', s: estadoParaGuia() }); } catch (e) { portas.delete(p); } });
@@ -87,9 +158,20 @@
     render();
   }
 
+  // Acompanha o tema do IXC (claro/escuro) no painel e no visual modernizado
+  function atualizarTema() {
+    const t = Lolla.visual.detectarTema();
+    if (s.visualModerno) Lolla.visual.marcarTema(t);
+    if (t === s.tema) return;
+    s.tema = t;
+    if (host) host.setAttribute('data-tema', t);
+    enviarEstado();
+  }
+
   function verificar() {
     if (!s.ativo) return;
     const tem = tela.encontrar().ok;
+    if (tem) atualizarTema();
     if (tem && s.visualModerno) Lolla.visual.aplicar(); else Lolla.visual.remover();
     if (tem && !host) { montar(); reler(true); }
     else if (!tem && host) { desmontar(); s.aberto = false; s.assinatura = ''; }
@@ -101,7 +183,7 @@
     s.ativo = true;
     observador = new MutationObserver(() => { clearTimeout(espera); espera = setTimeout(verificar, 300); });
     observador.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
-    relogio = setInterval(() => { if (host) { reler(false); if (s.visualModerno) Lolla.visual.atualizarSelecao(tela.ler().rodape); } }, 2000);
+    relogio = setInterval(() => { if (host) { atualizarTema(); reler(false); if (s.visualModerno) Lolla.visual.atualizarSelecao(tela.ler().rodape); } }, 2000);
     document.addEventListener('change', aoMarcar, true);
     verificar();
   }
@@ -116,6 +198,7 @@
     clearInterval(relogio); clearTimeout(espera);
     document.removeEventListener('change', aoMarcar, true);
     Lolla.visual.remover();
+    document.documentElement.removeAttribute('data-lolla-tema');
     desmontar(); s.aberto = false;
   }
 
@@ -190,15 +273,29 @@
   // Ações usadas pelo painel flutuante e pela guia
   async function executar(acao, { refs = [], k, d } = {}) {
     switch (acao) {
-      case 'expandir': s.expandido = !s.expandido; render(); return;
+      case 'expandir': {
+        // Abre/fecha o painel largo com transição de largura, para ficar claro o que mudou
+        const p0 = raiz.querySelector('.painel');
+        const w0 = p0 ? p0.getBoundingClientRect().width : 0;
+        s.expandido = !s.expandido; render();
+        const p1 = raiz.querySelector('.painel');
+        if (p1 && p1.animate && w0 && !semMovimento()) {
+          const w1 = p1.getBoundingClientRect().width;
+          p1.animate([{ width: w0 + 'px' }, { width: w1 + 'px' }], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)' });
+          const c = p1.querySelector('.corpo');
+          if (c) c.animate([{ opacity: .25, filter: 'blur(3px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 340, easing: 'ease-out' });
+        }
+        avisar('ok', s.expandido ? 'Painel expandido: blocos lado a lado.' : 'Painel recolhido.');
+        return;
+      }
       case 'abrir-guia': {
         const r = await enviar({ tipo: 'abrir-guia' });
         if (!r.ok) avisar('erro', r.erro || 'Não foi possível abrir a guia.');
-        else { s.aberto = false; render(); }
+        else await fecharComAnimacao();
         return;
       }
-      case 'abrir': s.aberto = true; s.status = await enviar({ tipo: 'status' }); reler(true); return;
-      case 'minimizar': s.aberto = false; render(); return;
+      case 'abrir': s.aberto = true; render(); animarEntrada(); s.status = await enviar({ tipo: 'status' }); reler(true); return;
+      case 'minimizar': if (s.aberto && !animando) await fecharComAnimacao(); return;
       case 'mostrar': { const n = tela.destacar(refs); if (!n) avisar('erro', 'Linha não está visível na grade agora.'); return; }
       case 'selecionar': { const n = tela.selecionar(refs); avisar(n ? 'ok' : 'erro', n ? `${n} linha(s) marcada(s) no IXC. Confira e concilie pelo IXC.` : 'Nada para marcar (já marcadas ou fora da grade).'); return; }
       case 'analisar': return analisar();
