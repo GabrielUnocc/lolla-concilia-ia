@@ -61,7 +61,7 @@
       }
       store.set({ desbloqueado: true });
       render();
-      acoes.carregarContas().then(() => { if (store.get().contas.length) acoes.buscar(); });
+      acoes.iniciar();
     } catch (e) {
       telaCofre(e.message);
     }
@@ -145,6 +145,13 @@
         try { const r = await Lolla.services.claude.testarConexao(); store.set({ testeClaude: 'Conectado: ' + r.modelo }); }
         catch (e) { store.set({ testeClaude: e.message }); }
         return;
+      case 'carregar-cenario': {
+        const id = document.getElementById('cfg-cenario').value;
+        const nome = Lolla.services.cenarios[id].nome;
+        if (!(await confirmar(`Carregar o ${nome}? A base simulada atual será substituída.`, { confirmar: 'Carregar' }))) return;
+        await acoes.carregarCenario(id);
+        return abrirAba('conciliacao');
+      }
       case 'restaurar-base':
         if (!(await confirmar('Restaurar a base simulada? Conciliações e lançamentos de teste serão desfeitos.', { confirmar: 'Restaurar' }))) return;
         await Lolla.services.ixc.restaurarBase();
