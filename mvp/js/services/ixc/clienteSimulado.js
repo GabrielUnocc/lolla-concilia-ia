@@ -128,6 +128,91 @@ Lolla.services.ixcSimulado = (function () {
       return { ok: true };
     },
 
+    /*
+     * Importa um OFX (já lido por Lolla.domain.ofx) como uma conta nova na base simulada.
+     * modo: 'divergencias' (espelho do OFX com erros plantados), 'exato' (espelho fiel) ou 'vazio' (sem IXC).
+     * Devolve o gabarito do que foi plantado, para conferir a análise da Lolla.
+     */
+    async importarOfx({ ofx, modo }) {
+      await carregar(); await rede('importação do OFX');
+      const contaId = Math.max(0, ...db.contas.map((c) => c.id)) + 1;
+      const fim = (ofx.conta.numero || '').slice(-6);
+      db.contas.push({ id: contaId, banco: ofx.conta.banco, importada: true,
+        descricao: `${ofx.conta.banco} — conta ${fim ? '…' + fim : 's/n'} (OFX ${ofx.arquivo || 'importado'})` });
+
+      const novosExt = ofx.linhas.map((l) => ({
+        id: ++db.proximoId.ext, conta_id: contaId, conciliado: false, data: l.data,
+        documento: l.documento || '', tx_id: '', fitid: l.fitid,
+        credito: l.valor > 0 ? l.valor : 0, debito: l.valor < 0 ? -l.valor : 0, historico: l.historico || l.tipo
+      }));
+      db.extrato.push(...novosExt);
+
+      const gabarito = [];
+      if (modo !== 'vazio') {
+        let seq = 0;
+        const vistos = new Set(); // linha repetida no OFX não vira baixa repetida no IXC
+        const espelho = novosExt.filter((e) => !e.fitid || (vistos.has(e.fitid) ? false : vistos.add(e.fitid))).map((e) => ({
+          id: ++db.proximoId.mov, conta_id: contaId, conciliado: false, data: e.data,
+          documento: e.documento || 'IXC' + String(++seq).padStart(5, '0'), tx_id: '',
+          credito: e.credito, debito: e.debito,
+          historico: e.credito ? 'Recebimento ' + (e.documento ? 'boleto ' + e.documento : 'cliente') : 'Lançamento de despesa',
+          cliente: '', origem: e.credito ? 'retorno' : 'contas a pagar'
+        }));
+
+        if (modo === 'divergencias') {
+          const fmtR = (c) => fmt.reais(c);
+          const creditos = espelho.filter((m) => m.credito > 0);
+          const debitos = espelho.filter((m) => m.debito > 0);
+          // escolhe posições espalhadas e diferentes entre si
+          const usados = new Set();
+          const escolher = (lista, frac) => {
+            if (!lista.length) return null;
+            for (let k = 0; k < lista.length; k++) {
+              const m = lista[(Math.floor(lista.length * frac) + k) % lista.length];
+              if (!usados.has(m.id)) { usados.add(m.id); return m; }
+            }
+            return null;
+          };
+          const br = (iso) => fmt.brDeIso(iso);
+          const remover = (m) => espelho.splice(espelho.indexOf(m), 1);
+
+          const semBaixa = escolher(creditos, 0.15);
+          if (semBaixa) { remover(semBaixa); gabarito.push(`Crédito sem baixa no IXC: ${fmtR(semBaixa.credito)} em ${br(semBaixa.data)}`); }
+
+          const dup = escolher(creditos, 0.35);
+          if (dup) {
+            espelho.push(Object.assign({}, dup, { id: ++db.proximoId.mov, historico: dup.historico + ' (consulta de pagamentos)', origem: 'consulta de pagamentos' }));
+            gabarito.push(`Baixa duplicada no IXC: documento ${dup.documento}, ${fmtR(dup.credito)}`);
+          }
+
+          const atrasada = escolher(creditos, 0.55);
+          if (atrasada) {
+            const d = new Date(atrasada.data + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() - 3);
+            const nova = d.toISOString().slice(0, 10);
+            gabarito.push(`Data de crédito diferente: ${fmtR(atrasada.credito)} — IXC em ${br(nova)}, banco em ${br(atrasada.data)}`);
+            atrasada.data = nova; atrasada.documento = 'IXC' + String(++seq).padStart(5, '0');
+          }
+
+          const valorErrado = escolher(creditos, 0.75);
+          if (valorErrado) {
+            gabarito.push(`Valor baixado diferente: banco ${fmtR(valorErrado.credito)}, IXC ${fmtR(valorErrado.credito + 1000)} em ${br(valorErrado.data)}`);
+            valorErrado.credito += 1000;
+          }
+
+          const despesa = debitos.find((m) => /TARIFA/i.test((novosExt.find((e) => e.data === m.data && e.debito === m.debito) || {}).historico || '')) || escolher(debitos, 0.5);
+          if (despesa) { usados.add(despesa.id); remover(despesa); gabarito.push(`Débito do banco sem lançamento no IXC: ${fmtR(despesa.debito)} em ${br(despesa.data)}`); }
+
+          const ultimo = novosExt.map((e) => e.data).sort().pop();
+          espelho.push({ id: ++db.proximoId.mov, conta_id: contaId, conciliado: false, data: ultimo, documento: 'IXC' + String(++seq).padStart(5, '0'), tx_id: '',
+            credito: 15000, debito: 0, historico: 'Recebimento manual - dinheiro no balcão', cliente: '', origem: 'manual' });
+          gabarito.push(`Recebimento manual sem crédito no banco: R$ 150,00 em ${br(ultimo)}`);
+        }
+        db.movimentacao.push(...espelho);
+      }
+      await salvar();
+      return { contaId, periodo: { dataIni: ofx.periodo.inicio, dataFim: ofx.periodo.fim }, gabarito };
+    },
+
     async restaurarBase(cenarioId) {
       await carregar();
       const id = cenarioId || db.cenario || 'padrao';
@@ -181,6 +266,7 @@ Lolla.services.ixc = (function () {
     lancarRecebimento: (a) => cliente().lancarRecebimento(a),
     estornarBaixa: (a) => cliente().estornarBaixa(a),
     restaurarBase: (id) => cliente().restaurarBase(id),
+    importarOfx: (a) => cliente().importarOfx(a),
     cenarioAtual: () => cliente().cenarioAtual ? cliente().cenarioAtual() : Promise.resolve(null)
   };
 })();
