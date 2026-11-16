@@ -13,4 +13,4 @@ Os testes **1 a 3 decidem o projeto** e não dependem da TI. O teste 6 pode come
 | 5 | Acessar a aba de conciliação de documento | Obtém o ID do boleto | Pendente |
 | 6 | IA com sobras + manual + exemplos | Acerta causa e etapa nos casos conhecidos | Pendente |
 
-Detalhes do que já foi testado: [resultado do primeiro teste](../../testes/README.md).
+Detalhes do que já foi testado: [resultado do primeiro teste](../../historico/extrator-v0/testes/README.md).

@@ -16,6 +16,8 @@ Definições de **10/11/2026**, separadas por assunto. Os valores marcados como 
 
 Outras partes do repositório:
 
-- [Resultado do primeiro teste (extrator e pareamento)](../../testes/README.md)
+- [Resultado do primeiro teste (extrator e pareamento)](../../historico/extrator-v0/testes/README.md)
 - [Estrutura da tela do IXC (amostras mascaradas)](../amostras-ixc/)
-- [Protótipo visual](../../prototipo/)
+- [Extensão AR Lolla (versão atual)](../../extensao/lolla/)
+- [MVP web com IXC simulado](../../mvp/)
+- [Protótipo visual (histórico)](../../historico/prototipo/)
