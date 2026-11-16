@@ -11,8 +11,10 @@ function origemCadastrada(url, enderecos) {
 }
 
 async function atualizar() {
-  const c = await chrome.storage.local.get({ ativo: true, enderecos: [] });
+  const c = await chrome.storage.local.get({ ativo: true, visualModerno: true, enderecos: [] });
   $('ativo').checked = c.ativo;
+  $('visual').checked = c.visualModerno;
+  $('visual').disabled = !c.ativo;
   $('ativo-txt').textContent = c.ativo ? 'Painel aparece na Conciliação do IXC' : 'Desligada: não lê nada em nenhuma aba';
   const aba = await abaAtual();
   const st = $('status'), botao = $('abrir');
@@ -34,6 +36,7 @@ async function atualizar() {
 }
 
 $('ativo').addEventListener('change', async (e) => { await chrome.storage.local.set({ ativo: e.target.checked }); setTimeout(atualizar, 300); });
+$('visual').addEventListener('change', (e) => chrome.storage.local.set({ visualModerno: e.target.checked }));
 $('abrir').addEventListener('click', async () => {
   const aba = await abaAtual();
   chrome.tabs.sendMessage(aba.id, { tipo: 'abrir-painel' }, () => window.close());

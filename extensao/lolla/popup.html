@@ -5,11 +5,14 @@
 <title>AR Lolla</title>
 <style>
   body { margin: 0; width: 300px; font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1d2733; background: #f3f5f8; }
-  header { background: #12355f; color: #fff; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
-  header img { width: 24px; height: 24px; } header b { font-size: 15px; }
+  header { color: #fff; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+  header { background: linear-gradient(135deg, #12355f, #1f5fa8); }
+  header img { width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.5); }
+  header b { font-size: 15px; } header small { display: block; font-size: 11px; opacity: .85; }
+  .breve { font-size: 10px; background: #e07b24; border-radius: 8px; padding: 0 6px; margin-left: 4px; vertical-align: 2px; }
   main { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-  .linha { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #d9dfe7; border-radius: 8px; padding: 10px; }
-  .chave { position: relative; width: 40px; height: 22px; }
+  .linha { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #fff; border: 1px solid #d9dfe7; border-radius: 8px; padding: 10px; }
+  .chave { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
   .chave input { opacity: 0; width: 0; height: 0; }
   .chave span { position: absolute; inset: 0; background: #c9d2dd; border-radius: 22px; transition: .2s; cursor: pointer; }
   .chave span::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
@@ -23,10 +26,12 @@
 </style>
 </head>
 <body>
-  <header><img src="icones/lolla-32.png" alt=""><b>AR Lolla</b></header>
+  <header><img src="icones/lolla-avatar.png" alt="Lolla (visual em breve)"><div><b>AR Lolla</b><span class="breve">em breve</span><small>Conciliação bancária com IA</small></div></header>
   <main>
     <label class="linha" for="ativo"><span><b>Lolla ativa</b><br><span class="suave" id="ativo-txt">Painel aparece na Conciliação do IXC</span></span>
       <span class="chave"><input type="checkbox" id="ativo"><span></span></span></label>
+    <label class="linha" for="visual"><span><b>Visual modernizado</b><br><span class="suave">Só a aparência da Conciliação. Dados e funções do IXC não mudam.</span></span>
+      <span class="chave"><input type="checkbox" id="visual"><span></span></span></label>
     <div class="status" id="status">Verificando esta aba…</div>
     <button id="abrir" disabled>Abrir o painel nesta aba</button>
     <p class="suave">Endereços do IXC, chave da API e modelo: <a href="#" id="opcoes">Configurações</a></p>
