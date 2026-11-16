@@ -19,6 +19,15 @@ Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamen
 - **Indicadores**: totais, diferença por dia, % pareado pelo código, sobras por tipo, taxa de aceite, tokens e custo.
 - **Configurações**: testar a conexão, forçar a IA simulada, ajustar erro e latência do IXC simulado, restaurar a base.
 
+## Cenários de teste
+
+Em **Configurações → Cenário de teste** dá para trocar a base simulada:
+
+- **Cenário 1 — Sicoob e Bradesco (03 a 13/11):** lote, rendimento não lançado, baixa duplicada, tarifa, recebimento manual, PIX sem baixa, data de crédito e estorno.
+- **Cenário 2 — Sicredi e Itaú (16 a 24/11):** lote de 4 boletos, pares ambíguos, linha repetida no OFX, PIX baixado 2x, float D+2, estorno, bloqueio judicial, convênio e tarifa. A conta Itaú fecha sem divergência.
+
+Para criar outro cenário, copie `js/services/ixc/cenarioTeste2.js`, mude o nome e adicione o `<script>` no `index.html`.
+
 ## Estrutura
 
 | Pasta / arquivo | Responsabilidade |
