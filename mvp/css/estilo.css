@@ -134,3 +134,15 @@ table.simples { background: var(--cartao); border: 1px solid var(--borda); borde
 button.perigo { background: var(--vermelho); border-color: var(--vermelho); color: #fff; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
 html { color-scheme: light; }
+
+.dialogo.largo { max-width: 600px; max-height: 90vh; overflow: auto; }
+.dialogo h3 { margin: 0; }
+.dialogo fieldset { border: 1px solid var(--borda); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+.dialogo legend { font-size: 12px; color: var(--suave); padding: 0 4px; }
+.opcao { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.opcao span { display: flex; flex-direction: column; }
+.opcao small { color: var(--suave); }
+.arquivo { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--suave); }
+.alerta.aviso { background: #fff6e5; color: #7a4d00; }
+.alerta ul, .gabarito { margin: 4px 0 0 18px; padding: 0; }
+.ok-txt { color: var(--verde); margin: 0; }
