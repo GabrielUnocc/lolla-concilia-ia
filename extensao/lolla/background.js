@@ -116,12 +116,19 @@ const tratadores = {
     const r = await chamarClaude({ system: 'Responda apenas: ok', messages: [{ role: 'user', content: 'teste' }], maxTokens: 10 });
     return { modelo: r.modelo };
   },
-  async sincronizar() { await sincronizarScripts(); await injetarNasAbasAbertas(); return {}; }
+  async sincronizar() { await sincronizarScripts(); await injetarNasAbasAbertas(); return {}; },
+  // Abre a Lolla numa guia própria, ligada à aba (e ao quadro) do IXC que pediu
+  async 'abrir-guia'(_msg, rem) {
+    if (!rem || !rem.tab) throw new Error('Aba do IXC não identificada.');
+    const url = chrome.runtime.getURL(`guia.html?aba=${rem.tab.id}&quadro=${rem.frameId || 0}`);
+    await chrome.tabs.create({ url, index: rem.tab.index + 1, openerTabId: rem.tab.id });
+    return {};
+  }
 };
 
-chrome.runtime.onMessage.addListener((msg, _rem, responder) => {
+chrome.runtime.onMessage.addListener((msg, rem, responder) => {
   const fn = tratadores[msg && msg.tipo];
   if (!fn) return false;
-  fn(msg).then((r) => responder(Object.assign({ ok: true }, r))).catch((e) => responder({ ok: false, erro: e.message }));
+  fn(msg, rem).then((r) => responder(Object.assign({ ok: true }, r))).catch((e) => responder({ ok: false, erro: e.message }));
   return true;
 });

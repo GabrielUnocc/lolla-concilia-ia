@@ -27,7 +27,10 @@ A tela de **Configurações** abre sozinha na primeira vez.
 4. **Analisar sobras com IA** mostra causa, próximo passo e certeza de cada divergência.
    - **Mostrar:** destaca a linha na grade do IXC.
    - **Selecionar no IXC:** marca as caixinhas no IXC. A Lolla nunca concilia; quem concilia é você, pelo botão do IXC.
-5. Para **desligar**, clique no ícone da Lolla na barra e desmarque **Lolla ativa**. Para desligar de vez, use `chrome://extensions`.
+5. No topo do painel:
+   - **⤢ Expandir:** o painel fica largo, com os blocos lado a lado (**⤡ Recolher** volta ao normal).
+   - **↗ Abrir em guia:** abre a Lolla numa aba própria do Chrome, conectada ao IXC. Ela se atualiza sozinha; **Mostrar** e **Selecionar** levam de volta à aba do IXC. Se o IXC for recarregado, a guia reconecta sozinha.
+6. Para **desligar**, clique no ícone da Lolla na barra e desmarque **Lolla ativa**. Para desligar de vez, use `chrome://extensions`.
 
 ## O que conferir no teste com o IXC
 
@@ -53,3 +56,5 @@ A tela de **Configurações** abre sozinha na primeira vez.
 | `conteudo/conteudo.js` | Liga/desliga, leitura automática, análise e ações |
 | `lib/` | Pareamento, mascaramento, indicadores, prompts e IA simulada (os mesmos do MVP) |
 | `popup.html` / `opcoes.html` | Botão da barra (liga/desliga) e Configurações |
+| `guia.html` / `guia.js` | A Lolla em guia própria, ligada à aba do IXC |
+| `conteudo/visual.js` | Visual modernizado da Conciliação (só aparência) |
