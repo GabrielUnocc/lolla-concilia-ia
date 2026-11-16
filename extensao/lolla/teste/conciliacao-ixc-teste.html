@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>IXC (simulado) — Conciliação Manual</title>
+<style>
+body{margin:0;font:13px Arial,sans-serif;background:#e9edf2;color:#222}
+.topo{background:#2b3e50;color:#fff;padding:8px 14px;font-weight:bold}
+.aviso{background:#fff3cd;padding:6px 14px;font-size:12px}
+#box_search_tab_3{display:flex;gap:16px;padding:8px 14px;align-items:center}
+#grids_aba_3{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+.flexigrid{background:#fff;border:1px solid #c5ced8} .ftitle{background:#3c5a78;color:#fff;padding:6px 8px;font-weight:bold}
+.hDiv table,.bDiv table{width:100%;border-collapse:collapse;table-layout:fixed} .bDiv{max-height:420px;overflow:auto}
+th,td{padding:4px 6px;border-bottom:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} th{background:#f4f6f8;font-size:12px}
+th[axis="col0"],td[axis="0"]{width:24px} th[axis="col1"],td[axis="1"]{width:64px} th[axis="col2"],td[axis="2"]{width:40px} th[axis="col3"],td[axis="3"]{width:82px} th[axis="col6"],td[axis="6"],th[axis="col7"],td[axis="7"]{width:70px}
+tr.trSelected{background:#d6e9ff} .fa-times{color:#c0392b} .fa-check{color:#2e8b57} .fa-times::before{content:"✗"} .fa-check::before{content:"✓"}
+#rodape_aba_3{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;padding:10px 14px} #rodape_aba_3 div{background:#fff;border:1px solid #c5ced8;padding:6px 10px}
+#rodape_aba_3 p{margin:2px 0;font-size:12px} #rodape_aba_3 input{width:120px} .verde{background:#d4edda!important} .laranja{background:#ffe5cc!important}
+button{padding:5px 12px}
+</style></head><body>
+<div class="topo">IXC Provedor (página de TESTE) · Financeiro › Conciliação bancária › Conciliação Manual</div>
+<div class="aviso">Página simulada para testar a extensão AR Lolla. Mesma estrutura de HTML da tela real (grades com atributo abbr e rodapé com os totais). Dados fictícios.</div>
+<section id="grids_aba_3">
+<div id="box_search_tab_3" style="grid-column:1/3">
+ <div class="search_input_group">Buscar movimentação <input type="text" data-grid="grid_lancamentos_aba_3" id="busca-mov"></div>
+ <div class="search_input_group">Buscar extrato <input type="text" data-grid="grid_lancamentos_OFX_3" id="busca-ext"></div>
+ <button id="btn-conciliar" disabled>Conciliar</button> <button id="btn-recarregar">Recarregar grades</button>
+</div>
+<div class="ixc-grids grid-global-container flexigrid novstripe">
+<div class="grid-title-container mDiv bg1"><div class="ftitle">Movimentação Financeira</div></div>
+<div class="grid-header-container hDiv"><div class="hDivBox"><table class="grid-table-container" cellpadding="0" cellspacing="0"><thead><tr class="tableRow"><th class="tableHeader" axis="col0" align="center"><div>-</div></th><th class="tableHeader" abbr="fn_movim_finan.id" axis="col1" align="center"><div>ID</div></th><th class="tableHeader" abbr="fn_movim_finan.conciliado" axis="col2" align="center"><div>Conc.</div></th><th class="tableHeader" abbr="fn_movim_finan.data" axis="col3" align="center"><div>Data</div></th><th class="tableHeader" abbr="fn_movim_finan.documento" axis="col4" align="left"><div>Documento</div></th><th class="tableHeader" abbr="fn_movim_finan.tx_id" axis="col5" align="left"><div>ID da transação</div></th><th class="tableHeader" abbr="fn_movim_finan.credito" axis="col6" align="right"><div>Entrada</div></th><th class="tableHeader" abbr="fn_movim_finan.debito" axis="col7" align="right"><div>Saída</div></th><th class="tableHeader" abbr="fn_movim_finan.historico" axis="col8" align="left"><div>Histórico</div></th></tr></thead></table></div></div>
+<div class="grid-body-container bDiv"><table id="grid_lancamentos_aba_3" class="grid_lancamentos_aba_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0"><tbody></tbody></table></div>
+</div>
+<div class="ixc-grids grid-global-container flexigrid novstripe">
+<div class="grid-title-container mDiv bg1"><div class="ftitle">Extrato Bancário</div></div>
+<div class="grid-header-container hDiv"><div class="hDivBox"><table class="grid-table-container" cellpadding="0" cellspacing="0"><thead><tr class="tableRow"><th class="tableHeader" axis="col0" align="center"><div>-</div></th><th class="tableHeader" abbr="fn_extrato.id" axis="col1" align="center"><div>ID</div></th><th class="tableHeader" abbr="fn_extrato.conciliado" axis="col2" align="center"><div>Conc.</div></th><th class="tableHeader" abbr="fn_extrato.data" axis="col3" align="center"><div>Data</div></th><th class="tableHeader" abbr="fn_extrato.documento" axis="col4" align="left"><div>Documento</div></th><th class="tableHeader" abbr="fn_extrato.tx_id" axis="col5" align="left"><div>ID da transação</div></th><th class="tableHeader" abbr="fn_extrato.credito" axis="col6" align="right"><div>Entrada</div></th><th class="tableHeader" abbr="fn_extrato.debito" axis="col7" align="right"><div>Saída</div></th><th class="tableHeader" abbr="fn_extrato.historico" axis="col8" align="left"><div>Histórico</div></th></tr></thead></table></div></div>
+<div class="grid-body-container bDiv"><table id="grid_lancamentos_OFX_3" class="grid_lancamentos_OFX_3 autoht grid-overflow-ellipsis" cellpadding="0" cellspacing="0" border="0"><tbody></tbody></table></div>
+</div>
+</section>
+<section id="rodape_aba_3">
+<div><p>Total selecionado:</p><input type="text" readonly id="total_selecionado_aba3_mov"><p>Total a conciliar:</p><input type="text" readonly id="total_a_conciliar_aba3_mov"></div>
+<div><p>Diferença:</p><input type="text" readonly id="diferenca_aba3"></div>
+<div><p>Total selecionado:</p><input type="text" id="total_selecionado_aba3_ext" readonly><p>Total a conciliar:</p><input type="text" readonly id="total_a_conciliar_aba3_ext"></div>
+</section>
+<script>
+const DADOS = {"mov": [{"id": 131371, "c": false, "d": "02/11/2026", "doc": "7178351", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178351"}, {"id": 131372, "c": false, "d": "02/11/2026", "doc": "7178352", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178352"}, {"id": 131373, "c": false, "d": "02/11/2026", "doc": "7178353", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178353"}, {"id": 131374, "c": false, "d": "02/11/2026", "doc": "7178354", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178354"}, {"id": 131375, "c": false, "d": "02/11/2026", "doc": "", "tx": "EM86MG4VKFC14LA9EDCNRB5W4", "cr": 89.9, "db": 0, "h": "Rec. PIX XXX"}, {"id": 131376, "c": false, "d": "03/11/2026", "doc": "7178355", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178355"}, {"id": 131377, "c": false, "d": "03/11/2026", "doc": "7178356", "tx": "", "cr": 99.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178356"}, {"id": 131378, "c": false, "d": "03/11/2026", "doc": "7178357", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178357"}, {"id": 131379, "c": false, "d": "03/11/2026", "doc": "7178358", "tx": "", "cr": 60.0, "db": 0, "h": "Rec. Teste XXX doc.: 7178358"}, {"id": 131380, "c": false, "d": "03/11/2026", "doc": "", "tx": "EF5T2FSWQ8UBEG1GU0EBAPPD6", "cr": 109.9, "db": 0, "h": "Rec. PIX XXX"}, {"id": 131381, "c": false, "d": "04/11/2026", "doc": "7178359", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178359"}, {"id": 131382, "c": false, "d": "04/11/2026", "doc": "7178360", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178360"}, {"id": 131383, "c": false, "d": "04/11/2026", "doc": "7178361", "tx": "", "cr": 60.0, "db": 0, "h": "Rec. Teste XXX doc.: 7178361"}, {"id": 131384, "c": false, "d": "04/11/2026", "doc": "7178362", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178362"}, {"id": 131385, "c": false, "d": "04/11/2026", "doc": "", "tx": "ETXFVXA2HJRGAD57MN48NJ20H", "cr": 109.9, "db": 0, "h": "Rec. PIX XXX"}, {"id": 131386, "c": false, "d": "05/11/2026", "doc": "7178363", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178363"}, {"id": 131387, "c": false, "d": "05/11/2026", "doc": "7178364", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178364"}, {"id": 131388, "c": false, "d": "05/11/2026", "doc": "7178365", "tx": "", "cr": 60.0, "db": 0, "h": "Rec. Teste XXX doc.: 7178365"}, {"id": 131389, "c": false, "d": "05/11/2026", "doc": "7178366", "tx": "", "cr": 99.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178366"}, {"id": 131390, "c": false, "d": "05/11/2026", "doc": "", "tx": "EVBPM1GCKP4SAXU0EEFPRAZZ5", "cr": 89.9, "db": 0, "h": "Rec. PIX XXX"}, {"id": 131391, "c": true, "d": "02/11/2026", "doc": "7178300", "tx": "", "cr": 150.0, "db": 0, "h": "Rec. Teste XXX doc.: 7178300"}, {"id": 131392, "c": false, "d": "03/11/2026", "doc": "7178367", "tx": "", "cr": 60.0, "db": 0, "h": "Rec. Teste XXX doc.: 7178367"}, {"id": 131393, "c": false, "d": "03/11/2026", "doc": "7178368", "tx": "", "cr": 99.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178368"}, {"id": 131394, "c": false, "d": "03/11/2026", "doc": "7178369", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178369"}, {"id": 131395, "c": false, "d": "04/11/2026", "doc": "7178370", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178370"}, {"id": 131396, "c": false, "d": "04/11/2026", "doc": "7178370", "tx": "", "cr": 79.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178370 (consulta)"}, {"id": 131397, "c": false, "d": "05/11/2026", "doc": "", "tx": "", "cr": 99.9, "db": 0, "h": "Recebimento manual - dinheiro no balcão"}, {"id": 131398, "c": false, "d": "02/11/2026", "doc": "7178371", "tx": "", "cr": 129.9, "db": 0, "h": "Rec. Teste XXX doc.: 7178371"}], "ext": [{"id": 88011, "c": false, "d": "02/11/2026", "doc": "7178351", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88012, "c": false, "d": "02/11/2026", "doc": "7178352", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88013, "c": false, "d": "02/11/2026", "doc": "7178353", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88014, "c": false, "d": "02/11/2026", "doc": "7178354", "tx": "", "cr": 79.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88015, "c": false, "d": "02/11/2026", "doc": "", "tx": "EM86MG4VKFC14LA9EDCNRB5W4", "cr": 89.9, "db": 0, "h": "PIX RECEBIDO - XXX CPF ***"}, {"id": 88016, "c": false, "d": "03/11/2026", "doc": "7178355", "tx": "", "cr": 79.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88017, "c": false, "d": "03/11/2026", "doc": "7178356", "tx": "", "cr": 99.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88018, "c": false, "d": "03/11/2026", "doc": "7178357", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88019, "c": false, "d": "03/11/2026", "doc": "7178358", "tx": "", "cr": 60.0, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88020, "c": false, "d": "03/11/2026", "doc": "", "tx": "EF5T2FSWQ8UBEG1GU0EBAPPD6", "cr": 109.9, "db": 0, "h": "PIX RECEBIDO - XXX CPF ***"}, {"id": 88021, "c": false, "d": "04/11/2026", "doc": "7178359", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88022, "c": false, "d": "04/11/2026", "doc": "7178360", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88023, "c": false, "d": "04/11/2026", "doc": "7178361", "tx": "", "cr": 60.0, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88024, "c": false, "d": "04/11/2026", "doc": "7178362", "tx": "", "cr": 79.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88025, "c": false, "d": "04/11/2026", "doc": "", "tx": "ETXFVXA2HJRGAD57MN48NJ20H", "cr": 109.9, "db": 0, "h": "PIX RECEBIDO - XXX CPF ***"}, {"id": 88026, "c": false, "d": "05/11/2026", "doc": "7178363", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88027, "c": false, "d": "05/11/2026", "doc": "7178364", "tx": "", "cr": 79.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88028, "c": false, "d": "05/11/2026", "doc": "7178365", "tx": "", "cr": 60.0, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88029, "c": false, "d": "05/11/2026", "doc": "7178366", "tx": "", "cr": 99.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88030, "c": false, "d": "05/11/2026", "doc": "", "tx": "EVBPM1GCKP4SAXU0EEFPRAZZ5", "cr": 89.9, "db": 0, "h": "PIX RECEBIDO - XXX CPF ***"}, {"id": 88031, "c": true, "d": "02/11/2026", "doc": "7178300", "tx": "", "cr": 150.0, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88032, "c": false, "d": "03/11/2026", "doc": "", "tx": "", "cr": 289.8, "db": 0, "h": "CRED LOTE COBRANCA"}, {"id": 88033, "c": false, "d": "04/11/2026", "doc": "7178370", "tx": "", "cr": 79.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}, {"id": 88034, "c": false, "d": "04/11/2026", "doc": "", "tx": "", "cr": 0, "db": 12.6, "h": "TARIFA COBRANCA 7 TITULOS"}, {"id": 88035, "c": false, "d": "05/11/2026", "doc": "", "tx": "EZZZZZZZZZZZZZZZZZZZZZZZZ", "cr": 60.0, "db": 0, "h": "PIX RECEBIDO - XXX CPF ***"}, {"id": 88036, "c": false, "d": "05/11/2026", "doc": "", "tx": "", "cr": 129.9, "db": 0, "h": "CRED.LIQUIDACAO COBRANCA"}]};
+const br = (v) => v.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const sel = { mov: new Set(), ext: new Set() };
+function linhas(lado) {
+  const busca = document.getElementById(lado === 'mov' ? 'busca-mov' : 'busca-ext').value.toLowerCase();
+  return DADOS[lado].filter((l) => !busca || JSON.stringify(l).toLowerCase().includes(busca));
+}
+function desenhar(lado) {
+  const pref = lado === 'mov' ? 'fn_movim_finan' : 'fn_extrato';
+  const tb = document.querySelector(lado === 'mov' ? '#grid_lancamentos_aba_3 tbody' : '#grid_lancamentos_OFX_3 tbody');
+  tb.innerHTML = linhas(lado).map((l) => `<tr class="tableRow ${sel[lado].has(l.id) ? 'trSelected' : ''}" id="row${l.id}">
+    <td class="tableCell" axis="0"><div><input type="checkbox" name="select_item" ${sel[lado].has(l.id) ? 'checked' : ''} ${l.c ? 'disabled' : ''} data-lado="${lado}" data-id="${l.id}"></div></td>
+    <td class="tableCell" axis="1" abbr="${pref}.id"><div title="${l.id}">${l.id}</div></td>
+    <td class="tableCell" axis="2" abbr="${pref}.conciliado"><div><i aria-hidden="true" class="fa ${l.c ? 'fa-check' : 'fa-times'}"></i></div></td>
+    <td class="tableCell" axis="3" abbr="${pref}.data"><div>${l.d}</div></td>
+    <td class="tableCell" axis="4" abbr="${pref}.documento"><div>${l.doc}</div></td>
+    <td class="tableCell" axis="5" abbr="${pref}.tx_id"><div>${l.tx}</div></td>
+    <td class="tableCell" axis="6" abbr="${pref}.credito"><div>${br(l.cr)}</div></td>
+    <td class="tableCell" axis="7" abbr="${pref}.debito"><div>${br(l.db)}</div></td>
+    <td class="tableCell" axis="8" abbr="${pref}.historico"><div title="${l.h}">${l.h}</div></td></tr>`).join('');
+}
+function totais() {
+  const soma = (arr) => arr.reduce((a, l) => a + l.cr - l.db, 0);
+  const sM = soma(DADOS.mov.filter((l) => sel.mov.has(l.id))), sE = soma(DADOS.ext.filter((l) => sel.ext.has(l.id)));
+  const pM = soma(DADOS.mov.filter((l) => !l.c)), pE = soma(DADOS.ext.filter((l) => !l.c));
+  const f = (id, v) => (document.getElementById(id).value = v);
+  f('total_selecionado_aba3_mov', sel.mov.size ? br(sM) : ''); f('total_selecionado_aba3_ext', sel.ext.size ? br(sE) : '');
+  f('total_a_conciliar_aba3_mov', br(pM)); f('total_a_conciliar_aba3_ext', br(pE)); f('diferenca_aba3', br(pM - pE));
+  const algum = sel.mov.size + sel.ext.size > 0, bate = algum && Math.abs(sM - sE) < 0.005;
+  document.querySelectorAll('#rodape_aba_3 div').forEach((d) => { d.classList.toggle('verde', bate); d.classList.toggle('laranja', algum && !bate); });
+  document.getElementById('btn-conciliar').disabled = !bate;
+}
+function tudo() { desenhar('mov'); desenhar('ext'); totais(); }
+document.addEventListener('change', (e) => {
+  const cb = e.target.closest('input[name="select_item"]'); if (!cb) return;
+  const s = sel[cb.dataset.lado], id = Number(cb.dataset.id);
+  cb.checked ? s.add(id) : s.delete(id); cb.closest('tr').classList.toggle('trSelected', cb.checked); totais();
+});
+document.getElementById('btn-conciliar').addEventListener('click', () => {
+  ['mov', 'ext'].forEach((lado) => DADOS[lado].forEach((l) => { if (sel[lado].has(l.id)) l.c = true; }));
+  sel.mov.clear(); sel.ext.clear();
+  document.querySelectorAll('.bDiv tbody').forEach((t) => (t.innerHTML = ''));
+  setTimeout(tudo, 600); // o IXC recarrega a grade depois de conciliar
+});
+document.getElementById('btn-recarregar').addEventListener('click', () => { document.querySelectorAll('.bDiv tbody').forEach((t) => (t.innerHTML = '')); setTimeout(tudo, 500); });
+document.querySelectorAll('#box_search_tab_3 input').forEach((i) => i.addEventListener('input', tudo));
+setTimeout(tudo, 400); // grades chegam depois da página, como no IXC
+</script>
+</body></html>
