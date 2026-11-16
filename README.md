@@ -2,17 +2,41 @@
 
 Ferramenta de apoio ao suporte para diagnosticar divergências na conciliação bancária do IXC Provedor: o que está no sistema (movimentação financeira) contra o que veio no extrato do banco (OFX).
 
-Status: ideia validada com protótipo visual e primeiro teste do extrator/pareamento (amostra mascarada e cenário fictício). Ainda sem teste em conciliação real nem IA conectada.
+Projeto **AR Lolla** (Agente Lolla). Status em 16/11/2026: extensão do Chrome na versão 0.3, testada no IXC simulado e na página de teste. Ainda falta o teste numa conciliação real (base de teste, mascarada) e a liberação da empresa para usar a IA com dados reais.
+
+## Por onde começar
+
+| Quero... | Vá em |
+|---|---|
+| Instalar e testar a extensão no IXC | [`extensao/lolla/`](extensao/lolla/) — leia o README da pasta |
+| Testar sem o IXC, com dados fictícios | [`mvp/`](mvp/) (app completa no navegador) ou [`extensao/lolla/teste/`](extensao/lolla/teste/) |
+| Entender o projeto, custos e retorno | [`docs/requisitos/`](docs/requisitos/) |
+| Ver como a tela do IXC é montada | [`docs/amostras-ixc/`](docs/amostras-ixc/) |
 
 ## Mapa do repositório
 
-| Pasta | O que tem |
-|---|---|
-| [`docs/requisitos/`](docs/requisitos/) | **Análise de requisitos**: objetivo, números, funcionamento, arquitetura, testes, custo, retorno e pendências |
-| [`docs/amostras-ixc/`](docs/amostras-ixc/) | HTML mascarado da tela de Conciliação Manual do IXC |
-| [`extensao/`](extensao/) | Código do extrator e do pareamento (base da extensão) |
-| [`testes/`](testes/) | Testes automáticos e resultado do primeiro teste de viabilidade |
-| [`prototipo/`](prototipo/) | Protótipo visual com dados fictícios |
+```
+README.md            este arquivo
+docs/
+  requisitos/        análise de requisitos (01 a 09): objetivo, números, arquitetura, testes, custo, retorno, pendências
+  amostras-ixc/      HTML mascarado da tela de Conciliação Manual do IXC
+extensao/
+  lolla/             EXTENSÃO DO CHROME (versão atual, 0.3) — o produto
+mvp/                 app web com IXC simulado, IA (ou IA simulada), indicadores e importação de OFX
+historico/           primeiras versões, só para consulta (não usar)
+  prototipo/         protótipo visual com 4 cenários fictícios
+  extrator-v0/       primeiro extrator + pareamento e seus testes automáticos
+```
+
+| Pasta | Situação | O que é |
+|---|---|---|
+| [`extensao/lolla/`](extensao/lolla/) | **Em uso** | Extensão MV3: lê as grades do IXC, confere com o rodapé, pareia em código, analisa as sobras com a IA, visual modernizado e painel em guia |
+| [`mvp/`](mvp/) | **Em uso** | Mesma lógica rodando sozinha no navegador, para testar cenários sem o IXC |
+| [`docs/requisitos/`](docs/requisitos/) | **Em uso** | Documentação do projeto |
+| [`docs/amostras-ixc/`](docs/amostras-ixc/) | Referência | Base para o leitor da extensão |
+| [`historico/`](historico/) | Arquivado | Versões que deram origem às de cima |
+
+O pareamento, o mascaramento e os prompts são os mesmos no `mvp/js/` e no `extensao/lolla/lib/`. Ao alterar um, copie para o outro.
 
 ## Problema
 
@@ -54,18 +78,9 @@ Detalhes em `docs/amostras-ixc/`.
 - Totais: `#total_selecionado_aba3_mov`, `#total_a_conciliar_aba3_mov`, `#diferenca_aba3`, `#total_selecionado_aba3_ext`, `#total_a_conciliar_aba3_ext`.
 - `Diferença` = total a conciliar (IXC) menos total a conciliar (extrato).
 
-## Protótipo
-
-`prototipo/conciliacao_ia_simulacao.html`: abra no navegador. Simulação com dados fictícios, no estilo do IXC, com seleção de linhas (verde quando os valores batem, laranja quando não), botão Conciliar, totais e painel de análise da IA com quatro cenários: lote, duplicado, só no banco e só no IXC.
-
 ## Próximos passos
 
-- [ ] Capturar um caso real (HTML das grades preenchidas, mascarado) de uma conciliação que não fecha.
-- [ ] Extensão de navegador que extrai as duas grades para JSON.
-- [ ] Pareamento automático em código (valor, data, documento, tx_id, soma em lote).
-- [ ] Integração com a IA para as divergências restantes.
-- [ ] Regras aprendidas a partir das correções do suporte.
-- [ ] Ler também a aba Filtros (conta e período) para dar contexto à IA.
+Lista completa e responsáveis em [`docs/requisitos/09-pendencias-e-proximos-passos.md`](docs/requisitos/09-pendencias-e-proximos-passos.md).
 
 ## Privacidade
 
