@@ -10,6 +10,7 @@
 window.LOLLA_CONFIG = {
   claude: {
     apiKey: '',                       // chave da API do Claude (uso local)
+    workspaceId: '',                  // só se a chave NÃO foi criada dentro de um workspace (ex.: 'wrkspc_...')
     model: 'claude-sonnet-5-5',       // alternativas: 'claude-haiku-5-5', 'claude-opus-5-5'
     baseUrl: 'https://api.anthropic.com',
     maxTokens: 2000,
