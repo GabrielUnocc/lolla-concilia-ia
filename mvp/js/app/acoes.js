@@ -53,6 +53,22 @@ Lolla.acoes = (function () {
       if (store.get().contas.length) await this.buscar();
     },
 
+    async importarOfx(ofx, modo) {
+      store.set({ carregando: true, erro: null });
+      try {
+        const r = await ixc.importarOfx({ ofx, modo });
+        store.set({ filtros: Object.assign({}, store.get().filtros, r.periodo, { contaId: r.contaId }), aba: 'conciliacao' });
+        await this.carregarContas();
+        await this.buscar();
+        avisar('ok', `OFX importado: ${ofx.resumo.total} lançamentos.`);
+        return r;
+      } catch (e) {
+        store.set({ carregando: false });
+        avisar('erro', e.message);
+        throw e;
+      }
+    },
+
     async carregarCenario(id) {
       store.set({ carregando: true });
       try {
