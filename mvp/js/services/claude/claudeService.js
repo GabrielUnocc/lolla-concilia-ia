@@ -13,7 +13,10 @@ Lolla.services.claude = (function () {
 
   // Estratégias de autenticação (troca futura sem tocar no resto)
   const autenticacao = {
-    'navegador-direto': (c) => ({ 'x-api-key': c.apiKey, 'anthropic-dangerous-direct-browser-access': 'true' }),
+    'navegador-direto': (c) => Object.assign(
+      { 'x-api-key': c.apiKey, 'anthropic-dangerous-direct-browser-access': 'true' },
+      c.workspaceId ? { 'anthropic-workspace-id': c.workspaceId } : {}  // só para chave sem workspace
+    ),
     intermediario: () => ({})
   };
 
@@ -42,7 +45,8 @@ Lolla.services.claude = (function () {
     if (!resp.ok) {
       const msg = (corpo.error && corpo.error.message) || resp.statusText;
       const amigavel = {
-        401: 'Chave da API inválida. Confira o config.js.',
+        400: /workspace/i.test(msg) ? 'A chave não está ligada a um workspace: preencha claude.workspaceId no config.js ou crie a chave escolhendo um workspace.' : undefined,
+        401: /CORS/i.test(msg) ? 'Sua organização na Anthropic não permite chamadas direto do navegador.' : 'Chave da API inválida. Confira o config.js.',
         403: 'A chave não tem permissão para este modelo.',
         404: 'Modelo não encontrado: ' + c.model,
         429: 'Limite de uso da API atingido. Aguarde e tente de novo.',
