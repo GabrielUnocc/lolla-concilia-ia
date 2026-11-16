@@ -25,7 +25,7 @@ npm test
 | `/login.html` | E-mail e senha. Sessão em cookie HttpOnly, senha com scrypt e limite de tentativas por IP. |
 | `/` | Lista de conciliações da equipe, com situação, pendências, diferença e autor. |
 | `/nova.html` | Envio do JSON extraído do IXC (validado na hora, com prévia dos totais), conta, período, observação e francesinha opcional (PDF, CSV, TXT, RET, XLS, XLSX ou OFX, até 10 MB). |
-| `/conciliacao.html?id=N` | Tela no estilo do IXC: abas Filtros, Conciliação Automática, Conciliação Manual e Todos os conciliados. Seleção verde/laranja, botão Conciliar e totais. Os vínculos ficam salvos aqui para o diagnóstico; para conciliar de fato, repita no IXC. |
+| `/conciliacao.html?id=N` | Tela no estilo do IXC: abas Filtros, Conciliação Manual, Ajustes e Todos os conciliados. Seleção verde/laranja, botão Conciliar e totais. Na Conciliação Manual dá para criar movimentações no lado do IXC e excluir linhas dos dois lados; tudo fica listado em Ajustes e pode ser desfeito. As linhas que já vieram conciliadas do IXC aparecem em Todos os conciliados. Vínculos e ajustes ficam salvos aqui para o diagnóstico; para valer, repita no IXC. |
 
 ### Formato do JSON
 

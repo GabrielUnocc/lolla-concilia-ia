@@ -235,3 +235,16 @@ table.tab { width: 100%; border-collapse: collapse; white-space: nowrap; font-si
 .painel-ia .grade-titulo { background: #e6eefb; }
 .painel-ia .corpo { padding: 12px; color: var(--mudo); }
 .ponto { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #9aa8b8; margin-right: 6px; vertical-align: 1px; }
+
+/* ---------- ajustes e diálogos ---------- */
+.espaco-topo { margin-top: 20px; margin-bottom: 8px; }
+.tag-nova { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 3px; padding: 0 5px; margin-left: 4px; background: #dce7f8; color: var(--primaria-esc); vertical-align: 1px; }
+.tag-acao { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 3px; padding: 1px 7px; }
+.tag-acao.inclusao { background: #dce7f8; color: var(--primaria-esc); }
+.tag-acao.exclusao { background: #fdeeee; color: #8a1f1f; }
+.dialogo { border: 1px solid var(--borda); border-radius: 6px; padding: 0; width: min(560px, calc(100% - 32px)); box-shadow: 0 10px 30px rgba(20, 35, 55, .25); color: var(--texto); background: var(--painel); }
+.dialogo::backdrop { background: rgba(20, 35, 55, .45); }
+.dialogo .janela-corpo p { margin: 0 0 12px; }
+.rodape-dialogo { border-top: 1px solid var(--borda); border-bottom: 0; }
+.btn.primario.perigo-forte { background: var(--vermelho); border-color: var(--vermelho); }
+.btn.primario.perigo-forte:hover:not(:disabled) { background: #b42f2f; }

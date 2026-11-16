@@ -5,7 +5,7 @@ import { randomBytes } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { abrirBanco, UPLOAD_DIR } from './lib/db.js';
 import { conferirSenha, HASH_FICTICIO, novoToken, hashToken } from './lib/senha.js';
-import { normalizarDados, avisosDePeriodo, resumo, paraISO, liquido, ErroValidacao } from './lib/dados.js';
+import { normalizarDados, avisosDePeriodo, resumo, paraISO, paraCentavos, liquido, aplicarAjustes, PREFIXO_NOVA, ErroValidacao } from './lib/dados.js';
 
 const PUBLIC = fileURLToPath(new URL('./public/', import.meta.url));
 const PORTA = Number(process.env.PORT || 3000);
@@ -70,6 +70,25 @@ export function criarApp(db) {
   const qVinculos = db.prepare(`SELECT v.id, v.ixc_ids, v.ext_ids, v.valor_centavos, v.criado_em, u.nome AS usuario
                                 FROM vinculos v JOIN usuarios u ON u.id = v.usuario_id WHERE v.conciliacao_id = ? ORDER BY v.id`);
   const vinculosDe = (id) => qVinculos.all(id).map((v) => ({ ...v, ixc_ids: JSON.parse(v.ixc_ids), ext_ids: JSON.parse(v.ext_ids) }));
+  const qAjustes = db.prepare(`SELECT a.id, a.tipo, a.lado, a.linha_id, a.linha_json, a.motivo, a.criado_em, u.nome AS usuario
+                               FROM ajustes a JOIN usuarios u ON u.id = a.usuario_id WHERE a.conciliacao_id = ? ORDER BY a.id`);
+  const ajustesDe = (id) => qAjustes.all(id).map(({ linha_json, ...a }) => ({ ...a, linha: JSON.parse(linha_json) }));
+  /** Dados como estão na ferramenta: importados + movimentações criadas − linhas excluídas. */
+  const estado = (c) => {
+    const ajustes = ajustesDe(c.id), vinculos = vinculosDe(c.id);
+    const dados = aplicarAjustes(JSON.parse(c.dados_json), ajustes);
+    return { dados, vinculos, ajustes, resumo: resumo(dados, vinculos, ajustes) };
+  };
+  const tocar = (id) => db.prepare("UPDATE conciliacoes SET atualizado_em = datetime('now') WHERE id = ?").run(id);
+  const transacao = (fn) => {
+    db.exec('BEGIN');
+    try { const r = fn(); db.exec('COMMIT'); return r; } catch (e) { db.exec('ROLLBACK'); throw e; }
+  };
+  const texto = (v, max, nome) => {
+    const t = String(v ?? '').trim();
+    if (t.length > max) throw new ErroValidacao(`${nome}: no máximo ${max} caracteres`);
+    return t;
+  };
   const qConc = db.prepare(`SELECT c.*, u.nome AS criado_por FROM conciliacoes c JOIN usuarios u ON u.id = c.usuario_id WHERE c.id = ?`);
 
   const rotas = [];
@@ -110,7 +129,7 @@ export function criarApp(db) {
     enviarJSON(res, 200, linhas.map(({ dados_json, avisos_json, ...c }) => ({
       ...c,
       avisos: JSON.parse(avisos_json).length,
-      resumo: resumo(JSON.parse(dados_json), vinculosDe(c.id)),
+      resumo: estado({ id: c.id, dados_json }).resumo,
     })));
   });
 
@@ -158,8 +177,7 @@ export function criarApp(db) {
     const c = qConc.get(p.id);
     if (!c) return erro(res, 404, 'Conciliação não encontrada');
     const { dados_json, avisos_json, francesinha_arquivo, ...resto } = c;
-    const dados = JSON.parse(dados_json), vinculos = vinculosDe(c.id);
-    enviarJSON(res, 200, { ...resto, avisos: JSON.parse(avisos_json), dados, vinculos, resumo: resumo(dados, vinculos) });
+    enviarJSON(res, 200, { ...resto, avisos: JSON.parse(avisos_json), ...estado(c) });
   });
 
   rota('DELETE', '/api/conciliacoes/:id', async (req, res) => {
@@ -185,7 +203,7 @@ export function criarApp(db) {
   // Confere uma lista de grupos { ixc: [ids], ext: [ids] }: ids existem, estão pendentes,
   // não se repetem entre grupos e os totais de cada grupo batem. O servidor refaz as somas.
   function validarGrupos(c, grupos) {
-    const dados = JSON.parse(c.dados_json), vinculos = vinculosDe(c.id);
+    const { dados, vinculos } = estado(c);
     const usados = { ixc: new Set(vinculos.flatMap((v) => v.ixc_ids)), ext: new Set(vinculos.flatMap((v) => v.ext_ids)) };
     const nesteEnvio = { ixc: new Set(), ext: new Set() };
     return grupos.map((g, i) => {
@@ -211,13 +229,11 @@ export function criarApp(db) {
 
   const qInserirVinculo = db.prepare('INSERT INTO vinculos (conciliacao_id, usuario_id, ixc_ids, ext_ids, valor_centavos) VALUES (?, ?, ?, ?, ?)');
   function gravarGrupos(c, usuario, grupos) {
-    db.exec('BEGIN');
-    try {
+    return transacao(() => {
       const ids = grupos.map((g) => Number(qInserirVinculo.run(c.id, usuario.id, JSON.stringify(g.ixc), JSON.stringify(g.ext), g.valor).lastInsertRowid));
-      db.prepare("UPDATE conciliacoes SET atualizado_em = datetime('now') WHERE id = ?").run(c.id);
-      db.exec('COMMIT');
+      tocar(c.id);
       return ids;
-    } catch (e) { db.exec('ROLLBACK'); throw e; }
+    });
   }
 
   // Vincula as linhas selecionadas como um único grupo (conciliação manual).
@@ -240,10 +256,95 @@ export function criarApp(db) {
     enviarJSON(res, 201, { ids });
   });
 
+  // Desfaz todos os vínculos da conciliação: as linhas voltam para a Conciliação Manual.
+  rota('DELETE', '/api/conciliacoes/:id/vinculos', async (req, res, { p }) => {
+    if (!qConc.get(p.id)) return erro(res, 404, 'Conciliação não encontrada');
+    const r = db.prepare('DELETE FROM vinculos WHERE conciliacao_id = ?').run(p.id);
+    tocar(p.id);
+    enviarJSON(res, 200, { desfeitos: Number(r.changes) });
+  });
+
   rota('DELETE', '/api/conciliacoes/:id/vinculos/:vid', async (req, res, { p }) => {
     const r = db.prepare('DELETE FROM vinculos WHERE id = ? AND conciliacao_id = ?').run(p.vid, p.id);
     if (!r.changes) return erro(res, 404, 'Vínculo não encontrado');
-    db.prepare("UPDATE conciliacoes SET atualizado_em = datetime('now') WHERE id = ?").run(p.id);
+    tocar(p.id);
+    enviarJSON(res, 200, { ok: true });
+  });
+
+  // ---------- ajustes: criar movimentação no IXC e excluir linhas ----------
+  const MOTIVOS_EXCLUSAO = ['Duplicidade', 'Ignorado (não lançado)', 'Errado', 'Outro'];
+  const qInserirAjuste = db.prepare(`INSERT INTO ajustes (conciliacao_id, usuario_id, tipo, lado, linha_id, linha_json, motivo)
+                                     VALUES (?, ?, ?, ?, ?, ?, ?)`);
+
+  // Cria uma movimentação no lado do IXC (ex.: tarifa ou recebimento que não foi lançado).
+  rota('POST', '/api/conciliacoes/:id/movimentacoes', async (req, res, { p, usuario }) => {
+    const c = qConc.get(p.id);
+    if (!c) return erro(res, 404, 'Conciliação não encontrada');
+    const b = await lerCorpo(req);
+    if (!['entrada', 'saida'].includes(b.tipo)) throw new ErroValidacao('Escolha se é entrada ou saída');
+    const valor = paraCentavos(b.valor, 'Valor');
+    if (valor <= 0) throw new ErroValidacao('Valor: informe um valor maior que zero');
+    const linha = {
+      data: paraISO(b.data, 'Data'),
+      documento: texto(b.documento, 60, 'Documento'),
+      tx_id: '',
+      credito: b.tipo === 'entrada' ? valor : 0,
+      debito: b.tipo === 'saida' ? valor : 0,
+      historico: texto(b.historico, 200, 'Histórico'),
+    };
+    if (!linha.historico) throw new ErroValidacao('Histórico: descreva a movimentação');
+    const r = qInserirAjuste.run(c.id, usuario.id, 'inclusao', 'ixc', null, JSON.stringify(linha), texto(b.motivo, 500, 'Motivo'));
+    tocar(c.id);
+    enviarJSON(res, 201, { id: PREFIXO_NOVA + r.lastInsertRowid });
+  });
+
+  // Exclui linhas pendentes dos dois lados. Movimentação criada aqui é apagada; linha importada
+  // fica guardada na aba Ajustes e pode ser restaurada. Tudo ou nada.
+  rota('POST', '/api/conciliacoes/:id/exclusoes', async (req, res, { p, usuario }) => {
+    const c = qConc.get(p.id);
+    if (!c) return erro(res, 404, 'Conciliação não encontrada');
+    const b = await lerCorpo(req);
+    const pedidos = { ixc: b.ixc ?? [], ext: b.ext ?? [] };
+    if (!Array.isArray(pedidos.ixc) || !Array.isArray(pedidos.ext)) throw new ErroValidacao('Envie listas de ids');
+    if (!pedidos.ixc.length && !pedidos.ext.length) throw new ErroValidacao('Selecione ao menos uma linha para excluir');
+    if (pedidos.ixc.length + pedidos.ext.length > 5000) throw new ErroValidacao('Linhas demais em um envio');
+    const motivo = String(b.motivo ?? '');
+    if (!MOTIVOS_EXCLUSAO.includes(motivo)) throw new ErroValidacao(`Motivo: escolha ${MOTIVOS_EXCLUSAO.join(', ')}`);
+    const { dados, vinculos } = estado(c);
+    const linhasDe = { ixc: dados.movimentacao, ext: dados.extrato };
+    const nomeDe = { ixc: 'Movimentação', ext: 'Extrato' };
+    const alvos = [];
+    for (const lado of ['ixc', 'ext']) {
+      const vinculados = new Set(vinculos.flatMap((v) => (lado === 'ixc' ? v.ixc_ids : v.ext_ids)));
+      for (const rid of new Set(pedidos[lado].map(String))) {
+        const r = linhasDe[lado].find((x) => x.id === rid);
+        if (!r) throw new ErroValidacao(`${nomeDe[lado]}: id ${rid} não existe`);
+        if (r.conciliado) throw new ErroValidacao(`${nomeDe[lado]}: id ${rid} já está conciliado no IXC`);
+        if (vinculados.has(rid)) throw new ErroValidacao(`${nomeDe[lado]}: id ${rid} está em um vínculo. Desfaça o vínculo antes.`);
+        alvos.push({ lado, r });
+      }
+    }
+    transacao(() => {
+      for (const { lado, r } of alvos) {
+        if (r.criada) db.prepare("DELETE FROM ajustes WHERE id = ? AND conciliacao_id = ? AND tipo = 'inclusao'").run(r.ajuste_id, c.id);
+        else qInserirAjuste.run(c.id, usuario.id, 'exclusao', lado, r.id, JSON.stringify(r), motivo);
+      }
+      tocar(c.id);
+    });
+    enviarJSON(res, 200, { excluidas: alvos.length });
+  });
+
+  // Desfaz um ajuste: restaura a linha excluída ou apaga a movimentação criada.
+  rota('DELETE', '/api/conciliacoes/:id/ajustes/:aid', async (req, res, { p }) => {
+    const c = qConc.get(p.id);
+    if (!c) return erro(res, 404, 'Conciliação não encontrada');
+    const a = db.prepare('SELECT id, tipo FROM ajustes WHERE id = ? AND conciliacao_id = ?').get(p.aid, c.id);
+    if (!a) return erro(res, 404, 'Ajuste não encontrado');
+    if (a.tipo === 'inclusao' && vinculosDe(c.id).some((v) => v.ixc_ids.includes(PREFIXO_NOVA + a.id))) {
+      throw new ErroValidacao('Essa movimentação está em um vínculo. Desfaça o vínculo antes.');
+    }
+    db.prepare('DELETE FROM ajustes WHERE id = ?').run(a.id);
+    tocar(c.id);
     enviarJSON(res, 200, { ok: true });
   });
 

@@ -134,7 +134,37 @@ test('fluxo completo pela API', async (t) => {
   assert.equal(lote.corpo.ids.length, 1);
   assert.equal((await req('GET', `/api/conciliacoes/${cid}`)).corpo.resumo.diferenca, 9500 - 0);
 
+  // Ajustes: criar movimentação no IXC, excluir e restaurar linhas
+  const antes = (await req('GET', `/api/conciliacoes/${cid}`)).corpo.resumo;
+  assert.equal((await req('POST', `/api/conciliacoes/${cid}/movimentacoes`, { data: '2026-11-02', tipo: 'saida', valor: '0', historico: 'x' })).status, 422);
+  const nova = await req('POST', `/api/conciliacoes/${cid}/movimentacoes`, { data: '2026-11-02', tipo: 'saida', valor: '2,90', historico: 'Tarifa não lançada' });
+  assert.equal(nova.status, 201);
+  assert.match(nova.corpo.id, /^N\d+$/);
+  let atual = (await req('GET', `/api/conciliacoes/${cid}`)).corpo;
+  assert.equal(atual.resumo.diferenca, antes.diferenca - 290);
+  assert.equal(atual.resumo.pendentes_ixc, antes.pendentes_ixc + 1);
+  assert.ok(atual.dados.movimentacao.find((r) => r.id === nova.corpo.id).criada);
+  // não exclui linha que está em vínculo
+  assert.equal((await req('POST', `/api/conciliacoes/${cid}/exclusoes`, { ixc: ['131402'], motivo: 'Errado' })).status, 422);
+  const ext1 = atual.dados.extrato.find((r) => !r.conciliado && !atual.vinculos.some((x) => x.ext_ids.includes(r.id)));
+  let exc = await req('POST', `/api/conciliacoes/${cid}/exclusoes`, { ixc: [nova.corpo.id], ext: [ext1.id], motivo: 'texto livre' });
+  assert.equal(exc.status, 422);
+  exc = await req('POST', `/api/conciliacoes/${cid}/exclusoes`, { ixc: [nova.corpo.id], ext: [ext1.id], motivo: 'Duplicidade' });
+  assert.equal(exc.status, 200);
+  atual = (await req('GET', `/api/conciliacoes/${cid}`)).corpo;
+  assert.equal(atual.ajustes.length, 1); // a criada foi apagada; a importada ficou registrada
+  assert.equal(atual.ajustes[0].linha_id, ext1.id);
+  assert.equal(atual.ajustes[0].motivo, 'Duplicidade');
+  assert.equal(atual.resumo.diferenca, antes.diferenca + (ext1.credito - ext1.debito));
+  assert.equal((await req('POST', `/api/conciliacoes/${cid}/vinculos`, { ixc: ['131409'], ext: [ext1.id] })).status, 422);
+  assert.equal((await req('DELETE', `/api/conciliacoes/${cid}/ajustes/${atual.ajustes[0].id}`)).status, 200);
+  assert.equal((await req('GET', `/api/conciliacoes/${cid}`)).corpo.resumo.diferenca, antes.diferenca);
+
   assert.equal((await req('DELETE', `/api/conciliacoes/${cid}/vinculos/${v.corpo.id}`)).status, 200);
+  const todos = await req('DELETE', `/api/conciliacoes/${cid}/vinculos`);
+  assert.equal(todos.status, 200);
+  assert.equal(todos.corpo.desfeitos, 1);
+  assert.equal((await req('GET', `/api/conciliacoes/${cid}`)).corpo.vinculos.length, 0);
   assert.equal((await req('GET', '/../server.js')).status, 404);
   assert.equal((await req('POST', '/api/logout', {})).status, 200);
   assert.equal((await req('GET', `/api/conciliacoes/${cid}`)).status, 401);

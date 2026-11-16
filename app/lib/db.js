@@ -53,6 +53,22 @@ export function abrirBanco(arquivo = resolve(DATA_DIR, 'concilia.db')) {
       criado_em TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS vinculos_conciliacao ON vinculos(conciliacao_id);
+
+    -- Ajustes feitos nesta ferramenta sobre os dados importados (não alteram o IXC):
+    -- 'inclusao' cria uma movimentação no lado do IXC (linha_json guarda a linha);
+    -- 'exclusao' tira uma linha importada da conciliação (linha_id; linha_json guarda a cópia).
+    CREATE TABLE IF NOT EXISTS ajustes (
+      id INTEGER PRIMARY KEY,
+      conciliacao_id INTEGER NOT NULL REFERENCES conciliacoes(id) ON DELETE CASCADE,
+      usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+      tipo TEXT NOT NULL CHECK (tipo IN ('inclusao', 'exclusao')),
+      lado TEXT NOT NULL CHECK (lado IN ('ixc', 'ext')),
+      linha_id TEXT,
+      linha_json TEXT NOT NULL,
+      motivo TEXT NOT NULL DEFAULT '',
+      criado_em TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS ajustes_conciliacao ON ajustes(conciliacao_id);
   `);
   return db;
 }

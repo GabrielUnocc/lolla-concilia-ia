@@ -175,7 +175,28 @@ export function avisosDePeriodo(dados, ini, fim) {
 }
 
 /** Situação calculada a partir dos dados e dos vínculos feitos aqui. */
-export function resumo(dados, vinculos) {
+/** Prefixo dos ids das movimentações criadas na ferramenta (não colide com ids do IXC). */
+export const PREFIXO_NOVA = 'N';
+
+/**
+ * Aplica os ajustes sobre os dados importados: as inclusões entram na Movimentação
+ * (com `criada: true`) e as exclusões saem do lado delas. Não altera `dados`.
+ */
+export function aplicarAjustes(dados, ajustes) {
+  const fora = { ixc: new Set(), ext: new Set() };
+  const novas = [];
+  for (const a of ajustes) {
+    if (a.tipo === 'exclusao') fora[a.lado].add(a.linha_id);
+    else novas.push({ ...a.linha, id: PREFIXO_NOVA + a.id, conciliado: false, criada: true, ajuste_id: a.id });
+  }
+  return {
+    ...dados,
+    movimentacao: [...dados.movimentacao.filter((r) => !fora.ixc.has(r.id)), ...novas],
+    extrato: dados.extrato.filter((r) => !fora.ext.has(r.id)),
+  };
+}
+
+export function resumo(dados, vinculos, ajustes = []) {
   const usadosIxc = new Set(vinculos.flatMap((v) => v.ixc_ids));
   const usadosExt = new Set(vinculos.flatMap((v) => v.ext_ids));
   const pIxc = dados.movimentacao.filter((r) => !r.conciliado && !usadosIxc.has(r.id));
@@ -189,6 +210,8 @@ export function resumo(dados, vinculos) {
     total_a_conciliar_ext: tExt,
     diferenca: tIxc - tExt,
     vinculos: vinculos.length,
+    criadas: ajustes.filter((a) => a.tipo === 'inclusao').length,
+    excluidas: ajustes.filter((a) => a.tipo === 'exclusao').length,
     linhas_ixc: dados.movimentacao.length,
     linhas_ext: dados.extrato.length,
   };

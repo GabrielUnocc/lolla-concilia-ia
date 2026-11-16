@@ -1,9 +1,11 @@
 import { $, api, esc, dinheiro, dataBR, dataHoraBR, iniciarTopo, aviso } from './comum.js';
 
 const id = Number(new URLSearchParams(location.search).get('id'));
-const ABAS = [['filtros', 'Filtros'], ['auto', 'Conciliação Automática'], ['manual', 'Conciliação Manual'], ['todos', 'Todos os conciliados']];
+const ABAS = [['filtros', 'Filtros'], ['manual', 'Conciliação Manual'], ['ajustes', 'Ajustes'], ['todos', 'Todos os conciliados']];
 const CAMPOS_BUSCA = [['*', 'Todos'], ['id', 'ID'], ['data', 'Data'], ['documento', 'Documento'], ['credito', 'Entrada'], ['debito', 'Saída'], ['historico', 'Histórico']];
 const LADOS = { ixc: 'movimentacao', ext: 'extrato' };
+
+const visiveisAgora = { ixc: [], ext: [] }; // linhas pendentes que passam pela busca, na ordem da grade
 
 const S = {
   c: null,
@@ -48,7 +50,10 @@ function cabecalho(comSelecao, lado) {
     return `<th class="${cls} ordenavel${ativo ? ' ativa' : ''}" data-ordem="${campo}" title="${dica}"
       aria-sort="${ativo ? (o.dir < 0 ? 'descending' : 'ascending') : 'none'}">${rotulo}<span class="seta">${seta}</span></th>`;
   }).join('');
-  return `<tr>${comSelecao ? '<th class="c">-</th>' : ''}${ths}</tr>`;
+  const todos = comSelecao && lado
+    ? `<th class="c"><input type="checkbox" data-todos aria-label="Selecionar todas as linhas visíveis" title="Selecionar todas"></th>`
+    : comSelecao ? '<th class="c">-</th>' : '';
+  return `<tr>${todos}${ths}</tr>`;
 }
 
 const ehNumero = (s) => /^\d+$/.test(s);
@@ -76,7 +81,7 @@ function confere(r, campo, q) {
 function linhaHTML(r, { selecao, classe = '', conc }) {
   return `<tr class="${selecao ? 'clicavel ' : ''}${classe}" data-id="${esc(r.id)}">
     ${selecao ? `<td class="c"><input type="checkbox" ${selecao.marcado ? 'checked' : ''} aria-label="Selecionar ${esc(r.id)}"></td>` : ''}
-    <td class="c">${esc(r.id)}</td>
+    <td class="c">${esc(r.id)}${r.criada ? '<span class="tag-nova" title="Criada nesta ferramenta">nova</span>' : ''}</td>
     <td class="c">${conc ? '<span class="ic-sim" title="Conciliado">✓</span>' : '<span class="ic-nao" title="Não conciliado">✗</span>'}</td>
     <td class="c">${dataBR(r.data)}</td>
     <td>${esc(r.documento)}</td>
@@ -189,7 +194,10 @@ function desenharBarraPares() {
   $('#sel-valor').disabled = !grupos.length;
   $('#btn-iguais').disabled = !grupos.length;
   $('#btn-iguais').textContent = grupos.length ? `Selecionar valores iguais (${totalPares})` : 'Selecionar valores iguais';
-  $('#btn-limpar').disabled = !S.sel.ixc.size && !S.sel.ext.size;
+  const nSel = S.sel.ixc.size + S.sel.ext.size;
+  $('#btn-limpar').disabled = !nSel;
+  $('#btn-excluir').disabled = !nSel;
+  $('#btn-excluir').textContent = nSel ? `Excluir selecionadas (${nSel})` : 'Excluir selecionadas';
 
   const info = $('#info-pares');
   if (selecaoEhDosPares()) {
@@ -212,7 +220,14 @@ function desenharManual() {
     const { campo, q } = S.busca[lado];
     const todos = pendentes(lado);
     const visiveis = ordenar(todos.filter((r) => confere(r, campo, q.trim().toLowerCase())), lado);
+    visiveisAgora[lado] = visiveis;
     $(`#h-${lado}`).innerHTML = cabecalho(true, lado);
+    const marcadas = visiveis.filter((r) => S.sel[lado].has(r.id)).length;
+    const cb = $(`#h-${lado} [data-todos]`);
+    cb.checked = visiveis.length > 0 && marcadas === visiveis.length;
+    cb.indeterminate = marcadas > 0 && marcadas < visiveis.length;
+    cb.disabled = !visiveis.length;
+    cb.title = cb.checked ? 'Desmarcar todas' : q.trim() ? 'Selecionar todas as linhas encontradas na busca' : 'Selecionar todas';
     $(`#q-${lado}`).textContent = visiveis.length === todos.length ? `${todos.length} a conciliar` : `${visiveis.length} de ${todos.length}`;
     $(`#g-${lado}`).innerHTML = visiveis.length
       ? visiveis.map((r) => {
@@ -257,9 +272,34 @@ function desenharAuto() {
   }
 }
 
+function desenharAjustes() {
+  const a = S.c.ajustes;
+  $('#q-ajustes').textContent = `${a.length}`;
+  $('#g-ajustes').innerHTML = a.length
+    ? a.map((x) => {
+      const l = x.linha, criada = x.tipo === 'inclusao';
+      return `<tr>
+        <td><span class="tag-acao ${x.tipo}">${criada ? 'Criada' : 'Excluída'}</span></td>
+        <td>${x.lado === 'ixc' ? 'IXC' : 'Extrato'}</td>
+        <td>${esc(criada ? 'N' + x.id : x.linha_id)}</td>
+        <td class="c">${dataBR(l.data)}</td>
+        <td>${esc(l.documento)}</td>
+        <td class="d">${dinheiro(l.credito)}</td>
+        <td class="d">${dinheiro(l.debito)}</td>
+        <td title="${esc(l.historico)}">${esc(l.historico)}</td>
+        <td title="${esc(x.motivo)}">${esc(x.motivo) || '–'}</td>
+        <td>${esc(x.usuario)}</td>
+        <td>${dataHoraBR(x.criado_em)}</td>
+        <td><button class="btn pq perigo" type="button" data-desfazer-ajuste="${x.id}">${criada ? 'Apagar' : 'Restaurar'}</button></td>
+      </tr>`;
+    }).join('')
+    : '<tr><td colspan="12" class="vazio">Nenhum ajuste. Na Conciliação Manual você pode criar movimentações no lado do IXC e excluir linhas dos dois lados.</td></tr>';
+}
+
 function desenharTodos() {
   const v = S.c.vinculos;
   $('#q-vinc').textContent = `${v.length}`;
+  $('#btn-desfazer-todos').disabled = !v.length;
   $('#g-vinc').innerHTML = v.length
     ? v.map((x, i) => `<tr>
         <td>${i + 1}</td>
@@ -302,6 +342,7 @@ function desenharFiltros() {
     ['Pendentes no IXC', r.pendentes_ixc], ['Pendentes no extrato', r.pendentes_ext],
     ['Total a conciliar (IXC)', dinheiro(r.total_a_conciliar_ixc)], ['Total a conciliar (extrato)', dinheiro(r.total_a_conciliar_ext)],
     ['Diferença', dinheiro(r.diferenca)], ['Vínculos feitos aqui', r.vinculos],
+    ['Movimentações criadas', r.criadas], ['Linhas excluídas', r.excluidas],
   ].map(([t, n]) => `<div class="metrica"><span>${t}</span><b>${n}</b></div>`).join('');
 }
 
@@ -313,7 +354,7 @@ function desenharCabecalho() {
     ? '<span class="etiqueta fechada">Sem diferença</span>'
     : `<span class="etiqueta aberta">Diferença ${dinheiro(r.diferenca)}</span>`;
   $('#etapas').innerHTML = ABAS.map(([k, t]) => {
-    const cont = k === 'manual' ? nPend : k === 'todos' ? r.vinculos : k === 'auto' ? linhas('ixc').filter((x) => x.conciliado).length : 0;
+    const cont = k === 'manual' ? nPend : k === 'todos' ? r.vinculos : k === 'ajustes' ? c.ajustes.length : 0;
     return `<button class="etapa${S.aba === k ? ' ativa' : ''}" type="button" data-aba="${k}">${t}${cont ? `<span class="cont">${cont}</span>` : ''}</button>`;
   }).join('');
   const i = ABAS.findIndex((a) => a[0] === S.aba);
@@ -324,7 +365,7 @@ function desenharCabecalho() {
 function desenhar() {
   for (const [k] of ABAS) $(`#aba-${k}`).hidden = S.aba !== k;
   desenharCabecalho();
-  ({ filtros: desenharFiltros, auto: desenharAuto, manual: desenharManual, todos: desenharTodos })[S.aba]();
+  ({ filtros: desenharFiltros, manual: desenharManual, ajustes: desenharAjustes, todos: () => { desenharTodos(); desenharAuto(); } })[S.aba]();
 }
 
 async function recarregar() {
@@ -350,6 +391,14 @@ for (const lado of ['ixc', 'ext']) {
   $(`#ha-${lado}`).innerHTML = cabecalho(false);
   // Clique no cabeçalho: maior → menor, depois menor → maior, depois ordem original.
   $(`#h-${lado}`).addEventListener('click', (e) => {
+    if (e.target.matches('[data-todos]')) {
+      // Marca todas as linhas visíveis (respeita a busca); se já estiverem todas marcadas, desmarca.
+      const s = S.sel[lado], vis = visiveisAgora[lado];
+      const todasMarcadas = vis.length && vis.every((r) => s.has(r.id));
+      for (const r of vis) todasMarcadas ? s.delete(r.id) : s.add(r.id);
+      desenharManual();
+      return;
+    }
     const th = e.target.closest('[data-ordem]');
     if (!th) return;
     const campo = th.dataset.ordem, o = S.ordem[lado];
@@ -414,6 +463,105 @@ $('#g-vinc').addEventListener('click', async (e) => {
     await api(`/api/conciliacoes/${id}/vinculos/${b.dataset.desfazer}`, { metodo: 'DELETE' });
     await recarregar();
     aviso('Vínculo desfeito. As linhas voltaram para a Conciliação Manual.');
+  } catch (err) { aviso(err.message, 'erro'); }
+});
+
+$('#btn-desfazer-todos').addEventListener('click', () => {
+  const v = S.c.vinculos;
+  const nI = v.reduce((n, x) => n + x.ixc_ids.length, 0), nE = v.reduce((n, x) => n + x.ext_ids.length, 0);
+  $('#desfazer-texto').textContent = `Desfazer ${v.length} vínculo${v.length > 1 ? 's' : ''}? ` +
+    `${nI} linha(s) da Movimentação e ${nE} do Extrato voltam para a Conciliação Manual como pendentes. ` +
+    'As linhas que já vieram conciliadas do IXC não mudam.';
+  abrirDialogo($('#dlg-desfazer-todos'));
+});
+$('#form-desfazer-todos').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const b = $('#desfazer-confirmar');
+  b.disabled = true;
+  try {
+    const r = await api(`/api/conciliacoes/${id}/vinculos`, { metodo: 'DELETE' });
+    $('#dlg-desfazer-todos').close();
+    await recarregar();
+    aviso(`${r.desfeitos} vínculo(s) desfeito(s). As linhas voltaram para a Conciliação Manual.`);
+  } catch (err) { $('#dlg-desfazer-todos').close(); aviso(err.message, 'erro'); }
+  finally { b.disabled = false; }
+});
+
+// ---------- criar movimentação e excluir linhas ----------
+const abrirDialogo = (dlg) => { dlg.showModal(); dlg.querySelector('input:not([readonly]), select')?.focus(); };
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-fechar]');
+  if (b) b.closest('dialog').close();
+});
+
+$('#btn-nova').addEventListener('click', () => {
+  $('#form-nova').reset();
+  $('#nova-erro').hidden = true;
+  $('#nova-data').value = S.c.data_final;
+  $('#nova-data').min = S.c.data_inicial;
+  $('#nova-data').max = S.c.data_final;
+  abrirDialogo($('#dlg-nova'));
+});
+$('#form-nova').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const b = $('#nova-salvar');
+  b.disabled = true;
+  try {
+    const r = await api(`/api/conciliacoes/${id}/movimentacoes`, { metodo: 'POST', corpo: {
+      data: $('#nova-data').value, tipo: $('#nova-tipo').value, valor: $('#nova-valor').value.trim(),
+      documento: $('#nova-doc').value, historico: $('#nova-hist').value, motivo: $('#nova-motivo').value,
+    } });
+    $('#dlg-nova').close();
+    await recarregar();
+    aviso(`Movimentação ${r.id} criada no lado do IXC`);
+  } catch (err) {
+    $('#nova-erro').textContent = err.message;
+    $('#nova-erro').hidden = false;
+  } finally { b.disabled = false; }
+});
+
+$('#btn-excluir').addEventListener('click', () => {
+  const nI = S.sel.ixc.size, nE = S.sel.ext.size;
+  const partes = [nI && `${nI} da Movimentação`, nE && `${nE} do Extrato`].filter(Boolean).join(' e ');
+  const criadas = [...S.sel.ixc].filter((x) => porId('ixc', x)?.criada).length;
+  $('#excluir-texto').textContent = `Excluir ${partes} desta conciliação? As linhas importadas ficam na aba Ajustes e podem ser restauradas` +
+    (criadas ? `; ${criadas === 1 ? 'a movimentação criada aqui será apagada' : `as ${criadas} movimentações criadas aqui serão apagadas`}.` : '.') +
+    ' Nada é alterado no IXC.';
+  $('#excluir-motivo').value = '';
+  $('#excluir-erro').hidden = true;
+  abrirDialogo($('#dlg-excluir'));
+});
+$('#form-excluir').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!$('#excluir-motivo').value) {
+    $('#excluir-erro').textContent = 'Selecione o motivo da exclusão.';
+    $('#excluir-erro').hidden = false;
+    $('#excluir-motivo').focus();
+    return;
+  }
+  const b = $('#excluir-confirmar');
+  b.disabled = true;
+  try {
+    const r = await api(`/api/conciliacoes/${id}/exclusoes`, { metodo: 'POST', corpo: {
+      ixc: [...S.sel.ixc], ext: [...S.sel.ext], motivo: $('#excluir-motivo').value,
+    } });
+    $('#dlg-excluir').close();
+    S.sel.ixc.clear(); S.sel.ext.clear();
+    S.pares = null; S.valorEscolhido = '';
+    await recarregar();
+    aviso(`${r.excluidas} linha(s) excluída(s). Veja em Ajustes.`);
+  } catch (err) { $('#dlg-excluir').close(); aviso(err.message, 'erro'); }
+  finally { b.disabled = false; }
+});
+
+$('#g-ajustes').addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-desfazer-ajuste]');
+  if (!b) return;
+  const restaurar = b.textContent === 'Restaurar';
+  try {
+    await api(`/api/conciliacoes/${id}/ajustes/${b.dataset.desfazerAjuste}`, { metodo: 'DELETE' });
+    await recarregar();
+    aviso(restaurar ? 'Linha restaurada na Conciliação Manual.' : 'Movimentação apagada.');
   } catch (err) { aviso(err.message, 'erro'); }
 });
 
