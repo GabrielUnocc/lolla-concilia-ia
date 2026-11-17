@@ -191,6 +191,10 @@ Lolla.painel = (function () {
       const a = s.analise, r = a.resultado;
       corpo = `${a.desatualizada ? '<div class="aviso">A tela mudou depois desta análise. Analise de novo para atualizar.</div>' : ''}
         <div class="resumo">${esc(r.resumo || '')}</div>
+        <div class="contextos-usados suave">${(a.contextos || []).length
+          ? `<b>Contexto da IA enviado (${a.contextos.length}):</b> <span class="chips">${a.contextos.map((c) => `<span class="chip">${esc(c.titulo)}</span>`).join('')}</span>`
+          : '<b>Contexto da IA:</b> nenhum enviado nesta análise.'}</div>
+        ${a.avisoContexto ? `<div class="aviso">${esc(a.avisoContexto)}</div>` : ''}
         ${r.perguntas_ao_cliente.length ? `<div class="aviso"><b>Perguntar ao cliente:</b> ${r.perguntas_ao_cliente.map(esc).join(' · ')}</div>` : ''}
         <div class="cards">${r.itens.map((it, k) => {
           const d = a.decisoes[k], refs = (it.refs || []).join(',');
