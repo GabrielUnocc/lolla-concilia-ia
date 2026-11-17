@@ -10,7 +10,35 @@
   const { esc } = Lolla.core.fmt;
   const $ = (sel) => document.querySelector(sel);
 
-  const ABAS = [['conciliacao', 'Conciliação'], ['indicadores', 'Indicadores'], ['historico', 'Histórico'], ['configuracoes', 'Configurações']];
+  const ABAS = [['painel', 'Painel'], ['conciliacao', 'Conciliação'], ['indicadores', 'Indicadores'], ['historico', 'Histórico'], ['contexto', 'Contexto da IA'], ['configuracoes', 'Configurações']];
+  const ctxSrv = Lolla.services.contexto;
+  const vCtx = () => Lolla.ui.views.contexto;
+  const setCtx = (parcial) => store.set((s) => ({ ctx: Object.assign({}, s.ctx, parcial) }));
+
+  /* ---------- Contexto da IA ---------- */
+  async function carregarContextos() {
+    if (!ctxSrv.disponivel()) return;
+    setCtx({ erro: null });
+    try {
+      const r = await ctxSrv.listar();
+      const x = store.get().ctx;
+      const aberto = r.contextos.some((i) => i.id === x.aberto) ? x.aberto : (r.contextos[0] || {}).id || null;
+      setCtx({ lista: r.contextos, limites: r.limites, total: r.total_caracteres, aberto });
+    } catch (e) { setCtx({ erro: e.message }); }
+  }
+  async function salvarContexto() {
+    const x = store.get().ctx, rc = vCtx().rascunho;
+    const titulo = rc.titulo.trim(), texto = rc.texto.trim();
+    if (!titulo || !texto) return setCtx({ erroForm: !titulo ? 'Informe o título.' : 'Escreva o texto do contexto.' });
+    setCtx({ salvando: true, erroForm: null });
+    try {
+      const novo = x.modo === 'novo';
+      const r = novo ? await ctxSrv.criar({ titulo, texto }) : await ctxSrv.atualizar(x.aberto, { titulo, texto });
+      setCtx({ salvando: false, modo: 'ver', aberto: r.id });
+      await carregarContextos();
+      acoes.avisar('ok', novo ? 'Contexto salvo. A próxima análise já usa ele.' : 'Contexto atualizado. A próxima análise já usa o texto novo.');
+    } catch (e) { setCtx({ salvando: false, erroForm: e.message }); }
+  }
 
   /* ---------- Diálogo de confirmação na própria página (confirm/prompt nativos não funcionam em todo lugar) ---------- */
   function dialogo({ texto, confirmar = 'Confirmar', perigo = false, conteudo = '' }) {
