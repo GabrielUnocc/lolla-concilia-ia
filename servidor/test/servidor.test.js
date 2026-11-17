@@ -89,3 +89,16 @@ test('os contextos iniciais do projeto são válidos e entram na primeira vez', 
   assert.equal((await req('GET', '/api/contextos')).corpo.contextos.length, iniciais.length - 1);
 });
 
+test('só o MVP e extensões do Chrome usam a API', async (t) => {
+  const { req } = await subir(t);
+  // outro site aberto no navegador não lê nem grava
+  assert.equal((await req('GET', '/api/contextos', null, 'https://site-qualquer.com')).status, 403);
+  assert.equal((await req('POST', '/api/contextos', { titulo: 'a', texto: 'b' }, 'https://site-qualquer.com')).status, 403);
+  assert.equal((await req('POST', '/api/contextos', { titulo: 'a', texto: 'b' }, null)).status, 403); // escrita sem Origin
+  // extensão: permitido, com CORS para a origem dela
+  const ext = 'chrome-extension://abcdefghijklmnopabcdefghijklmnop';
+  const r = await req('POST', '/api/contextos', { titulo: 'Da extensão', texto: 'ok' }, ext);
+  assert.equal(r.status, 201);
+  assert.equal(r.headers.get('access-control-allow-origin'), ext);
+  assert.equal((await req('GET', '/api/contextos', null, ext)).corpo.contextos.length, 1);
+});
