@@ -106,7 +106,11 @@ Lolla.ui.views.conciliacao = (function () {
     const perguntas = r.perguntas_ao_cliente.length
       ? `<div class="perguntas"><b>Perguntar ao cliente:</b><ul>${r.perguntas_ao_cliente.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>` : '';
     const chat = s.chat.map((m) => `<div class="msg ${m.papel}">${esc(m.texto)}</div>`).join('');
-    return cab + `<div class="resumo">${esc(r.resumo)}</div>${perguntas}<div class="cards">${itens}</div>
+    const ctxUsados = (a.contextos || []).length
+      ? `<div class="ctx-usados"><b>Contexto da IA enviado (${a.contextos.length}):</b> ${a.contextos.map((x) => c.selo(x.titulo, 'azul')).join(' ')}</div>`
+      : '<div class="ctx-usados"><b>Contexto da IA:</b> nenhum enviado nesta análise.</div>';
+    const ctxAviso = a.avisoContexto ? `<div class="alerta aviso">${esc(a.avisoContexto)}</div>` : '';
+    return cab + `<div class="resumo">${esc(r.resumo)}</div>${ctxUsados}${ctxAviso}${perguntas}<div class="cards">${itens}</div>
       <div class="ia-acoes"><button data-acao="copiar-resumo">Copiar resumo para o atendimento</button>
         ${a.usage ? `<small>${a.usage.input_tokens} tokens de entrada · ${a.usage.output_tokens} de saída</small>` : ''}</div>
       <div class="chat"><div class="msgs">${chat}${s.conversando ? '<div class="msg lolla">…</div>' : ''}</div>
