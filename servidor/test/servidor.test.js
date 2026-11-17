@@ -69,3 +69,23 @@ test('contexto da IA: cadastro, edição, exclusão e validações', async (t) =
   assert.equal((await req('DELETE', `/api/contextos/${novo.corpo.id}`)).status, 404);
 });
 
+test('os contextos iniciais do projeto são válidos e entram na primeira vez', async (t) => {
+  const arquivo = new URL('../contextos-iniciais.json', import.meta.url);
+  const { readFileSync } = await import('node:fs');
+  const iniciais = JSON.parse(readFileSync(arquivo, 'utf8'));
+  const { LIMITES } = await import('../servidor.js');
+  assert.ok(iniciais.length > 0 && iniciais.length <= LIMITES.maxContextos);
+  assert.ok(iniciais.reduce((s, c) => s + c.texto.length, 0) <= LIMITES.maxTotal);
+  for (const c of iniciais) {
+    assert.ok(c.titulo && c.titulo.length <= LIMITES.maxTitulo, c.titulo);
+    assert.ok(c.texto && c.texto.length <= LIMITES.maxTexto, c.titulo);
+    assert.doesNotMatch(c.texto, /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|@/, c.titulo); // sem CPF nem e-mail
+  }
+  const { req } = await subir(t, arquivo.pathname);
+  const lista = await req('GET', '/api/contextos');
+  assert.equal(lista.corpo.contextos.length, iniciais.length);
+  // depois de salvar a primeira alteração, a lista passa a ser a do arquivo de dados (apagar não "ressuscita" os iniciais)
+  assert.equal((await req('DELETE', '/api/contextos/1')).status, 200);
+  assert.equal((await req('GET', '/api/contextos')).corpo.contextos.length, iniciais.length - 1);
+});
+
