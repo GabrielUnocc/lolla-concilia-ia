@@ -1,5 +1,17 @@
 # AR Lolla — MVP frontend (uso local)
 
+## Modo Análise (`analise.html`) — francesinha × OFX × recebimentos IXC
+
+Envie a francesinha (PDF), o extrato (OFX) e o relatório de recebimentos do IXC (CSV/XLS/XLSX). A página identifica o banco, mostra os dados extraídos, cruza tudo em código e explica cada divergência, com as linhas originais, CSV e texto pronto para o chamado. A IA é opcional e passa pelo intermediário local (a chave nunca fica no navegador).
+
+- Com IA: `npm run intermediario` e abra http://127.0.0.1:8787/analise.html
+- Sem IA: abra `analise.html` direto do disco (duplo clique)
+- Detalhes, regras e pendências: [`docs/requisitos/10-modo-analise.md`](../docs/requisitos/10-modo-analise.md)
+- Lógica em `js/domain/analise/`, tela em `js/ui/analise/`, leitor de PDF em `vendor/pdfjs/`. Ao mudar, rode `npm run sincronizar` para copiar para a extensão.
+
+---
+
+
 Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamento em código, análise das sobras com a API do Claude e indicadores.
 
 > **Segurança:** a chave da API fica visível no navegador. Use só neste computador, em ambiente controlado. Não publique esta aplicação nem versione o `config.js`.
