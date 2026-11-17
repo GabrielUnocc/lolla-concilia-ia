@@ -8,6 +8,7 @@ Projeto **AR Lolla** (Agente Lolla). Status em 16/11/2026: extensão do Chrome n
 
 | Quero... | Vá em |
 |---|---|
+| Cruzar francesinha × OFX × recebimentos IXC (Modo Análise) | `npm run intermediario` e abra http://127.0.0.1:8787/analise.html, ou o popup da extensão. Veja [`docs/requisitos/10-modo-analise.md`](docs/requisitos/10-modo-analise.md) |
 | Instalar e testar a extensão no IXC | [`extensao/lolla/`](extensao/lolla/): leia o README da pasta |
 | Rodar a aplicação web com login (equipe) | [`app/`](app/): veja "Como rodar" abaixo |
 | Testar sem o IXC, com dados fictícios | [`mvp/`](mvp/) (app completa no navegador) ou [`extensao/lolla/teste/`](extensao/lolla/teste/) |
@@ -25,7 +26,10 @@ docs/
   amostras-ixc/      HTML mascarado da tela de Conciliação Manual do IXC
 extensao/
   lolla/             EXTENSÃO DO CHROME (versão atual, 0.3): o produto
-mvp/                 app web com IXC simulado, IA (ou IA simulada), indicadores e importação de OFX
+mvp/                 app web com IXC simulado + Modo Análise (analise.html: francesinha × OFX × IXC)
+intermediario/       servidor local que guarda a chave da IA, aplica limites e mostra o custo (Modo Análise)
+scripts/             sincronizar-extensao.mjs: copia a lógica do mvp/ para a extensão
+testes/              testes do Modo Análise (unitários, ponta a ponta e amostras fictícias)
 historico/           primeiras versões, só para consulta (não usar)
   prototipo/         protótipo visual com 4 cenários fictícios
   extrator-v0/       primeiro extrator + pareamento e seus testes automáticos
@@ -40,7 +44,7 @@ historico/           primeiras versões, só para consulta (não usar)
 | [`docs/amostras-ixc/`](docs/amostras-ixc/) | Referência | Base para o leitor da extensão |
 | [`historico/`](historico/) | Arquivado | Versões que deram origem às de cima |
 
-O pareamento, o mascaramento e os prompts são os mesmos no `mvp/js/` e no `extensao/lolla/lib/`. Ao alterar um, copie para o outro.
+O pareamento, o mascaramento e os prompts são os mesmos no `mvp/js/` e no `extensao/lolla/lib/`. Ao alterar um, copie para o outro. O Modo Análise é copiado por `npm run sincronizar`, e o `npm test` falha se a cópia estiver desatualizada.
 
 ## Como rodar a aplicação web (`app/`)
 
@@ -49,7 +53,8 @@ Precisa de Node 22.13 ou mais novo (usa o SQLite nativo do Node, sem dependênci
 ```bash
 npm run criar-usuario -- voce@empresa.com "Seu Nome"   # pede a senha no terminal
 npm start                                              # http://127.0.0.1:3000
-npm test
+npm test                                               # app + Modo Análise + conferência da extensão
+npm run test:e2e                                       # Modo Análise no Chromium (precisa do Playwright)
 ```
 
 - Não há cadastro aberto: cada acesso é criado por quem administra, porque a análise com IA vai consumir tokens da conta da equipe. Para desativar: `npm run criar-usuario -- voce@empresa.com --desativar`.

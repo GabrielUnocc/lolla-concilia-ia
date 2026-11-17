@@ -4,6 +4,10 @@ Painel que abre por cima da **Conciliação Manual do IXC Provedor**. Ele lê as
 
 > Use só com a **base de teste** (sem dados reais de clientes) até a liberação da empresa. A chave da API fica guardada apenas neste navegador.
 
+## Modo Análise (versão 0.5)
+
+No popup, **Modo Análise** abre uma guia para cruzar francesinha (PDF), extrato (OFX) e relatório de recebimentos do IXC (CSV/XLS/XLSX). Não depende da tela do IXC. Para a IA, rode o intermediário local (`npm run intermediario`): a chave fica nele, não na extensão. Os arquivos `analise.html`, `analise/`, `lib/analise/`, `lib/servicos/`, `lib/ofx.js` e `vendor/` são gerados por `npm run sincronizar` a partir do `mvp/`: não edite aqui. Detalhes em [`docs/requisitos/10-modo-analise.md`](../../docs/requisitos/10-modo-analise.md).
+
 ## Instalar (uma vez)
 
 1. Baixe e extraia a pasta `lolla` (ou a pasta `extensao/lolla` do repositório).
