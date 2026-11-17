@@ -120,6 +120,7 @@ Lolla.painel = (function () {
   ul.sobras li button { width: 100%; text-align: left; border: 0; background: transparent; padding: 5px 6px; display: grid; grid-template-columns: 70px 1fr auto; gap: 6px; border-radius: 8px; }
   ul.sobras li button:hover { background: var(--acento-suave); }
   ul.sobras .h { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tinta-3); }
+  .contextos-usados { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
   .resumo { background: var(--acento-suave); border-left: 3px solid var(--acento); padding: 8px 10px; border-radius: 8px; }
   .card { border: 1px solid var(--borda-bloco); border-radius: 14px; padding: 9px 11px; background: var(--vidro-forte); display: flex; flex-direction: column; gap: 6px; box-shadow: var(--realce), 0 2px 10px rgba(30,60,150,.06); }
   .card.aceita { border-color: var(--verde); background: var(--verde-f); } .card.rejeitada { opacity: .7; background: var(--vermelho-f); }
@@ -190,6 +191,10 @@ Lolla.painel = (function () {
       const a = s.analise, r = a.resultado;
       corpo = `${a.desatualizada ? '<div class="aviso">A tela mudou depois desta análise. Analise de novo para atualizar.</div>' : ''}
         <div class="resumo">${esc(r.resumo || '')}</div>
+        <div class="contextos-usados suave">${(a.contextos || []).length
+          ? `<b>Contexto da IA enviado (${a.contextos.length}):</b> <span class="chips">${a.contextos.map((c) => `<span class="chip">${esc(c.titulo)}</span>`).join('')}</span>`
+          : '<b>Contexto da IA:</b> nenhum enviado nesta análise.'}</div>
+        ${a.avisoContexto ? `<div class="aviso">${esc(a.avisoContexto)}</div>` : ''}
         ${r.perguntas_ao_cliente.length ? `<div class="aviso"><b>Perguntar ao cliente:</b> ${r.perguntas_ao_cliente.map(esc).join(' · ')}</div>` : ''}
         <div class="cards">${r.itens.map((it, k) => {
           const d = a.decisoes[k], refs = (it.refs || []).join(',');

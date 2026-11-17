@@ -64,7 +64,7 @@ Lolla.core.criarStore = function (inicial) {
 
 Lolla.core.store = Lolla.core.criarStore({
   desbloqueado: false,
-  aba: 'conciliacao',
+  aba: 'painel',
   contas: [],
   filtros: { contaId: null, dataIni: '2026-11-03', dataFim: '2026-11-06' },
   carregando: false,
@@ -82,5 +82,10 @@ Lolla.core.store = Lolla.core.criarStore({
   historico: [],         // análises salvas (carregadas ao abrir Indicadores/Histórico)
   cenario: 'padrao',     // cenário de teste carregado na base simulada
   testeClaude: '',
+  // Painel: conciliações registradas, cada uma com a situação calculada pelo IXC
+  painel: { lista: null, erro: null, filtro: '' },
+  conciliacaoAberta: null,   // id da conciliação aberta a partir do Painel
+  // Contexto da IA (lista vinda do servidor local, a mesma da extensão)
+  ctx: { lista: null, limites: null, total: 0, erro: null, aberto: null, modo: 'ver', busca: '', salvando: false, erroForm: null },
   aviso: null            // { tipo: 'ok'|'erro', texto }
 });

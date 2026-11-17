@@ -12,6 +12,7 @@ Projeto **AR Lolla** (Agente Lolla). Status em 16/11/2026: extensão do Chrome n
 | Instalar e testar a extensão no IXC | [`extensao/lolla/`](extensao/lolla/): leia o README da pasta |
 | Rodar a aplicação web com login (equipe) | [`app/`](app/): veja "Como rodar" abaixo |
 | Testar sem o IXC, com dados fictícios | [`mvp/`](mvp/) (app completa no navegador) ou [`extensao/lolla/teste/`](extensao/lolla/teste/) |
+| Cadastrar o Contexto da IA (regras de banco, casos resolvidos) | `npm run contexto` e aba **Contexto da IA** do MVP: veja "Contexto da IA" abaixo |
 | Entender o projeto, custos e retorno | [`docs/requisitos/`](docs/requisitos/) |
 | Ver como a tela do IXC é montada | [`docs/amostras-ixc/`](docs/amostras-ixc/) |
 
@@ -28,6 +29,7 @@ extensao/
   lolla/             EXTENSÃO DO CHROME (versão atual, 0.3): o produto
 mvp/                 app web com IXC simulado + Modo Análise (analise.html: francesinha × OFX × IXC)
 intermediario/       servidor local que guarda a chave da IA, aplica limites e mostra o custo (Modo Análise)
+servidor/            servidor do Contexto da IA (npm run contexto): abre o MVP e guarda os contextos do MVP e da extensão
 scripts/             sincronizar-extensao.mjs: copia a lógica do mvp/ para a extensão
 testes/              testes do Modo Análise (unitários, ponta a ponta e amostras fictícias)
 historico/           primeiras versões, só para consulta (não usar)
@@ -40,6 +42,7 @@ historico/           primeiras versões, só para consulta (não usar)
 | [`extensao/lolla/`](extensao/lolla/) | **Em uso** | Extensão MV3: lê as grades do IXC, confere com o rodapé, pareia em código, analisa as sobras com a IA, visual modernizado e painel em guia |
 | [`app/`](app/) | **Em uso** | Aplicação web Node (SQLite nativo) com login, importação do JSON do IXC e da francesinha |
 | [`mvp/`](mvp/) | **Em uso** | Mesma lógica rodando sozinha no navegador, para testar cenários sem o IXC |
+| [`servidor/`](servidor/) | Opcional | Servidor do Contexto da IA (uma lista só para o MVP e a extensão), separado do `app/` |
 | [`docs/requisitos/`](docs/requisitos/) | **Em uso** | Documentação do projeto |
 | [`docs/amostras-ixc/`](docs/amostras-ixc/) | Referência | Base para o leitor da extensão |
 | [`historico/`](historico/) | Arquivado | Versões que deram origem às de cima |
@@ -94,6 +97,22 @@ São aceitos dois formatos:
 - Valores aceitam `1.234,56`, `60,00` ou número. Datas aceitam `dd/mm/aaaa` ou `aaaa-mm-dd`.
 - `filtros` preenche conta e período automaticamente. `totais` é conferido contra as linhas: se não bater, aparece um aviso de extração incompleta.
 - Linhas fora do período informado também geram aviso.
+
+## Contexto da IA (`servidor/`)
+
+Servidor pequeno e separado do `app/` (porta própria, sem dependências). Ele abre o MVP e guarda o Contexto da IA, uma lista única usada pelo MVP e pela extensão.
+
+```bash
+npm run contexto        # http://127.0.0.1:3100 → MVP com Painel e aba Contexto da IA
+npm run test:contexto   # testes do servidor
+```
+
+- **Contexto da IA:** textos que o suporte cadastra (regras de um banco, padrões de histórico, casos já resolvidos). Vão junto com as sobras em toda análise, no MVP e na extensão, e o resultado mostra quais foram enviados.
+- **Contextos iniciais:** na primeira vez, o servidor carrega os 8 contextos de `servidor/contextos-iniciais.json`. Depois vale a lista salva em `servidor/dados/contextos.json` (fora do Git).
+- Na extensão, informe `http://127.0.0.1:3100` em **Configurações → 3. Contexto da IA**.
+- Limites: 20 contextos, 4.000 caracteres cada e 20.000 no total. O servidor recusa texto vazio e texto com CPF, CNPJ ou e-mail.
+- Só escuta em `127.0.0.1` e só aceita chamadas do próprio MVP e de extensões do Chrome. Variáveis opcionais: `CONTEXTO_PORTA`, `CONTEXTO_HOST` e `ARQUIVO_CONTEXTOS`.
+- Sem esse servidor, tudo continua funcionando: só a análise sai sem o Contexto da IA, com um aviso.
 
 ## Problema
 

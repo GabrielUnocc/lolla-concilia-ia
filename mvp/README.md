@@ -19,11 +19,15 @@ Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamen
 ## Como rodar
 
 1. Copie `config.example.js` para `config.js` (ele não vai para o Git) e preencha `claude.apiKey`. Sem chave, a app usa uma **IA simulada** por regras locais.
-2. Abra `index.html` no Chrome ou Edge (duplo clique; não precisa de servidor nem de Node).
+2. Na pasta do projeto, rode `npm run contexto` e abra **http://127.0.0.1:3100** no Chrome ou Edge. Assim a aba **Contexto da IA** funciona, com a mesma lista da extensão.
+   Sem Node, dá para abrir o `index.html` com duplo clique: tudo funciona, menos o Contexto da IA.
 3. Crie uma senha local: ela cifra a base simulada e o histórico salvos no navegador.
 
 ## O que dá para fazer
 
+- **Painel** (primeira tela depois de entrar): quantas conciliações estão **abertas** (nada conciliado), **em andamento** (parte conciliada) e **fechadas** (tudo conciliado), com a lista e filtro por situação.
+- **Nova conciliação:** conta já cadastrada ou importada de um OFX, período (um dia ou vários), francesinha (opcional, fica cifrada no navegador) e observação. **Abrir** leva para a Conciliação já filtrada.
+- **Contexto da IA:** regras e casos que vão junto com as sobras na análise (precisa do `npm run contexto`). O projeto já traz 8 contextos iniciais em `servidor/contextos-iniciais.json`.
 - Buscar conta e período (a base simulada tem dados de 03/11 a 13/11/2026, em duas contas).
 - Ver as duas grades com o status de cada linha: par automático, sobra, duplicado ou conciliado.
 - Conciliar a seleção, conciliar todos os pares automáticos, desfazer a conciliação, lançar no IXC e estornar uma baixa.

@@ -43,5 +43,11 @@ Use só os dados fornecidos; se faltar informação, diga o que precisa ser veri
   const contextoChat = (payload, resultado) =>
     'Dados da conciliação:\n' + JSON.stringify(payload) + '\n\nAnálise já feita:\n' + JSON.stringify(resultado || {});
 
-  return { SISTEMA_ANALISE, SISTEMA_CHAT, analise, contextoChat, CATEGORIAS, ACOES };
+  // Contexto da IA cadastrado pelo suporte (servidor local, o mesmo para o MVP e a extensão): vai no fim do prompt de sistema
+  const comContextos = (sistema, contextos) => !contextos || !contextos.length ? sistema : sistema +
+    '\n\nContexto cadastrado pelo suporte (regras de banco, padrões de histórico e casos já resolvidos). ' +
+    'Use quando se aplicar às sobras; os números continuam vindo só do código:\n' +
+    contextos.map((c, k) => `\n### ${k + 1}. ${c.titulo}\n${c.texto}`).join('\n');
+
+  return { SISTEMA_ANALISE, SISTEMA_CHAT, analise, contextoChat, comContextos, CATEGORIAS, ACOES };
 })();

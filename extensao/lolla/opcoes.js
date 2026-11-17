@@ -1,10 +1,12 @@
 const $ = (id) => document.getElementById(id);
-const PADRAO = { enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false };
+const PADRAO = { enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false, servidorLolla: '' };
 
 function mensagem(id, texto, tipo) { const el = $(id); el.textContent = texto; el.className = 'msg ' + (tipo || ''); }
 
 async function carregar() {
   const c = await chrome.storage.local.get(PADRAO);
+  $('servidor-lolla').value = c.servidorLolla;
+  $('editar-contextos').disabled = !c.servidorLolla;
   $('chave').value = c.apiKey; $('workspace').value = c.workspaceId; $('modelo').value = c.modelo; $('simulada').checked = c.iaSimulada;
   const lista = $('enderecos');
   lista.innerHTML = '';
@@ -61,6 +63,45 @@ async function testar() {
   mensagem('msg-api', r && r.ok ? 'Conectado: ' + r.modelo : 'Falhou: ' + ((r && r.erro) || 'sem resposta'), r && r.ok ? 'ok' : 'erro');
 }
 
+// Servidor da Lolla: guarda o endereço, pede a permissão do Chrome só para ele e testa a leitura dos contextos
+async function testarServidor() {
+  const r = await chrome.runtime.sendMessage({ tipo: 'contextos' });
+  if (!r || !r.ok) return mensagem('msg-servidor', 'Falhou: ' + ((r && r.erro) || 'sem resposta'), 'erro');
+  if (r.aviso) return mensagem('msg-servidor', r.aviso, 'erro');
+  mensagem('msg-servidor', `Conectado. ${r.contextos.length} contexto(s) vão junto em cada análise${r.contextos.length ? ': ' + r.contextos.map((c) => c.titulo).join(', ') : ''}.`, 'ok');
+}
+async function conectarServidor() {
+  let origem;
+  try {
+    const bruto = $('servidor-lolla').value.trim() || 'http://127.0.0.1:3100';
+    origem = new URL(/^https?:\/\//i.test(bruto) ? bruto : 'http://' + bruto).origin;
+  } catch (e) { return mensagem('msg-servidor', 'Endereço inválido. Ex.: http://127.0.0.1:3100', 'erro'); }
+  const ok = await chrome.permissions.request({ origins: [origem + '/*'] });
+  if (!ok) return mensagem('msg-servidor', 'Permissão não concedida. A Lolla não vai buscar os contextos.', 'erro');
+  await chrome.storage.local.set({ servidorLolla: origem });
+  $('servidor-lolla').value = origem;
+  $('editar-contextos').disabled = false;
+  mensagem('msg-servidor', 'Testando…');
+  testarServidor();
+}
+async function removerServidor() {
+  const { servidorLolla, enderecos } = await chrome.storage.local.get(PADRAO);
+  await chrome.storage.local.set({ servidorLolla: '' });
+  // Só devolve a permissão se o mesmo endereço não for também um IXC cadastrado
+  if (servidorLolla && !enderecos.includes(servidorLolla)) { try { await chrome.permissions.remove({ origins: [servidorLolla + '/*'] }); } catch (e) { /* ok */ } }
+  $('servidor-lolla').value = '';
+  $('editar-contextos').disabled = true;
+  mensagem('msg-servidor', 'A análise não vai mais usar o Contexto da IA.', 'ok');
+}
+async function abrirContextos() {
+  const { servidorLolla } = await chrome.storage.local.get(PADRAO);
+  if (servidorLolla) chrome.tabs.create({ url: servidorLolla + '/#contexto' });
+}
+
+$('conectar-servidor').addEventListener('click', conectarServidor);
+$('servidor-lolla').addEventListener('keydown', (e) => { if (e.key === 'Enter') conectarServidor(); });
+$('remover-servidor').addEventListener('click', removerServidor);
+$('editar-contextos').addEventListener('click', abrirContextos);
 $('adicionar').addEventListener('click', adicionar);
 $('novo-endereco').addEventListener('keydown', (e) => { if (e.key === 'Enter') adicionar(); });
 $('salvar').addEventListener('click', salvar);

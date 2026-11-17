@@ -146,3 +146,51 @@ html { color-scheme: light; }
 .alerta.aviso { background: #fff6e5; color: #7a4d00; }
 .alerta ul, .gabarito { margin: 4px 0 0 18px; padding: 0; }
 .ok-txt { color: var(--verde); margin: 0; }
+
+/* ---------- Contexto da IA ---------- */
+.ctx-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ctx { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .ctx { grid-template-columns: 1fr; } }
+.ctx .bloco { padding: 12px 14px; }
+.ctx-barra { display: flex; gap: 8px; margin-bottom: 10px; }
+.ctx-barra input { flex: 1; min-width: 0; }
+.ctx-itens { list-style: none; margin: 0; padding: 0; max-height: 560px; overflow: auto; display: flex; flex-direction: column; gap: 4px; }
+.ctx-item { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; border-color: transparent; border-left: 3px solid transparent; border-radius: 6px; }
+.ctx-item:hover:not(:disabled) { background: #f5f8fc; border-color: transparent; border-left-color: var(--borda); }
+.ctx-item.ativo { background: var(--sel); border-left-color: var(--primaria); }
+.ctx-item .trecho { color: var(--suave); font-size: 12px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ctx-item small { color: var(--suave); font-size: 11px; }
+.ctx-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.ctx-cab h3 { margin: 4px 0; }
+.ctx-ver { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.55; padding: 10px 0; max-height: 520px; overflow: auto; border-top: 1px solid var(--borda); border-bottom: 1px solid var(--borda); }
+.ctx-form { display: flex; flex-direction: column; gap: 10px; }
+.ctx-form h3 { margin: 4px 0; }
+.ctx-form label { display: flex; flex-direction: column; gap: 4px; margin: 0; font-size: 13px; color: var(--suave); }
+.ctx-form input, .ctx-form textarea { font: inherit; color: var(--texto); padding: 8px 10px; border: 1px solid var(--borda); border-radius: 6px; }
+.ctx-form textarea { min-height: 280px; resize: vertical; line-height: 1.5; }
+.ctx-form small { color: var(--suave); }
+.obrig { color: var(--vermelho); }
+.erro-txt { color: var(--vermelho) !important; }
+.ctx-usados { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font-size: 13px; color: var(--suave); margin: -4px 0 10px; }
+
+/* ---------- Painel de conciliações ---------- */
+.painel-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.kpis-painel { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-top: 4px; }
+.kpi-filtro { text-align: left; cursor: pointer; border-left: 4px solid var(--borda); }
+.kpi-filtro .kpi-val { font-size: 26px; }
+.kpi-filtro.aberta { border-left-color: #e08a3a; } .kpi-filtro.andamento { border-left-color: #d4b106; } .kpi-filtro.fechada { border-left-color: var(--verde); }
+.kpi-filtro.ativo { box-shadow: 0 0 0 2px var(--primaria) inset; }
+.tabela-painel { margin-top: 10px; max-height: none; }
+.tabela-painel td.acoes, .tabela-painel td.arquivos { white-space: nowrap; }
+button.mini { padding: 3px 8px; font-size: 12px; }
+.giro.pequeno { width: 12px; height: 12px; border-width: 2px; vertical-align: -2px; }
+.faixa-conc { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; background: #eef4fc; border: 1px solid #cddcf2; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; }
+.faixa-conc .obs { color: var(--suave); font-size: 12px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.faixa-conc details { width: 100%; font-size: 13px; } .faixa-conc ul { margin: 4px 0 0 18px; padding: 0; }
+.nova-conc .campo { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--suave); }
+.nova-conc .campo select, .nova-conc .campo input { color: var(--texto); }
+.nova-conc textarea#nc-obs { font: inherit; font-size: 14px; color: var(--texto); }
+.duas-datas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+[hidden] { display: none !important; }
+.tabela-painel td:nth-child(2) { white-space: normal; min-width: 200px; max-width: 320px; }
+.tabela-painel th, .tabela-painel td { padding: 7px 8px; }

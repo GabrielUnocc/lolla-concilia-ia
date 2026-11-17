@@ -20,6 +20,11 @@ Lolla.acoes = (function () {
   function recalcular(mov, ext) {
     const pareamento = parear(mov, ext);
     store.set({ movimentacao: mov, extrato: ext, pareamento, selecao: { mov: [], ext: [] } });
+    // Se a tela mostra uma conciliação do Painel, a situação dela acompanha o que foi conciliado
+    const s = store.get(), reg = s.conciliacaoAberta && (s.painel.lista || []).find((r) => r.id === s.conciliacaoAberta);
+    if (reg && String(reg.contaId) === String(s.filtros.contaId) && reg.dataIni === s.filtros.dataIni && reg.dataFim === s.filtros.dataFim) {
+      trocarItem(reg.id, { st: Lolla.services.conciliacoes.situacao({ movimentacao: mov, extrato: ext }), erroSt: null });
+    }
   }
 
   function indicadoresAtuais() {
@@ -34,6 +39,27 @@ Lolla.acoes = (function () {
   }
 
   async function lerHistorico() { return (await seguro.ler(HIST)) || []; }
+
+  /* ---------- Painel de conciliações ---------- */
+  const conc = Lolla.services.conciliacoes;
+  const setPainel = (parcial) => store.set((s) => ({ painel: Object.assign({}, s.painel, parcial) }));
+  const trocarItem = (id, parcial) => store.set((s) => ({
+    painel: Object.assign({}, s.painel, { lista: (s.painel.lista || []).map((r) => (r.id === id ? Object.assign({}, r, parcial) : r)) })
+  }));
+
+  async function atualizarSituacao(id) {
+    const reg = (store.get().painel.lista || []).find((r) => r.id === id);
+    if (!reg) return;
+    trocarItem(id, { st: null, erroSt: null });
+    const contas = store.get().contas;
+    if (contas.length && !contas.some((c) => String(c.id) === String(reg.contaId))) {
+      return trocarItem(id, { erroSt: 'A conta não existe mais na base simulada (o cenário foi trocado ou restaurado).' });
+    }
+    try {
+      const tela = await ixc.buscarTela({ contaId: reg.contaId, dataIni: reg.dataIni, dataFim: reg.dataFim });
+      trocarItem(id, { st: conc.situacao(tela) });
+    } catch (e) { trocarItem(id, { erroSt: e.message }); }
+  }
   async function gravarHistorico(h) { await seguro.gravar(HIST, h.slice(-200)); }
 
   return {
@@ -41,6 +67,51 @@ Lolla.acoes = (function () {
     indicadoresAtuais,
     payloadAtual,
     lerHistorico,
+    atualizarSituacao,
+
+    // Mostra a lista na hora; a situação de cada conciliação chega conforme o IXC responde
+    async carregarPainel() {
+      setPainel({ erro: null });
+      try {
+        const regs = await conc.listar();
+        setPainel({ lista: regs.map((r) => Object.assign({}, r, { st: null, erroSt: null })) });
+        await Promise.all(regs.map((r) => atualizarSituacao(r.id)));
+      } catch (e) { setPainel({ erro: e.message }); }
+    },
+
+    // dados: { origem: 'conta'|'ofx', contaId, ofx, modo, dataIni, dataFim, observacao }, francesinha: { nome, tipo, tamanho, base64 } | null
+    async criarConciliacao(dados, francesinha) {
+      let contaId = dados.contaId, gabarito = [];
+      if (dados.origem === 'ofx') {
+        const r = await ixc.importarOfx({ ofx: dados.ofx, modo: dados.modo });
+        contaId = r.contaId; gabarito = r.gabarito;
+        await this.carregarContas();
+      }
+      const conta = store.get().contas.find((c) => String(c.id) === String(contaId));
+      const reg = await conc.criar({
+        contaId, contaDescricao: conta ? conta.descricao : 'Conta ' + contaId, dataIni: dados.dataIni, dataFim: dados.dataFim,
+        ofx: dados.origem === 'ofx' ? { arquivo: dados.ofx.arquivo, lancamentos: dados.ofx.resumo.total, modo: dados.modo } : null,
+        observacao: dados.observacao || '', gabarito
+      }, francesinha);
+      await this.carregarPainel();
+      avisar('ok', `Conciliação #${reg.id} criada.`);
+      return { reg, gabarito };
+    },
+
+    async abrirConciliacao(id) {
+      const reg = (store.get().painel.lista || []).find((r) => r.id === id);
+      if (!reg) return;
+      store.set({ filtros: Object.assign({}, store.get().filtros, { contaId: reg.contaId, dataIni: reg.dataIni, dataFim: reg.dataFim }),
+        aba: 'conciliacao', conciliacaoAberta: id });
+      await this.buscar();
+    },
+
+    async excluirConciliacao(id) {
+      await conc.remover(id);
+      if (store.get().conciliacaoAberta === id) store.set({ conciliacaoAberta: null });
+      await this.carregarPainel();
+      avisar('ok', `Conciliação #${id} excluída.`);
+    },
 
     // Ao abrir: usa o período do cenário de teste carregado
     async iniciar() {
@@ -199,7 +270,8 @@ Lolla.acoes = (function () {
           id: 'A' + Date.now(), em: Date.now(), contaId: s.filtros.contaId, filtros: Object.assign({}, s.filtros),
           diferenca: payload.totais_calculados_pelo_codigo.diferenca_ixc_menos_banco,
           sobras: payload.so_no_ixc.length + payload.so_no_banco.length,
-          resultado: r.resultado, simulado: r.simulado, usage: r.usage, modelo: r.modelo || null, decisoes: {}
+          resultado: r.resultado, simulado: r.simulado, usage: r.usage, modelo: r.modelo || null, decisoes: {},
+          contextos: r.contextos || [], avisoContexto: r.avisoContexto || null
         };
         const h = await lerHistorico(); h.push(registro); await gravarHistorico(h);
         store.set({ analisando: false, analise: registro });

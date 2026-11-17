@@ -22,6 +22,7 @@ A tela de **Configurações** abre sozinha na primeira vez.
 
 1. **Endereço do IXC:** com o IXC de teste aberto, copie o endereço da barra (ex.: `https://teste.seuprovedor.com.br`), cole em Configurações e clique em **Adicionar**. O Chrome pede permissão só para esse endereço.
 2. **API do Claude:** cole a chave, escolha o modelo e clique em **Testar conexão**. Sem chave, a Lolla usa a IA simulada (regras locais).
+3. **Contexto da IA:** com o servidor da Lolla rodando (`npm run contexto` na pasta do projeto), informe `http://127.0.0.1:3100` e clique em **Conectar**. Os contextos cadastrados na aba **Contexto da IA** do MVP (botão **Abrir o Contexto da IA**) vão junto com as sobras em cada análise, e o resultado mostra quais foram enviados. É a mesma lista do MVP. Se o servidor estiver fora do ar, a análise sai sem contexto e o painel avisa.
 
 ## Usar
 

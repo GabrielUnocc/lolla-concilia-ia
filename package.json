@@ -15,6 +15,8 @@
     "test:e2e": "node testes/e2e/modo-analise.e2e.mjs",
     "intermediario": "node intermediario/servidor.mjs",
     "sincronizar": "node scripts/sincronizar-extensao.mjs",
-    "amostras": "python3 testes/amostras/gerar_amostras.py"
+    "amostras": "python3 testes/amostras/gerar_amostras.py",
+    "contexto": "node servidor/servidor.js",
+    "test:contexto": "node --test servidor/test/*.test.js"
   }
 }
