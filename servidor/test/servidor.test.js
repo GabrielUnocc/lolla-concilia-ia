@@ -35,3 +35,37 @@ test('serve o MVP e bloqueia caminhos fora da pasta', async (t) => {
   assert.notEqual((await req('GET', '/%2e%2e/package.json')).status, 200);
 });
 
+test('contexto da IA: cadastro, edição, exclusão e validações', async (t) => {
+  const { req } = await subir(t);
+  assert.equal((await req('POST', '/api/contextos', { titulo: '', texto: 'x' })).status, 422);
+  assert.equal((await req('POST', '/api/contextos', { titulo: 'x', texto: '  ' })).status, 422);
+  const cpf = await req('POST', '/api/contextos', { titulo: 'Caso', texto: 'Cliente 123.456.789-09 pagou duas vezes' });
+  assert.equal(cpf.status, 422);
+  assert.match(cpf.corpo.erro, /CPF/, JSON.stringify(cpf));
+  assert.equal((await req('POST', '/api/contextos', { titulo: 'Caso', texto: 'contato fulano@empresa.com' })).status, 422);
+  assert.equal((await req('POST', '/api/contextos', { titulo: 'Caso', texto: 'x'.repeat(4001) })).status, 422);
+
+  const texto = 'Sicredi: liquidação em lote.\n\nUm crédito por dia = soma das baixas do Gateway.';
+  const novo = await req('POST', '/api/contextos', { titulo: 'Sicredi', texto });
+  assert.equal(novo.status, 201);
+  let lista = await req('GET', '/api/contextos');
+  assert.equal(lista.corpo.contextos.length, 1);
+  assert.equal(lista.corpo.contextos[0].texto, texto); // quebras de linha preservadas
+  assert.equal(lista.corpo.total_caracteres, texto.length);
+
+  assert.equal((await req('PUT', `/api/contextos/${novo.corpo.id}`, { titulo: 'Sicredi lote', texto: 'Novo texto' })).status, 200);
+  lista = await req('GET', '/api/contextos');
+  assert.equal(lista.corpo.contextos[0].titulo, 'Sicredi lote');
+  assert.equal(lista.corpo.contextos[0].texto, 'Novo texto');
+  assert.equal((await req('PUT', '/api/contextos/999', { titulo: 'a', texto: 'b' })).status, 404);
+
+  for (let i = 0; i < 4; i++) assert.equal((await req('POST', '/api/contextos', { titulo: `T${i}`, texto: 'a'.repeat(4000) })).status, 201);
+  const estoura = await req('POST', '/api/contextos', { titulo: 'T5', texto: 'a'.repeat(4000) });
+  assert.equal(estoura.status, 422);
+  assert.match(estoura.corpo.erro, /20000/);
+
+  assert.equal((await req('DELETE', `/api/contextos/${novo.corpo.id}`)).status, 200);
+  assert.ok(!(await req('GET', '/api/contextos')).corpo.contextos.some((c) => c.id === novo.corpo.id));
+  assert.equal((await req('DELETE', `/api/contextos/${novo.corpo.id}`)).status, 404);
+});
+
