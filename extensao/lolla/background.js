@@ -149,12 +149,13 @@ const tratadores = {
       r = r2;
     }
     if (!obj) throw erroFormato(r);
-    return { resultado: obj, usage: uso, modelo: r.modelo };
+    return { resultado: obj, usage: uso, modelo: r.modelo, contextos: usados(ctx), avisoContexto: ctx.aviso };
   },
   async conversar({ historico, payload, resultado }) {
+    const ctx = await buscarContextos();
     const msgs = [{ role: 'user', content: P().contextoChat(payload, resultado) }, { role: 'assistant', content: 'Entendido. Pode perguntar.' }]
       .concat(historico.map((m) => ({ role: m.papel === 'usuario' ? 'user' : 'assistant', content: m.texto })));
-    const r = await chamarClaude({ system: P().SISTEMA_CHAT, messages: msgs, maxTokens: 800 });
+    const r = await chamarClaude({ system: P().comContextos(P().SISTEMA_CHAT, ctx.contextos), messages: msgs, maxTokens: 800 });
     return { texto: r.texto, usage: r.usage };
   },
   async testar() {
