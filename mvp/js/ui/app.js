@@ -327,6 +327,29 @@
         if (await confirmar('Conciliar todos os pares automáticos (exceto os ambíguos)?', { confirmar: 'Conciliar' })) return acoes.conciliarParesAutomaticos();
         return;
       case 'analisar': return acoes.analisar();
+      case 'nova-conciliacao': return abrirNovaConciliacao();
+      case 'painel-recarregar': return acoes.carregarPainel();
+      case 'painel-situacao': return acoes.atualizarSituacao(Number(alvo.dataset.id));
+      case 'painel-filtro': return store.set({ painel: Object.assign({}, s.painel, { filtro: alvo.dataset.estado || '' }) });
+      case 'abrir-conciliacao': return acoes.abrirConciliacao(Number(alvo.dataset.id));
+      case 'baixar-francesinha': return baixarFrancesinha(Number(alvo.dataset.id));
+      case 'excluir-conciliacao': {
+        const id = Number(alvo.dataset.id);
+        if (!(await confirmar(`Excluir a conciliação #${id} do painel? A francesinha guardada também é apagada. Os lançamentos do IXC (simulado) não mudam.`, { confirmar: 'Excluir', perigo: true }))) return;
+        return acoes.excluirConciliacao(id);
+      }
+      case 'ctx-recarregar': return carregarContextos();
+      case 'ctx-abrir': return setCtx({ aberto: Number(alvo.dataset.id), modo: 'ver', erroForm: null });
+      case 'ctx-novo': vCtx().prepararRascunho(null); return setCtx({ modo: 'novo', erroForm: null });
+      case 'ctx-editar': vCtx().prepararRascunho(s.ctx.lista.find((i) => i.id === s.ctx.aberto)); return setCtx({ modo: 'editar', erroForm: null });
+      case 'ctx-cancelar': return setCtx({ modo: 'ver', erroForm: null });
+      case 'ctx-apagar': {
+        const item = s.ctx.lista.find((i) => i.id === s.ctx.aberto);
+        if (!item || !(await confirmar(`Apagar "${item.titulo}"? Ele sai da lista e não vai mais para a IA (aqui e na extensão). Não dá para desfazer.`, { confirmar: 'Apagar', perigo: true }))) return;
+        try { await ctxSrv.apagar(item.id); setCtx({ aberto: null }); await carregarContextos(); acoes.avisar('ok', 'Contexto apagado. Ele não vai mais para a IA.'); }
+        catch (e) { acoes.avisar('erro', e.message); }
+        return;
+      }
       case 'ver-refs': {
         acoes.selecionarRefs(alvo.dataset.refs.split(',').filter(Boolean));
         const el = document.querySelector('tr.destaque'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
