@@ -7,6 +7,7 @@
 Lolla.services.armazenamento = (function () {
   const PREFIXO = 'lolla:';
   const VERIFICADOR = 'lolla-ok';
+  const BANCO_ARQUIVOS = 'lolla-arquivos';
   const cripto = Lolla.services.cripto;
 
   function ler(k) {
@@ -49,6 +50,7 @@ Lolla.services.armazenamento = (function () {
       try {
         Object.keys(localStorage).filter((k) => k.startsWith(PREFIXO)).forEach((k) => localStorage.removeItem(k));
       } catch (e) { /* ignora */ }
+      try { indexedDB.deleteDatabase(BANCO_ARQUIVOS); } catch (e) { /* ignora */ }
       cripto.bloquear();
     }
   };
