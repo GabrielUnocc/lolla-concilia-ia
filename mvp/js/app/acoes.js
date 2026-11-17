@@ -62,6 +62,51 @@ Lolla.acoes = (function () {
     indicadoresAtuais,
     payloadAtual,
     lerHistorico,
+    atualizarSituacao,
+
+    // Mostra a lista na hora; a situação de cada conciliação chega conforme o IXC responde
+    async carregarPainel() {
+      setPainel({ erro: null });
+      try {
+        const regs = await conc.listar();
+        setPainel({ lista: regs.map((r) => Object.assign({}, r, { st: null, erroSt: null })) });
+        await Promise.all(regs.map((r) => atualizarSituacao(r.id)));
+      } catch (e) { setPainel({ erro: e.message }); }
+    },
+
+    // dados: { origem: 'conta'|'ofx', contaId, ofx, modo, dataIni, dataFim, observacao }, francesinha: { nome, tipo, tamanho, base64 } | null
+    async criarConciliacao(dados, francesinha) {
+      let contaId = dados.contaId, gabarito = [];
+      if (dados.origem === 'ofx') {
+        const r = await ixc.importarOfx({ ofx: dados.ofx, modo: dados.modo });
+        contaId = r.contaId; gabarito = r.gabarito;
+        await this.carregarContas();
+      }
+      const conta = store.get().contas.find((c) => String(c.id) === String(contaId));
+      const reg = await conc.criar({
+        contaId, contaDescricao: conta ? conta.descricao : 'Conta ' + contaId, dataIni: dados.dataIni, dataFim: dados.dataFim,
+        ofx: dados.origem === 'ofx' ? { arquivo: dados.ofx.arquivo, lancamentos: dados.ofx.resumo.total, modo: dados.modo } : null,
+        observacao: dados.observacao || '', gabarito
+      }, francesinha);
+      await this.carregarPainel();
+      avisar('ok', `Conciliação #${reg.id} criada.`);
+      return { reg, gabarito };
+    },
+
+    async abrirConciliacao(id) {
+      const reg = (store.get().painel.lista || []).find((r) => r.id === id);
+      if (!reg) return;
+      store.set({ filtros: Object.assign({}, store.get().filtros, { contaId: reg.contaId, dataIni: reg.dataIni, dataFim: reg.dataFim }),
+        aba: 'conciliacao', conciliacaoAberta: id });
+      await this.buscar();
+    },
+
+    async excluirConciliacao(id) {
+      await conc.remover(id);
+      if (store.get().conciliacaoAberta === id) store.set({ conciliacaoAberta: null });
+      await this.carregarPainel();
+      avisar('ok', `Conciliação #${id} excluída.`);
+    },
 
     // Ao abrir: usa o período do cenário de teste carregado
     async iniciar() {
