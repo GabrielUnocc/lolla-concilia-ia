@@ -78,3 +78,117 @@ function validar(corpo, dados, id = null) {
   return { titulo, texto };
 }
 
+const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ofx': 'application/x-ofx', '.ico': 'image/x-icon' };
+
+export function criarApp({ armazem = criarArmazem(), pastaMvp = PASTA_MVP } = {}) {
+  const json = (res, status, corpo, extra = {}) => {
+    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...extra });
+    res.end(JSON.stringify(corpo));
+  };
+
+  // Quem pode usar a API: o próprio MVP (mesma origem) e extensões do Chrome.
+  // Bloqueia outros sites abertos no navegador de lerem ou alterarem os contextos.
+  const origemOk = (req) => {
+    const o = req.headers.origin;
+    if (!o) return req.method === 'GET'; // curl/testes só leem; escrita exige Origin
+    if (o.startsWith('chrome-extension://')) return true;
+    try { return new URL(o).host === req.headers.host; } catch { return false; }
+  };
+  const cors = (req) => (req.headers.origin || '').startsWith('chrome-extension://')
+    ? { 'Access-Control-Allow-Origin': req.headers.origin, 'Vary': 'Origin' } : {};
+
+  const lerCorpo = (req) => new Promise((ok, falha) => {
+    if (!(req.headers['content-type'] || '').startsWith('application/json')) return falha(new ErroValidacao('Envie JSON'));
+    let tam = 0; const partes = [];
+    req.on('data', (c) => { tam += c.length; if (tam > 64 * 1024) { falha(new ErroValidacao('Conteúdo grande demais')); req.destroy(); } else partes.push(c); });
+    req.on('end', () => { try { ok(JSON.parse(Buffer.concat(partes).toString('utf8') || '{}')); } catch { falha(new ErroValidacao('JSON inválido')); } });
+    req.on('error', falha);
+  });
+
+  async function api(req, res, caminho) {
+    if (req.method === 'OPTIONS') {
+      if (!origemOk({ ...req, method: 'POST', headers: req.headers })) return json(res, 403, { erro: 'Origem não permitida' });
+      res.writeHead(204, { ...cors(req), 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '600' });
+      return res.end();
+    }
+    if (!origemOk(req)) return json(res, 403, { erro: 'Origem não permitida' });
+    const h = cors(req);
+    const m = caminho.match(/^\/api\/contextos(?:\/(\d+))?$/);
+    if (!m) return json(res, 404, { erro: 'Rota não encontrada' }, h);
+    const id = m[1] ? Number(m[1]) : null;
+
+    if (req.method === 'GET' && id === null) {
+      const d = await armazem.ler();
+      const contextos = [...d.contextos].sort((a, b) => b.atualizado_em.localeCompare(a.atualizado_em) || a.id - b.id);
+      return json(res, 200, { contextos, limites: LIMITES, total_caracteres: contextos.reduce((s, c) => s + c.texto.length, 0) }, h);
+    }
+    if (req.method === 'POST' && id === null) {
+      const corpo = await lerCorpo(req);
+      const novo = await armazem.alterar((d) => {
+        const v = validar(corpo, d);
+        const agora = new Date().toISOString();
+        const c = { id: d.proximoId++, ...v, criado_em: agora, atualizado_em: agora };
+        d.contextos.push(c);
+        return c;
+      });
+      return json(res, 201, novo, h);
+    }
+    if (req.method === 'PUT' && id !== null) {
+      const corpo = await lerCorpo(req);
+      const c = await armazem.alterar((d) => {
+        const atual = d.contextos.find((x) => x.id === id);
+        if (!atual) return null;
+        Object.assign(atual, validar(corpo, d, id), { atualizado_em: new Date().toISOString() });
+        return atual;
+      });
+      return c ? json(res, 200, c, h) : json(res, 404, { erro: 'Contexto não encontrado' }, h);
+    }
+    if (req.method === 'DELETE' && id !== null) {
+      const ok = await armazem.alterar((d) => {
+        const antes = d.contextos.length;
+        d.contextos = d.contextos.filter((x) => x.id !== id);
+        return d.contextos.length < antes;
+      });
+      return ok ? json(res, 200, { ok: true }, h) : json(res, 404, { erro: 'Contexto não encontrado' }, h);
+    }
+    return json(res, 405, { erro: 'Método não permitido' }, h);
+  }
+
+  async function estatico(req, res, caminho) {
+    if (caminho === '/') caminho = '/index.html';
+    const alvo = resolve(pastaMvp, '.' + caminho);
+    if (!alvo.startsWith(pastaMvp + sep)) return json(res, 403, { erro: 'Proibido' });
+    try {
+      if (!(await stat(alvo)).isFile()) throw new Error();
+      res.writeHead(200, { 'Content-Type': MIME[extname(alvo)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
+      res.end(await readFile(alvo));
+    } catch {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Não encontrado');
+    }
+  }
+
+  return async function app(req, res) {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'same-origin');
+    const caminho = decodeURIComponent(new URL(req.url, 'http://local').pathname);
+    try {
+      if (caminho.startsWith('/api/')) return await api(req, res, caminho);
+      if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { erro: 'Método não permitido' });
+      return await estatico(req, res, caminho);
+    } catch (e) {
+      if (e instanceof ErroValidacao) return json(res, 422, { erro: e.message }, cors(req));
+      console.error(e);
+      json(res, 500, { erro: 'Erro interno' });
+    }
+  };
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  createServer(criarApp()).listen(PORTA, HOST, () => {
+    console.log(`AR Lolla em http://${HOST}:${PORTA}  (MVP + Contexto da IA)`);
+    console.log(`Contextos salvos em ${ARQUIVO}`);
+  });
+}
