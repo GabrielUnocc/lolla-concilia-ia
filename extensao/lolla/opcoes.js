@@ -1,10 +1,12 @@
 const $ = (id) => document.getElementById(id);
-const PADRAO = { enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false };
+const PADRAO = { enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false, servidorLolla: '' };
 
 function mensagem(id, texto, tipo) { const el = $(id); el.textContent = texto; el.className = 'msg ' + (tipo || ''); }
 
 async function carregar() {
   const c = await chrome.storage.local.get(PADRAO);
+  $('servidor-lolla').value = c.servidorLolla;
+  $('editar-contextos').disabled = !c.servidorLolla;
   $('chave').value = c.apiKey; $('workspace').value = c.workspaceId; $('modelo').value = c.modelo; $('simulada').checked = c.iaSimulada;
   const lista = $('enderecos');
   lista.innerHTML = '';
