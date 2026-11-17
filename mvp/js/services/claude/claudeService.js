@@ -75,16 +75,20 @@ Lolla.services.claude = (function () {
     },
 
     async analisar(payload) {
-      if (usarSimulada()) return Object.assign(await Lolla.services.iaSimulada.analisar(payload), { simulado: true });
-      const r = await enviar({ system: prompts.SISTEMA_ANALISE, messages: [{ role: 'user', content: prompts.analise(payload) }] });
-      return { resultado: extrairJson(r.texto), usage: r.usage, simulado: false, modelo: r.modelo };
+      const ctx = await Lolla.services.contexto.paraIA();
+      const usados = { contextos: ctx.contextos.map((c) => ({ id: c.id, titulo: c.titulo })), avisoContexto: ctx.aviso };
+      // A IA simulada não usa o texto, mas registra quais contextos teriam ido (para testar sem gastar tokens)
+      if (usarSimulada()) return Object.assign(await Lolla.services.iaSimulada.analisar(payload), { simulado: true }, usados);
+      const r = await enviar({ system: prompts.comContextos(prompts.SISTEMA_ANALISE, ctx.contextos), messages: [{ role: 'user', content: prompts.analise(payload) }] });
+      return Object.assign({ resultado: extrairJson(r.texto), usage: r.usage, simulado: false, modelo: r.modelo }, usados);
     },
 
     async conversar(historico, payload, resultado) {
       if (usarSimulada()) return Object.assign(await Lolla.services.iaSimulada.conversar(), { simulado: true });
       const msgs = [{ role: 'user', content: prompts.contextoChat(payload, resultado) }, { role: 'assistant', content: 'Entendido. Pode perguntar.' }]
         .concat(historico.map((m) => ({ role: m.papel === 'usuario' ? 'user' : 'assistant', content: m.texto })));
-      const r = await enviar({ system: prompts.SISTEMA_CHAT, messages: msgs, maxTokens: 800 });
+      const ctx = await Lolla.services.contexto.paraIA();
+      const r = await enviar({ system: prompts.comContextos(prompts.SISTEMA_CHAT, ctx.contextos), messages: msgs, maxTokens: 800 });
       return { texto: r.texto, usage: r.usage, simulado: false };
     },
 
