@@ -35,11 +35,28 @@ historico/           primeiras versões, só para consulta (não usar)
 |---|---|---|
 | [`extensao/lolla/`](extensao/lolla/) | **Em uso** | Extensão MV3: lê as grades do IXC, confere com o rodapé, pareia em código, analisa as sobras com a IA, visual modernizado e painel em guia |
 | [`mvp/`](mvp/) | **Em uso** | Mesma lógica rodando sozinha no navegador, para testar cenários sem o IXC |
+| [`servidor/`](servidor/) | **Em uso** | Servidor local sem dependências: serve o MVP e guarda o Contexto da IA (uma lista só para o MVP e a extensão) |
 | [`docs/requisitos/`](docs/requisitos/) | **Em uso** | Documentação do projeto |
 | [`docs/amostras-ixc/`](docs/amostras-ixc/) | Referência | Base para o leitor da extensão |
 | [`historico/`](historico/) | Arquivado | Versões que deram origem às de cima |
 
 O pareamento, o mascaramento e os prompts são os mesmos no `mvp/js/` e no `extensao/lolla/lib/`. Ao alterar um, copie para o outro.
+
+## Servidor local e Contexto da IA
+
+Precisa de Node 22 ou mais novo (sem dependências para instalar).
+
+```bash
+npm start      # http://127.0.0.1:3000 → abre o MVP; a aba Contexto da IA usa este servidor
+npm test       # testes do servidor
+```
+
+- **Contextos iniciais:** na primeira vez, o servidor carrega os 8 contextos de `servidor/contextos-iniciais.json` (campos da tela do IXC, liquidação em lote, PIX de terceiros, OFX com acentos quebrados, francesinha, datas, tarifas e como responder). Depois disso vale a lista salva.
+- **Contexto da IA:** textos que o suporte cadastra (regras de um banco, padrões de histórico, casos já resolvidos). Vão junto com as sobras em toda análise, no MVP e na extensão, e o resultado mostra quais foram enviados.
+- A lista é uma só: fica em `servidor/dados/contextos.json` (fora do Git). Na extensão, informe o endereço do servidor em **Configurações → 3. Contexto da IA**.
+- Limites: 20 contextos, 4.000 caracteres cada e 20.000 no total (cerca de 5 mil tokens por análise). O servidor recusa texto vazio e texto com CPF, CNPJ ou e-mail.
+- O servidor só escuta em `127.0.0.1` e só aceita chamadas do próprio MVP e de extensões do Chrome. Variáveis opcionais: `PORT`, `HOST` e `ARQUIVO_CONTEXTOS`.
+- Sem o servidor, o MVP ainda abre pelo arquivo (duplo clique no `index.html`) e a extensão funciona: só a análise sai sem o Contexto da IA, com um aviso.
 
 ## Problema
 
