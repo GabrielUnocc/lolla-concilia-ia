@@ -1,6 +1,6 @@
 /*
  * Servidor local da AR Lolla.
- * - Serve o MVP (pasta mvp/) em http://127.0.0.1:3000
+ * - Serve o MVP (pasta mvp/) em http://127.0.0.1:3100 (npm run contexto; a 3000 é do app/)
  * - Guarda o Contexto da IA num arquivo local e atende o MVP e a extensão,
  *   para os dois usarem a MESMA lista de contextos.
  * Sem dependências: só Node 22+.
@@ -12,8 +12,8 @@ import { fileURLToPath } from 'node:url';
 
 const RAIZ = fileURLToPath(new URL('..', import.meta.url));
 const PASTA_MVP = join(RAIZ, 'mvp');
-const PORTA = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || '127.0.0.1';
+const PORTA = Number(process.env.CONTEXTO_PORTA || 3100);
+const HOST = process.env.CONTEXTO_HOST || '127.0.0.1';
 const ARQUIVO = resolve(process.env.ARQUIVO_CONTEXTOS || join(RAIZ, 'servidor', 'dados', 'contextos.json'));
 // Contextos que já vêm com o projeto: usados só na primeira vez, quando ainda não há lista salva
 const INICIAIS = join(RAIZ, 'servidor', 'contextos-iniciais.json');

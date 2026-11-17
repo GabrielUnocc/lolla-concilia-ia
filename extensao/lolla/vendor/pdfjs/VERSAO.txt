@@ -1,0 +1,3 @@
+pdf.js 3.11.174 (Mozilla, Apache-2.0) — https://github.com/mozilla/pdf.js
+Arquivos copiados de pdfjs-dist@3.11.174/build (npm).
+Usado só para extrair o texto da francesinha, com isEvalSupported:false (mitiga CVE-2024-4367).

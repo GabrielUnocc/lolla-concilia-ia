@@ -8,7 +8,7 @@ Lolla.services.contexto = (function () {
   const disponivel = () => /^https?:$/.test(location.protocol);
 
   async function chamar(metodo, caminho, corpo) {
-    if (!disponivel()) throw new Error('Abra a Lolla pelo servidor (npm start e depois http://127.0.0.1:3000) para usar o Contexto da IA.');
+    if (!disponivel()) throw new Error('Abra a Lolla pelo servidor (npm run contexto e depois http://127.0.0.1:3100) para usar o Contexto da IA.');
     let r;
     try {
       r = await fetch(caminho, { method: metodo, cache: 'no-store',

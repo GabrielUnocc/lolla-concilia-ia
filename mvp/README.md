@@ -1,5 +1,17 @@
 # AR Lolla — MVP frontend (uso local)
 
+## Modo Análise (`analise.html`) — francesinha × OFX × recebimentos IXC
+
+Envie a francesinha (PDF), o extrato (OFX) e o relatório de recebimentos do IXC (CSV/XLS/XLSX). A página identifica o banco, mostra os dados extraídos, cruza tudo em código e explica cada divergência, com as linhas originais, CSV e texto pronto para o chamado. A IA é opcional e passa pelo intermediário local (a chave nunca fica no navegador).
+
+- Com IA: `npm run intermediario` e abra http://127.0.0.1:8787/analise.html
+- Sem IA: abra `analise.html` direto do disco (duplo clique)
+- Detalhes, regras e pendências: [`docs/requisitos/10-modo-analise.md`](../docs/requisitos/10-modo-analise.md)
+- Lógica em `js/domain/analise/`, tela em `js/ui/analise/`, leitor de PDF em `vendor/pdfjs/`. Ao mudar, rode `npm run sincronizar` para copiar para a extensão.
+
+---
+
+
 Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamento em código, análise das sobras com a API do Claude e indicadores.
 
 > **Segurança:** a chave da API fica visível no navegador. Use só neste computador, em ambiente controlado. Não publique esta aplicação nem versione o `config.js`.
@@ -7,7 +19,7 @@ Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamen
 ## Como rodar
 
 1. Copie `config.example.js` para `config.js` (ele não vai para o Git) e preencha `claude.apiKey`. Sem chave, a app usa uma **IA simulada** por regras locais.
-2. Na pasta do projeto, rode `npm start` e abra **http://127.0.0.1:3000** no Chrome ou Edge. Assim a aba **Contexto da IA** funciona, com a mesma lista da extensão.
+2. Na pasta do projeto, rode `npm run contexto` e abra **http://127.0.0.1:3100** no Chrome ou Edge. Assim a aba **Contexto da IA** funciona, com a mesma lista da extensão.
    Sem Node, dá para abrir o `index.html` com duplo clique: tudo funciona, menos o Contexto da IA.
 3. Crie uma senha local: ela cifra a base simulada e o histórico salvos no navegador.
 
@@ -15,7 +27,7 @@ Conciliação bancária com IA, rodando só no navegador: IXC simulado, pareamen
 
 - **Painel** (primeira tela depois de entrar): quantas conciliações estão **abertas** (nada conciliado), **em andamento** (parte conciliada) e **fechadas** (tudo conciliado), com a lista e filtro por situação.
 - **Nova conciliação:** conta já cadastrada ou importada de um OFX, período (um dia ou vários), francesinha (opcional, fica cifrada no navegador) e observação. **Abrir** leva para a Conciliação já filtrada.
-- **Contexto da IA:** regras e casos que vão junto com as sobras na análise (precisa do `npm start`). O projeto já traz 8 contextos iniciais em `servidor/contextos-iniciais.json`.
+- **Contexto da IA:** regras e casos que vão junto com as sobras na análise (precisa do `npm run contexto`). O projeto já traz 8 contextos iniciais em `servidor/contextos-iniciais.json`.
 - Buscar conta e período (a base simulada tem dados de 03/11 a 13/11/2026, em duas contas).
 - Ver as duas grades com o status de cada linha: par automático, sobra, duplicado ou conciliado.
 - Conciliar a seleção, conciliar todos os pares automáticos, desfazer a conciliação, lançar no IXC e estornar uma baixa.

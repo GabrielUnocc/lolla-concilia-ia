@@ -13,6 +13,7 @@ Definições de **10/11/2026**, separadas por assunto. Os valores marcados como 
 | 07 | [Custo da IA](07-custo-da-ia.md) | Preço por consulta e por ano, por modelo |
 | 08 | [Retorno do investimento](08-retorno-do-investimento.md) | Economia de tempo do time e fórmulas |
 | 09 | [Pendências e próximos passos](09-pendencias-e-proximos-passos.md) | O que falta definir, de quem, e a ordem de execução |
+| 10 | [Modo Análise](10-modo-analise.md) | Francesinha × OFX × recebimentos IXC: arquitetura, regras do motor, privacidade, pendências |
 
 Outras partes do repositório:
 

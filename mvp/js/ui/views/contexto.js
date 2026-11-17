@@ -56,7 +56,7 @@ Lolla.ui.views.contexto = (function () {
     const titulo = '<h2>Contexto da IA</h2>';
     if (!Lolla.services.contexto.disponivel()) {
       return titulo + `<div class="alerta erro">O Contexto da IA fica no servidor local da Lolla, o mesmo que a extensão usa.
-        Na pasta do projeto rode <code>npm start</code> e abra <b>http://127.0.0.1:3000</b>.</div>`;
+        Na pasta do projeto rode <code>npm run contexto</code> e abra <b>http://127.0.0.1:3100</b>.</div>`;
     }
     if (x.erro) return titulo + `<div class="alerta erro">${esc(x.erro)} <button data-acao="ctx-recarregar">Tentar novamente</button></div>`;
     if (!x.lista) return titulo + c.spinner('Carregando os contextos…');

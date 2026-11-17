@@ -43,3 +43,6 @@ $('abrir').addEventListener('click', async () => {
 });
 $('opcoes').addEventListener('click', (e) => { e.preventDefault(); chrome.runtime.openOptionsPage(); });
 atualizar();
+
+// Modo Análise (francesinha × OFX × recebimentos IXC): abre numa guia própria da extensão; não depende da tela do IXC
+$('analise').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('analise.html') }));

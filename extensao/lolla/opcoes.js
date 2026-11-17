@@ -73,9 +73,9 @@ async function testarServidor() {
 async function conectarServidor() {
   let origem;
   try {
-    const bruto = $('servidor-lolla').value.trim() || 'http://127.0.0.1:3000';
+    const bruto = $('servidor-lolla').value.trim() || 'http://127.0.0.1:3100';
     origem = new URL(/^https?:\/\//i.test(bruto) ? bruto : 'http://' + bruto).origin;
-  } catch (e) { return mensagem('msg-servidor', 'Endereço inválido. Ex.: http://127.0.0.1:3000', 'erro'); }
+  } catch (e) { return mensagem('msg-servidor', 'Endereço inválido. Ex.: http://127.0.0.1:3100', 'erro'); }
   const ok = await chrome.permissions.request({ origins: [origem + '/*'] });
   if (!ok) return mensagem('msg-servidor', 'Permissão não concedida. A Lolla não vai buscar os contextos.', 'erro');
   await chrome.storage.local.set({ servidorLolla: origem });
