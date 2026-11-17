@@ -303,6 +303,8 @@
   async function abrirAba(aba) {
     store.set({ aba });
     if (aba === 'indicadores' || aba === 'historico') store.set({ historico: await acoes.lerHistorico() });
+    if (aba === 'contexto') await carregarContextos();
+    if (aba === 'painel') await acoes.carregarPainel();
   }
 
   /* ---------- Eventos ---------- */
