@@ -289,6 +289,17 @@
     }
   });
 
+  // Contexto da IA: o rascunho fica fora do store (digitar não redesenha a tela); só o contador muda
+  document.addEventListener('input', (ev) => {
+    const el = ev.target;
+    if (el.id === 'ctx-titulo' || el.id === 'ctx-texto') {
+      vCtx().rascunho[el.id === 'ctx-titulo' ? 'titulo' : 'texto'] = el.value;
+      const cont = vCtx().contador(store.get()), alvo = document.getElementById('ctx-contador');
+      if (alvo) { alvo.textContent = cont.texto; alvo.className = cont.passa ? 'erro-txt' : ''; }
+    }
+    if (el.id === 'ctx-busca') setCtx({ busca: el.value });
+  });
+
   store.assinar(render);
 
   /* ---------- Início ---------- */
