@@ -118,6 +118,21 @@ Lolla.ui.views.conciliacao = (function () {
         <button class="primario" ${s.conversando ? 'disabled' : ''}>Enviar</button></form></div>`;
   }
 
+  // Faixa com a conciliação aberta pelo Painel (some se o filtro for trocado)
+  function faixaConciliacao(s) {
+    const reg = s.conciliacaoAberta && (s.painel.lista || []).find((r) => r.id === s.conciliacaoAberta);
+    if (!reg || String(reg.contaId) !== String(s.filtros.contaId) || reg.dataIni !== s.filtros.dataIni || reg.dataFim !== s.filtros.dataFim) return '';
+    const p = Lolla.ui.views.painel;
+    const st = reg.st ? c.selo(Lolla.services.conciliacoes.ROTULOS[reg.st.estado], p.TOM[reg.st.estado]) : '';
+    return `<div class="faixa-conc">
+      <button data-acao="aba" data-aba="painel">← Painel</button>
+      <b>Conciliação #${reg.id}</b><span>${esc(reg.contaDescricao)} · ${p.periodo(reg)}</span>${st}
+      ${reg.francesinha ? `<button class="mini" data-acao="baixar-francesinha" data-id="${reg.id}">Francesinha ↓</button>` : ''}
+      ${reg.observacao ? `<span class="obs" title="${esc(reg.observacao)}">${esc(reg.observacao)}</span>` : ''}
+      ${reg.gabarito && reg.gabarito.length ? `<details><summary>Gabarito do OFX (${reg.gabarito.length})</summary><ul>${reg.gabarito.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></details>` : ''}
+    </div>`;
+  }
+
   function render(s) {
     const contas = s.contas.map((ct) => `<option value="${ct.id}" ${String(ct.id) === String(s.filtros.contaId) ? 'selected' : ''}>${esc(ct.descricao)}</option>`).join('');
     const filtros = `<form class="filtros" id="box_search_tab_3" data-form="filtros">
