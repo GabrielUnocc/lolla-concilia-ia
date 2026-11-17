@@ -64,7 +64,7 @@ Lolla.core.criarStore = function (inicial) {
 
 Lolla.core.store = Lolla.core.criarStore({
   desbloqueado: false,
-  aba: 'conciliacao',
+  aba: 'painel',
   contas: [],
   filtros: { contaId: null, dataIni: '2026-11-03', dataFim: '2026-11-06' },
   carregando: false,
