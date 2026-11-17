@@ -199,7 +199,8 @@ Lolla.acoes = (function () {
           id: 'A' + Date.now(), em: Date.now(), contaId: s.filtros.contaId, filtros: Object.assign({}, s.filtros),
           diferenca: payload.totais_calculados_pelo_codigo.diferenca_ixc_menos_banco,
           sobras: payload.so_no_ixc.length + payload.so_no_banco.length,
-          resultado: r.resultado, simulado: r.simulado, usage: r.usage, modelo: r.modelo || null, decisoes: {}
+          resultado: r.resultado, simulado: r.simulado, usage: r.usage, modelo: r.modelo || null, decisoes: {},
+          contextos: r.contextos || [], avisoContexto: r.avisoContexto || null
         };
         const h = await lerHistorico(); h.push(registro); await gravarHistorico(h);
         store.set({ analisando: false, analise: registro });
