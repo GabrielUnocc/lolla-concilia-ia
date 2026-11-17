@@ -20,6 +20,11 @@ Lolla.acoes = (function () {
   function recalcular(mov, ext) {
     const pareamento = parear(mov, ext);
     store.set({ movimentacao: mov, extrato: ext, pareamento, selecao: { mov: [], ext: [] } });
+    // Se a tela mostra uma conciliação do Painel, a situação dela acompanha o que foi conciliado
+    const s = store.get(), reg = s.conciliacaoAberta && (s.painel.lista || []).find((r) => r.id === s.conciliacaoAberta);
+    if (reg && String(reg.contaId) === String(s.filtros.contaId) && reg.dataIni === s.filtros.dataIni && reg.dataFim === s.filtros.dataFim) {
+      trocarItem(reg.id, { st: Lolla.services.conciliacoes.situacao({ movimentacao: mov, extrato: ext }), erroSt: null });
+    }
   }
 
   function indicadoresAtuais() {
