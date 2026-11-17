@@ -34,6 +34,27 @@ Lolla.acoes = (function () {
   }
 
   async function lerHistorico() { return (await seguro.ler(HIST)) || []; }
+
+  /* ---------- Painel de conciliações ---------- */
+  const conc = Lolla.services.conciliacoes;
+  const setPainel = (parcial) => store.set((s) => ({ painel: Object.assign({}, s.painel, parcial) }));
+  const trocarItem = (id, parcial) => store.set((s) => ({
+    painel: Object.assign({}, s.painel, { lista: (s.painel.lista || []).map((r) => (r.id === id ? Object.assign({}, r, parcial) : r)) })
+  }));
+
+  async function atualizarSituacao(id) {
+    const reg = (store.get().painel.lista || []).find((r) => r.id === id);
+    if (!reg) return;
+    trocarItem(id, { st: null, erroSt: null });
+    const contas = store.get().contas;
+    if (contas.length && !contas.some((c) => String(c.id) === String(reg.contaId))) {
+      return trocarItem(id, { erroSt: 'A conta não existe mais na base simulada (o cenário foi trocado ou restaurado).' });
+    }
+    try {
+      const tela = await ixc.buscarTela({ contaId: reg.contaId, dataIni: reg.dataIni, dataFim: reg.dataFim });
+      trocarItem(id, { st: conc.situacao(tela) });
+    } catch (e) { trocarItem(id, { erroSt: e.message }); }
+  }
   async function gravarHistorico(h) { await seguro.gravar(HIST, h.slice(-200)); }
 
   return {
