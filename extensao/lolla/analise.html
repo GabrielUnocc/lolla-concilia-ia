@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR Lolla — Modo Análise</title>
+  <link rel="stylesheet" href="analise/analise.css">
+</head>
+<body>
+  <header class="topo"><div class="topo-in">
+    <div class="marca" aria-hidden="true">L</div>
+    <div><h1>AR Lolla · Modo Análise</h1><p>Francesinha × extrato OFX × recebimentos do IXC — o código cruza, a IA só interpreta as sobras</p></div>
+    <span class="sep"></span>
+    <span class="pilula">Processamento local no navegador</span>
+  </div></header>
+
+  <main>
+    <section class="bloco" id="etapa-arquivos"></section>
+    <section class="bloco" id="etapa-banco"></section>
+    <section class="bloco" id="etapa-dados"></section>
+    <section class="bloco" id="etapa-resultado"></section>
+    <section class="bloco" id="etapa-ia"></section>
+  </main>
+
+  <noscript><p style="padding:16px">O Modo Análise precisa de JavaScript.</p></noscript>
+  <!-- Leitor de PDF (local, sem CDN) -->
+  <script src="vendor/pdfjs/pdf.min.js"></script>
+  <!-- GERADO por scripts/sincronizar-extensao.mjs a partir de mvp/analise.html: não edite aqui -->
+  <script src="lib/base.js"></script>
+  <script src="lib/pareamento.js"></script>
+  <script src="lib/mascaramento.js"></script>
+  <script src="lib/ofx.js"></script>
+  <script src="lib/analise/normalizacao.js"></script>
+  <script src="lib/analise/bancos.js"></script>
+  <script src="lib/analise/bancos/sicoob.js"></script>
+  <script src="lib/analise/bancos/bradesco.js"></script>
+  <script src="lib/analise/bancos/bancoDoBrasil.js"></script>
+  <script src="lib/analise/bancos/sicredi.js"></script>
+  <script src="lib/analise/bancos/itau.js"></script>
+  <script src="lib/analise/bancos/santander.js"></script>
+  <script src="lib/analise/classificacaoOfx.js"></script>
+  <script src="lib/analise/leitorOfx.js"></script>
+  <script src="lib/analise/leitorFrancesinha.js"></script>
+  <script src="lib/analise/planilha.js"></script>
+  <script src="lib/analise/leitorRecebimentos.js"></script>
+  <script src="lib/analise/motor.js"></script>
+  <script src="lib/analise/resultado.js"></script>
+  <script src="lib/analise/privacidadeIa.js"></script>
+  <!-- Serviços -->
+  <script src="lib/servicos/pdfTexto.js"></script>
+  <script src="lib/servicos/iaIntermediario.js"></script>
+  <!-- Interface -->
+  <script src="analise/componentes.js"></script>
+  <script src="analise/arquivos.js"></script>
+  <script src="analise/resultados.js"></script>
+  <script src="analise/ia.js"></script>
+  <script src="analise/app.js"></script>
+</body>
+</html>
