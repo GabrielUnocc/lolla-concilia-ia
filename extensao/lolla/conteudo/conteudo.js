@@ -219,16 +219,12 @@
       s.status = await enviar({ tipo: 'status' });
       const p = payload();
       let r;
-      if (s.status.iaSimulada) {
-        // A IA simulada não usa o texto, mas lista os contextos que seriam enviados (para testar sem gastar tokens)
-        const ctx = await enviar({ tipo: 'contextos' });
-        r = Object.assign({}, await Lolla.services.iaSimulada.analisar(p), { contextos: ctx.contextos || [], avisoContexto: ctx.ok ? ctx.aviso : ctx.erro });
-      } else {
+      if (s.status.iaSimulada) r = await Lolla.services.iaSimulada.analisar(p);
+      else {
         r = await enviar({ tipo: 'analisar', payload: p });
         if (!r.ok) throw new Error(r.erro);
       }
       s.analise = { id: 'A' + Date.now(), em: Date.now(), resultado: r.resultado, usage: r.usage || null, decisoes: {}, desatualizada: false,
-        contextos: r.contextos || [], avisoContexto: r.avisoContexto || null,
         diferenca: p.totais_calculados_pelo_codigo.diferenca_ixc_menos_banco, simulado: !!s.status.iaSimulada };
       guardarHistorico();
     } catch (e) { s.erroIA = e.message; }

@@ -106,31 +106,12 @@ Lolla.ui.views.conciliacao = (function () {
     const perguntas = r.perguntas_ao_cliente.length
       ? `<div class="perguntas"><b>Perguntar ao cliente:</b><ul>${r.perguntas_ao_cliente.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>` : '';
     const chat = s.chat.map((m) => `<div class="msg ${m.papel}">${esc(m.texto)}</div>`).join('');
-    const ctxUsados = (a.contextos || []).length
-      ? `<div class="ctx-usados"><b>Contexto da IA enviado (${a.contextos.length}):</b> ${a.contextos.map((x) => c.selo(x.titulo, 'azul')).join(' ')}</div>`
-      : '<div class="ctx-usados"><b>Contexto da IA:</b> nenhum enviado nesta análise.</div>';
-    const ctxAviso = a.avisoContexto ? `<div class="alerta aviso">${esc(a.avisoContexto)}</div>` : '';
-    return cab + `<div class="resumo">${esc(r.resumo)}</div>${ctxUsados}${ctxAviso}${perguntas}<div class="cards">${itens}</div>
+    return cab + `<div class="resumo">${esc(r.resumo)}</div>${perguntas}<div class="cards">${itens}</div>
       <div class="ia-acoes"><button data-acao="copiar-resumo">Copiar resumo para o atendimento</button>
         ${a.usage ? `<small>${a.usage.input_tokens} tokens de entrada · ${a.usage.output_tokens} de saída</small>` : ''}</div>
       <div class="chat"><div class="msgs">${chat}${s.conversando ? '<div class="msg lolla">…</div>' : ''}</div>
         <form data-form="chat"><input id="chat-entrada" autocomplete="off" placeholder="Pergunte à Lolla sobre esta análise…" ${s.conversando ? 'disabled' : ''}>
         <button class="primario" ${s.conversando ? 'disabled' : ''}>Enviar</button></form></div>`;
-  }
-
-  // Faixa com a conciliação aberta pelo Painel (some se o filtro for trocado)
-  function faixaConciliacao(s) {
-    const reg = s.conciliacaoAberta && (s.painel.lista || []).find((r) => r.id === s.conciliacaoAberta);
-    if (!reg || String(reg.contaId) !== String(s.filtros.contaId) || reg.dataIni !== s.filtros.dataIni || reg.dataFim !== s.filtros.dataFim) return '';
-    const p = Lolla.ui.views.painel;
-    const st = reg.st ? c.selo(Lolla.services.conciliacoes.ROTULOS[reg.st.estado], p.TOM[reg.st.estado]) : '';
-    return `<div class="faixa-conc">
-      <button data-acao="aba" data-aba="painel">← Painel</button>
-      <b>Conciliação #${reg.id}</b><span>${esc(reg.contaDescricao)} · ${p.periodo(reg)}</span>${st}
-      ${reg.francesinha ? `<button class="mini" data-acao="baixar-francesinha" data-id="${reg.id}">Francesinha ↓</button>` : ''}
-      ${reg.observacao ? `<span class="obs" title="${esc(reg.observacao)}">${esc(reg.observacao)}</span>` : ''}
-      ${reg.gabarito && reg.gabarito.length ? `<details><summary>Gabarito do OFX (${reg.gabarito.length})</summary><ul>${reg.gabarito.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></details>` : ''}
-    </div>`;
   }
 
   function render(s) {
@@ -155,7 +136,7 @@ Lolla.ui.views.conciliacao = (function () {
         ${rodape(s, ind)}
         <section class="painel-ia">${painelIA(s)}</section>`;
     }
-    return faixaConciliacao(s) + filtros + corpo;
+    return filtros + corpo;
   }
 
   return { render };
