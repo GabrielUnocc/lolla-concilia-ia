@@ -155,7 +155,7 @@ Lolla.ui.views.conciliacao = (function () {
         ${rodape(s, ind)}
         <section class="painel-ia">${painelIA(s)}</section>`;
     }
-    return filtros + corpo;
+    return faixaConciliacao(s) + filtros + corpo;
   }
 
   return { render };
