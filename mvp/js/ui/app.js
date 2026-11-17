@@ -279,6 +279,7 @@
     if (!form) return;
     ev.preventDefault();
     if (form.dataset.form === 'cofre') return entrar(form);
+    if (form.dataset.form === 'ctx') return salvarContexto();
     if (form.dataset.form === 'ofx') return; // tratado no próprio diálogo
     if (form.dataset.form === 'filtros') return acoes.buscar();
     if (form.dataset.form === 'chat') {
