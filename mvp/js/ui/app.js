@@ -264,6 +264,9 @@
       store.set({ desbloqueado: true });
       render();
       acoes.iniciar();
+      // Depois de entrar vai para o Painel (ou para a aba pedida no endereço, ex.: #contexto)
+      const pedida = location.hash.slice(1);
+      abrirAba(ABAS.some(([id]) => id === pedida) ? pedida : 'painel');
     } catch (e) {
       telaCofre(e.message);
     }
