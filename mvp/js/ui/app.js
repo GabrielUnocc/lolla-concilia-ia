@@ -131,6 +131,108 @@
     });
   }
 
+  /* ---------- Nova conciliação ---------- */
+  const TIPOS_FRANCESINHA = ['.pdf', '.csv', '.txt', '.ret', '.xls', '.xlsx'];
+  const lerBase64 = (arquivo) => new Promise((ok, falha) => {
+    const fr = new FileReader();
+    fr.onload = () => ok(String(fr.result).split(',')[1] || '');
+    fr.onerror = () => falha(new Error('Não consegui ler o arquivo.'));
+    fr.readAsDataURL(arquivo);
+  });
+
+  function abrirNovaConciliacao() {
+    const s = store.get();
+    const contas = s.contas.map((ct) => `<option value="${ct.id}" ${String(ct.id) === String(s.filtros.contaId) ? 'selected' : ''}>${esc(ct.descricao)}</option>`).join('');
+    const fundo = document.createElement('div');
+    fundo.className = 'dialogo-fundo';
+    fundo.innerHTML = `<form class="dialogo largo nova-conc" role="dialog" aria-modal="true" aria-labelledby="nc-titulo" novalidate>
+      <h3 id="nc-titulo">Nova conciliação</h3>
+      <fieldset><legend>Extrato bancário</legend>
+        <label class="opcao"><input type="radio" name="origem" value="conta" ${contas ? 'checked' : 'disabled'}><span><b>Conta já cadastrada</b><small>Usa o extrato que já está no IXC (simulado).</small></span></label>
+        <label class="opcao"><input type="radio" name="origem" value="ofx" ${contas ? '' : 'checked'}><span><b>Importar arquivo OFX</b><small>O arquivo é lido aqui no navegador e vira uma conta nova com o extrato.</small></span></label>
+      </fieldset>
+      <label class="campo" id="nc-bloco-conta" ${contas ? '' : 'hidden'}>Conta<select id="nc-conta">${contas}</select></label>
+      <div id="nc-bloco-ofx" class="campo" ${contas ? 'hidden' : ''}>
+        <label class="arquivo">Arquivo OFX<input id="nc-ofx" type="file" accept=".ofx,.OFX,application/x-ofx"></label>
+        <div id="nc-ofx-resumo"></div>
+        <label class="campo">Lado do IXC (simulado)<select id="nc-modo">
+          <option value="divergencias">Espelho com divergências (mostra o gabarito)</option>
+          <option value="exato">Espelho exato (o código deve parear tudo)</option>
+          <option value="vazio">IXC vazio (só o extrato)</option></select></label>
+      </div>
+      <div class="duas-datas"><label class="campo">De<input id="nc-ini" type="date" value="${esc(s.filtros.dataIni)}"></label>
+        <label class="campo">Até<input id="nc-fim" type="date" value="${esc(s.filtros.dataFim)}"></label></div>
+      <small class="nota">Para conciliar um dia só, use a mesma data nos dois campos.</small>
+      <label class="arquivo">Francesinha (opcional)<input id="nc-fr" type="file" accept="${TIPOS_FRANCESINHA.join(',')}">
+        <small>PDF, CSV, TXT, RET, XLS ou XLSX, até 10 MB. Fica cifrada neste navegador.</small></label>
+      <label class="campo">Observação<textarea id="nc-obs" rows="3" maxlength="1000" placeholder="Contexto do chamado, o que o cliente relatou… Sem nomes, CPF ou CNPJ de clientes."></textarea></label>
+      <div id="nc-erro"></div>
+      <div class="dialogo-botoes"><button type="button" data-r="cancelar">Cancelar</button><button class="primario" id="nc-salvar">Criar conciliação</button></div>
+    </form>`;
+    document.body.appendChild(fundo);
+    const q = (sel) => fundo.querySelector(sel);
+    let ofx = null;
+    const fechar = () => fundo.remove();
+    const erro = (t) => { q('#nc-erro').innerHTML = t ? `<div class="alerta erro">${esc(t)}</div>` : ''; };
+    fundo.addEventListener('click', (e) => { if (e.target === fundo || e.target.closest('[data-r="cancelar"]')) fechar(); });
+    fundo.addEventListener('change', async (e) => {
+      if (e.target.name === 'origem') {
+        const deOfx = e.target.value === 'ofx';
+        q('#nc-bloco-ofx').hidden = !deOfx; q('#nc-bloco-conta').hidden = deOfx; erro('');
+      }
+      if (e.target.id === 'nc-ofx') {
+        const f = e.target.files[0]; ofx = null; erro('');
+        if (!f) { q('#nc-ofx-resumo').innerHTML = ''; return; }
+        q('#nc-ofx-resumo').innerHTML = Lolla.ui.c.spinner('Lendo o arquivo…');
+        try {
+          if (f.size > 5 * 1024 * 1024) throw new Error('OFX maior que 5 MB. Exporte um período menor.');
+          ofx = Lolla.domain.ofx.interpretar(await Lolla.domain.ofx.lerArquivo(f), f.name);
+          q('#nc-ofx-resumo').innerHTML = `<p class="ok-txt">${esc(ofx.conta.banco)} · ${ofx.resumo.total} lançamentos de ${Lolla.core.fmt.brDeIso(ofx.periodo.inicio)} a ${Lolla.core.fmt.brDeIso(ofx.periodo.fim)}.</p>`;
+          q('#nc-ini').value = ofx.periodo.inicio; q('#nc-fim').value = ofx.periodo.fim;
+        } catch (err) { q('#nc-ofx-resumo').innerHTML = ''; erro(err.message); }
+      }
+    });
+    q('form').addEventListener('submit', async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const origem = fundo.querySelector('input[name="origem"]:checked').value;
+      const dataIni = q('#nc-ini').value, dataFim = q('#nc-fim').value;
+      if (origem === 'conta' && !q('#nc-conta').value) return erro('Escolha a conta.');
+      if (origem === 'ofx' && !ofx) return erro('Escolha um arquivo OFX válido.');
+      if (!dataIni || !dataFim) return erro('Informe o período (De e Até).');
+      if (dataIni > dataFim) return erro('A data inicial é depois da data final.');
+      let francesinha = null;
+      const fr = q('#nc-fr').files[0];
+      if (fr) {
+        const ext = (fr.name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
+        if (!TIPOS_FRANCESINHA.includes(ext)) return erro('Francesinha: use PDF, CSV, TXT, RET, XLS ou XLSX.');
+        if (fr.size > 10 * 1024 * 1024) return erro('Francesinha: máximo de 10 MB.');
+      }
+      const botao = q('#nc-salvar');
+      botao.disabled = true; botao.textContent = 'Criando…'; erro('');
+      try {
+        if (fr) francesinha = { nome: fr.name, tipo: fr.type || 'application/octet-stream', tamanho: fr.size, base64: await lerBase64(fr) };
+        const r = await acoes.criarConciliacao({ origem, contaId: q('#nc-conta').value, ofx, modo: q('#nc-modo').value,
+          dataIni, dataFim, observacao: q('#nc-obs').value.trim() }, francesinha);
+        fechar();
+        if (r.gabarito.length) {
+          dialogo({ texto: `Conciliação #${r.reg.id} criada. Gabarito do que foi plantado no IXC, para conferir a análise da Lolla:`, confirmar: '',
+            conteudo: `<ul class="gabarito">${r.gabarito.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>` });
+        }
+      } catch (err) { erro(err.message); botao.disabled = false; botao.textContent = 'Criar conciliação'; }
+    });
+  }
+
+  async function baixarFrancesinha(id) {
+    try {
+      const f = await Lolla.services.conciliacoes.lerFrancesinha(id);
+      if (!f) throw new Error('A francesinha desta conciliação não está neste navegador.');
+      const bytes = Uint8Array.from(atob(f.base64), (ch) => ch.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: f.tipo }));
+      const a = document.createElement('a'); a.href = url; a.download = f.nome; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { acoes.avisar('erro', e.message); }
+  }
+
   /* ---------- Desbloqueio ---------- */
   function telaCofre(erro) {
     const novo = !cofre.existe();
