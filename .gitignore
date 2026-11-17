@@ -4,3 +4,4 @@ node_modules/
 *.ofx
 capturas-reais/
 data/
+servidor/dados/
