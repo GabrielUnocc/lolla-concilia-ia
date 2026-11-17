@@ -61,3 +61,20 @@ export function criarArmazem(arquivo = ARQUIVO, iniciais = INICIAIS) {
   return { ler, alterar };
 }
 
+function validar(corpo, dados, id = null) {
+  const titulo = String(corpo?.titulo ?? '').trim();
+  const texto = String(corpo?.texto ?? '').replace(/\r\n/g, '\n').trim();
+  if (!titulo) throw new ErroValidacao('Informe o título');
+  if (!texto) throw new ErroValidacao('Escreva o texto do contexto');
+  if (titulo.length > LIMITES.maxTitulo) throw new ErroValidacao(`Título: no máximo ${LIMITES.maxTitulo} caracteres`);
+  if (texto.length > LIMITES.maxTexto) throw new ErroValidacao(`Texto: no máximo ${LIMITES.maxTexto} caracteres`);
+  for (const [re, nome] of DADO_PESSOAL) {
+    if (re.test(titulo) || re.test(texto)) throw new ErroValidacao(`O texto parece ter ${nome}. Não coloque dados de clientes: este contexto vai para a IA.`);
+  }
+  const outros = dados.contextos.filter((c) => c.id !== id);
+  if (id === null && outros.length >= LIMITES.maxContextos) throw new ErroValidacao(`Limite de ${LIMITES.maxContextos} contextos. Apague um para criar outro.`);
+  const total = outros.reduce((s, c) => s + c.texto.length, 0) + texto.length;
+  if (total > LIMITES.maxTotal) throw new ErroValidacao(`Os contextos somados passariam de ${LIMITES.maxTotal} caracteres (ficariam com ${total}). Encurte este ou apague outro.`);
+  return { titulo, texto };
+}
+
