@@ -5,7 +5,7 @@
  */
 importScripts('lib/base.js', 'lib/prompts.js');
 
-const PADRAO = { ativo: true, visualModerno: true, enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false };
+const PADRAO = { ativo: true, visualModerno: true, enderecos: [], apiKey: '', workspaceId: '', modelo: 'claude-sonnet-5-5', iaSimulada: false, servidorLolla: '' };
 const ID_SCRIPT = 'lolla-ixc';
 const ARQUIVOS_CONTEUDO = [
   'lib/base.js', 'lib/pareamento.js', 'lib/mascaramento.js', 'lib/indicadores.js', 'lib/simulador.js',
