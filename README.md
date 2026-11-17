@@ -10,6 +10,7 @@ Projeto **AR Lolla** (Agente Lolla). Status em 16/11/2026: extensão do Chrome n
 |---|---|
 | Instalar e testar a extensão no IXC | [`extensao/lolla/`](extensao/lolla/) — leia o README da pasta |
 | Testar sem o IXC, com dados fictícios | [`mvp/`](mvp/) (app completa no navegador) ou [`extensao/lolla/teste/`](extensao/lolla/teste/) |
+| Cadastrar o Contexto da IA (regras de banco, casos resolvidos) | `npm start` e aba **Contexto da IA** do MVP: veja "Servidor local" abaixo |
 | Entender o projeto, custos e retorno | [`docs/requisitos/`](docs/requisitos/) |
 | Ver como a tela do IXC é montada | [`docs/amostras-ixc/`](docs/amostras-ixc/) |
 
@@ -22,7 +23,9 @@ docs/
   amostras-ixc/      HTML mascarado da tela de Conciliação Manual do IXC
 extensao/
   lolla/             EXTENSÃO DO CHROME (versão atual, 0.3) — o produto
-mvp/                 app web com IXC simulado, IA (ou IA simulada), indicadores e importação de OFX
+mvp/                 app web com IXC simulado, IA (ou IA simulada), indicadores, importação de OFX e Contexto da IA
+servidor/            servidor local (npm start): abre o MVP e guarda o Contexto da IA usado pelo MVP e pela extensão
+package.json         npm start / npm test do servidor
 historico/           primeiras versões, só para consulta (não usar)
   prototipo/         protótipo visual com 4 cenários fictícios
   extrator-v0/       primeiro extrator + pareamento e seus testes automáticos
