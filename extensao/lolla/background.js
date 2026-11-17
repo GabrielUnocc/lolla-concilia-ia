@@ -108,13 +108,32 @@ const somarUso = (a, b) => (!a ? b : !b ? a : { input_tokens: (a.input_tokens ||
 
 const P = () => self.Lolla.services.prompts;
 
+/* ---------- Contexto da IA (servidor local da Lolla, o mesmo do MVP) ---------- */
+// Nunca impede a análise: se não der para buscar, a análise segue sem contexto e o painel avisa o motivo.
+async function buscarContextos() {
+  const { servidorLolla } = await cfg();
+  if (!servidorLolla) return { contextos: [], aviso: 'Servidor da Lolla não configurado (Configurações → Contexto da IA): a análise foi feita sem o Contexto da IA.' };
+  let resp;
+  try { resp = await fetch(servidorLolla + '/api/contextos', { cache: 'no-store' }); }
+  catch (e) { return { contextos: [], aviso: `O servidor da Lolla (${servidorLolla}) não respondeu: rode npm start. A análise foi feita sem o Contexto da IA.` }; }
+  if (!resp.ok) return { contextos: [], aviso: `O servidor da Lolla respondeu com erro ${resp.status}. A análise foi feita sem o Contexto da IA.` };
+  const corpo = await resp.json().catch(() => ({}));
+  return { contextos: (corpo.contextos || []).map((c) => ({ id: c.id, titulo: c.titulo, texto: c.texto })), aviso: null };
+}
+const usados = (ctx) => ctx.contextos.map((c) => ({ id: c.id, titulo: c.titulo }));
+
 const tratadores = {
   async status() {
     const c = await cfg();
     return { temChave: !!c.apiKey, iaSimulada: c.iaSimulada || !c.apiKey, modelo: c.modelo, ativo: c.ativo };
   },
+  async contextos() {
+    const ctx = await buscarContextos();
+    return { contextos: usados(ctx), aviso: ctx.aviso };
+  },
   async analisar({ payload }) {
-    const system = P().SISTEMA_ANALISE;
+    const ctx = await buscarContextos();
+    const system = P().comContextos(P().SISTEMA_ANALISE, ctx.contextos);
     const messages = [{ role: 'user', content: P().analise(payload) }];
     let r = await chamarClaude({ system, messages, maxTokens: 8000 });
     let obj = extrairJson(r.texto);
